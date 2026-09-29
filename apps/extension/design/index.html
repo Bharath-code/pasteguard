@@ -1,0 +1,1020 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PasteGuard extension design</title>
+<meta name="description" content="Living UI/UX design doc for the PasteGuard Chrome extension: surfaces, states, motion system, accessibility and budgets.">
+<link rel="icon" href="../../landing/public/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=JetBrains+Mono:wght@400;600&family=Rubik:wght@400;500;600&display=swap">
+<style>
+:root {
+  --ink: #1B1433; --ink-2: #251C45; --ink-3: #120D24; --line: #3B3163;
+  --text: #EDEAF7; --muted: #ADA6C4;
+  --paper: #F4F2FB; --paper-ink: #1B1433; --paper-muted: #5B5474; --paper-line: #DAD5EA;
+  --marker: #F2E15B; --alert: #FF5E7E; --violet: #9C8CFF;
+  --f-display: "Bricolage Grotesque", "Rubik", system-ui, sans-serif;
+  --f-body: "Rubik", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-code: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 18px;
+  --gutter: clamp(16px, 4vw, 48px);
+  --section: clamp(72px, 10vw, 136px);
+  --hatch: repeating-linear-gradient(-45deg, var(--marker) 0 6px, var(--ink-3) 6px 12px);
+
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
+  --ease-in-out: cubic-bezier(.77, 0, .175, 1);
+  --ease-drawer: cubic-bezier(.32, .72, 0, 1);
+  --d-press: 120ms; --d-pop: 180ms; --d-exit: 120ms; --d-tape: 260ms; --d-peel: 320ms; --d-hold: 1200ms;
+}
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: 24px; -webkit-text-size-adjust: 100%; }
+body { background: var(--ink); color: var(--text); font: 400 1.0625rem/1.65 var(--f-body); -webkit-font-smoothing: antialiased; overflow-x: clip; }
+svg { display: block; max-width: 100%; }
+a { color: var(--violet); text-underline-offset: 3px; }
+code, pre, kbd { font-family: var(--f-code); font-size: .88em; }
+kbd { display: inline-block; padding: 0 6px; min-width: 1.6em; text-align: center; border: 1px solid currentColor; border-bottom-width: 2px; border-radius: 5px; font-size: .78em; line-height: 1.5; opacity: .85; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--violet); outline-offset: 3px; border-radius: 4px; }
+::selection { background: var(--marker); color: var(--ink-3); }
+
+.display { font-family: var(--f-display); font-variation-settings: "wdth" 78, "opsz" 96; font-weight: 760; font-size: clamp(2.8rem, 7.6vw, 6.2rem); line-height: .9; letter-spacing: -.02em; text-wrap: balance; }
+.h-big { font-family: var(--f-display); font-variation-settings: "wdth" 82, "opsz" 72; font-weight: 700; font-size: clamp(2rem, 4.2vw, 3.2rem); line-height: 1; letter-spacing: -.015em; text-wrap: balance; }
+.h-mid { font-family: var(--f-display); font-variation-settings: "wdth" 85; font-weight: 700; font-size: 1.45rem; line-height: 1.1; }
+.lede { font-size: clamp(1.1rem, 1.6vw, 1.3rem); line-height: 1.55; color: var(--muted); max-width: 36em; }
+.muted { color: var(--muted); }
+.fine { font-size: .875rem; color: var(--muted); }
+.num { font-family: var(--f-code); font-size: .8rem; color: var(--marker); }
+
+/* layout */
+.shell { display: grid; grid-template-columns: 1fr; max-width: 1320px; margin-inline: auto; }
+@media (min-width: 1100px) { .shell { grid-template-columns: 220px 1fr; } }
+.toc { display: none; }
+@media (min-width: 1100px) {
+  .toc { display: block; position: sticky; top: 0; align-self: start; height: 100dvh; padding: 32px 0 32px var(--gutter); }
+  .toc ol { list-style: none; padding: 0; display: grid; gap: 2px; margin-top: 24px; counter-reset: s; }
+  .toc a { display: flex; gap: 10px; padding: 5px 8px; border-radius: var(--r-sm); color: var(--muted); text-decoration: none; font-size: .875rem; transition: color .15s ease, background-color .15s ease; }
+  .toc a::before { counter-increment: s; content: counter(s, decimal-leading-zero); font: .72rem/1.9 var(--f-code); opacity: .6; }
+  .toc a[aria-current] { color: var(--ink-3); background: var(--marker); }
+  .toc a[aria-current]::before { opacity: 1; }
+}
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-variation-settings: "wdth" 85; font-weight: 700; font-size: 1.1rem; color: var(--text); text-decoration: none; }
+.brand svg { width: 26px; height: 26px; }
+main { min-width: 0; }
+section { padding: var(--section) var(--gutter); border-top: 1px solid color-mix(in oklab, var(--line) 50%, transparent); }
+section:first-child { border-top: 0; }
+.head { max-width: 44rem; margin-bottom: 40px; }
+.head p { color: var(--muted); margin-top: 14px; font-size: 1.1rem; }
+.kicker { font: 500 .95rem var(--f-body); color: var(--marker); margin-bottom: 12px; display: flex; gap: 10px; align-items: center; }
+.kicker::before { content: ""; width: 26px; height: 10px; border-radius: 3px; background: var(--hatch); }
+.grid2 { display: grid; gap: 24px; }
+@media (min-width: 900px) { .grid2 { grid-template-columns: 1fr 1fr; } }
+.grid3 { display: grid; gap: 20px; }
+@media (min-width: 800px) { .grid3 { grid-template-columns: repeat(3, 1fr); } }
+.card { background: var(--ink-2); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 24px; }
+.card h3 { font: 600 1.05rem/1.3 var(--f-body); margin-bottom: 8px; }
+.card p, .card li { color: var(--muted); font-size: .95rem; }
+.card ul { padding-left: 1.1em; display: grid; gap: 6px; }
+.paper { background: var(--paper); color: var(--paper-ink); border-color: transparent; }
+.paper p, .paper li, .paper .fine { color: var(--paper-muted); }
+.stack > * + * { margin-top: 16px; }
+.spec { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; font-size: .88rem; margin-top: 16px; }
+.spec dt { color: var(--muted); }
+.spec dd { font-family: var(--f-code); font-size: .82rem; color: var(--text); }
+.tbl { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.tbl th, .tbl td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tbl th { font-weight: 500; color: var(--muted); font-size: .82rem; }
+.tbl td code { color: var(--marker); }
+.scroll-x { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--ink-2); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; background: var(--marker); color: var(--ink-3); border: 0; border-radius: var(--r-md); font-weight: 600; font-size: .92rem; transition: transform var(--d-press) var(--ease-out); box-shadow: inset 0 -3px 0 rgb(0 0 0 / .18); }
+.btn:active { transform: scale(.97); }
+.btn-quiet { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1.5px var(--line); }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+/* hero */
+.hero { padding-top: clamp(40px, 6vw, 88px); display: grid; gap: 48px; }
+@media (min-width: 1000px) { .hero { grid-template-columns: 1fr 1fr; align-items: center; } }
+.hero-copy > * + * { margin-top: 24px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.meta span { font-size: .8rem; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); }
+.hero-art { aspect-ratio: 1.1; max-width: 560px; width: 100%; justify-self: center; }
+
+/* live loops: only animate while visible */
+[data-live] :is(.loop, .loop *) { animation-play-state: paused !important; }
+[data-live].on :is(.loop, .loop *) { animation-play-state: running !important; }
+
+/* hero svg animation */
+@keyframes tape { 0%, 12% { transform: scaleX(0); } 28%, 78% { transform: scaleX(1); } 92%, 100% { transform: scaleX(0); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes blink { 0%, 20%, 80%, 100% { opacity: 0; } 30%, 70% { opacity: 1; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+.h-tape { transform-box: fill-box; transform-origin: left; animation: tape 6s var(--ease-in-out) infinite; }
+.h-tape.d2 { animation-delay: .25s; } .h-tape.d3 { animation-delay: .5s; }
+.h-shield { transform-box: fill-box; transform-origin: center; animation: float 5s ease-in-out infinite; }
+.h-alert { animation: blink 6s ease infinite; }
+.h-ring { transform-box: fill-box; transform-origin: center; animation: spin 40s linear infinite; }
+
+/* ---------- mock browser + demo ---------- */
+.demo-wrap { display: grid; gap: 24px; }
+@media (min-width: 1000px) { .demo-wrap { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: start; } }
+.win { background: var(--ink-2); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; box-shadow: 0 40px 80px -30px rgb(0 0 0 / .6); display: flex; flex-direction: column; min-height: 560px; }
+.win-bar { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: .8rem; color: var(--muted); }
+.win-dots { display: flex; gap: 6px; } .win-dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.win-url { flex: 1; min-width: 0; padding: 4px 10px; border-radius: 99px; background: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tb-icon { width: 22px; height: 22px; position: relative; }
+.tb-icon .badge { position: absolute; right: -6px; bottom: -4px; min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px; background: var(--alert); color: #fff; font: 600 9px/14px var(--f-body); text-align: center; opacity: 0; transform: scale(.8); transition: opacity var(--d-pop) var(--ease-out), transform var(--d-pop) var(--ease-out); }
+.tb-icon .badge.on { opacity: 1; transform: none; }
+.thread { flex: 1; padding: 18px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; max-height: 420px; }
+.thread:empty::before { content: "New chat"; margin: auto; font: 600 1.4rem var(--f-display); color: var(--line); }
+.msg { max-width: 92%; font-size: .9rem; white-space: pre-wrap; word-break: break-word; transition: opacity 260ms var(--ease-out), transform 260ms var(--ease-out); @starting-style { opacity: 0; transform: translateY(10px); } }
+.msg.you { align-self: flex-end; background: var(--ink-3); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; font-family: var(--f-code); font-size: .78rem; line-height: 1.8; }
+.msg.ai { line-height: 1.7; }
+.msg.ai pre { margin: 10px 0 4px; padding: 10px 12px; background: var(--ink-3); border-radius: var(--r-md); white-space: pre-wrap; }
+.msg.ai pre + pre { margin-top: 6px; }
+
+.composer-zone { position: relative; padding: 0 14px 14px; }
+.composer { min-height: 96px; max-height: 180px; overflow-y: auto; padding: 12px 14px 44px; background: var(--ink-3); border: 1px solid var(--line); border-radius: 14px; font: .8rem/1.9 var(--f-code); white-space: pre-wrap; word-break: break-all; outline: none; transition: border-color .15s ease; }
+.composer:focus { border-color: var(--violet); }
+.composer:empty::before { content: attr(data-placeholder); color: var(--muted); font-family: var(--f-body); font-size: .9rem; }
+.composer-actions { position: absolute; right: 24px; bottom: 22px; display: flex; gap: 8px; }
+.send { min-height: 32px; padding: 0 12px; border-radius: 8px; border: 0; background: var(--line); color: var(--text); font-weight: 600; font-size: .8rem; transition: transform var(--d-press) var(--ease-out); }
+.send:active { transform: scale(.97); }
+
+/* the tape token (placeholder pill) */
+.tape { position: relative; display: inline-block; vertical-align: baseline; padding: 0 6px; border-radius: 4px; background: var(--marker); color: var(--ink-3); font-weight: 600; white-space: nowrap; line-height: 1.5; animation: stamp var(--d-tape) var(--ease-out) both; animation-delay: calc(var(--i, 0) * 50ms); }
+.tape::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--hatch); clip-path: inset(0 0 0 0); animation: sweep 420ms var(--ease-in-out) both; animation-delay: calc(var(--i, 0) * 50ms + 60ms); }
+@keyframes stamp { from { opacity: 0; transform: scale(.94); } }
+@keyframes sweep { to { clip-path: inset(0 0 0 100%); } }
+.raw { color: var(--alert); text-decoration: underline wavy color-mix(in oklab, var(--alert) 70%, transparent); text-underline-offset: 4px; }
+
+/* the in-page chip */
+.chip { position: absolute; left: 14px; right: 14px; bottom: calc(100% - 4px); z-index: 3; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 10px 12px; background: var(--paper); color: var(--paper-ink); border-radius: 12px; box-shadow: 0 18px 40px -14px rgb(0 0 0 / .6); font-size: .84rem; transform-origin: bottom center;
+  opacity: 0; transform: translateY(6px) scale(.98); visibility: hidden; transition: opacity var(--d-exit) ease, transform var(--d-exit) ease, visibility 0s var(--d-exit); }
+.chip.open { opacity: 1; transform: none; visibility: visible; transition: opacity var(--d-pop) var(--ease-out), transform var(--d-pop) var(--ease-out), visibility 0s; }
+.chip-ico { width: 22px; height: 22px; flex: none; }
+.chip-msg { flex: 1 1 14em; min-width: 0; }
+.chip-msg b { font-weight: 600; }
+.chip-msg small { display: block; color: var(--paper-muted); font-size: .76rem; }
+.chip[data-state=exposed] { box-shadow: 0 0 0 2px var(--alert), 0 18px 40px -14px rgb(0 0 0 / .6); }
+.chip-keys { display: flex; gap: 6px; align-items: center; color: var(--paper-muted); font-size: .76rem; }
+.swap { transition: filter 200ms ease, opacity 200ms ease; }
+.swap.out { filter: blur(3px); opacity: 0; }
+
+/* hold to send original */
+.hold { position: relative; overflow: hidden; min-height: 32px; padding: 0 12px; border-radius: 8px; border: 1.5px solid var(--alert); background: transparent; color: #b3143a; font-weight: 600; font-size: .78rem; transition: transform var(--d-press) var(--ease-out); touch-action: none; user-select: none; -webkit-user-select: none; }
+.hold::before { content: ""; position: absolute; inset: 0; background: var(--alert); clip-path: inset(0 100% 0 0); transition: clip-path 200ms var(--ease-out); }
+.hold.holding { transform: scale(.97); }
+.hold.holding::before { clip-path: inset(0 0 0 0); transition: clip-path var(--d-hold) linear; }
+.hold span { position: relative; }
+.hold.holding span { color: #fff; transition: color var(--d-hold) steps(1, jump-end); }
+
+/* restored secret in answer */
+.restore { position: relative; display: inline-grid; vertical-align: baseline; }
+.restore > * { grid-area: 1 / 1; }
+.restore .val { font-family: var(--f-code); font-size: .9em; opacity: 0; filter: blur(3px); transition: opacity var(--d-peel) ease, filter var(--d-peel) ease; background: linear-gradient(transparent 62%, color-mix(in oklab, var(--marker) 45%, transparent) 62%); }
+.restore .cover { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 5px; border-radius: 4px; background: var(--hatch); color: var(--ink-3); font: 600 .78em/1.6 var(--f-code); clip-path: inset(0 0 0 0); transition: clip-path var(--d-peel) var(--ease-in-out); }
+.restore .cover b { background: var(--marker); padding: 0 3px; border-radius: 3px; }
+.restore.done .val { opacity: 1; filter: none; }
+.restore.done .cover { clip-path: inset(0 0 0 100%); }
+.restore .tip { position: absolute; bottom: calc(100% + 8px); left: 0; width: max-content; max-width: 240px; padding: 8px 10px; border-radius: 8px; background: var(--paper); color: var(--paper-ink); font: 400 .76rem/1.4 var(--f-body); white-space: normal; box-shadow: 0 10px 30px -10px rgb(0 0 0 / .6); transform-origin: bottom left; opacity: 0; transform: scale(.97) translateY(2px); pointer-events: none; transition: opacity 125ms var(--ease-out), transform 125ms var(--ease-out); z-index: 2; }
+.restore:is(:hover, :focus-visible) .tip { opacity: 1; transform: none; transition-delay: 300ms; }
+.restore:focus-visible { outline-offset: 2px; }
+
+/* package verdict badge */
+.pkg { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; padding: 1px 9px; border-radius: 99px; font: 600 .72rem/1.7 var(--f-body); vertical-align: 1px; position: relative; overflow: hidden; }
+.pkg[data-state=checking] { color: var(--muted); background: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line); }
+.pkg[data-state=checking]::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgb(255 255 255 / .12), transparent); transform: translateX(-100%); animation: shimmer 900ms linear infinite; }
+@keyframes shimmer { to { transform: translateX(100%); } }
+.pkg[data-state=bad] { background: var(--alert); color: #2a0612; }
+.pkg[data-state=new] { background: color-mix(in oklab, var(--marker) 22%, var(--ink-2)); color: var(--marker); box-shadow: inset 0 0 0 1px var(--marker); }
+.pkg[data-state=ok] { color: var(--muted); box-shadow: inset 0 0 0 1px var(--line); }
+.pkg svg { width: 12px; height: 12px; }
+
+.demo-side .step { display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding: 14px 0; border-bottom: 1px dashed var(--line); }
+.demo-side .step:last-child { border: 0; }
+.demo-side .step i { font: 600 .8rem/28px var(--f-code); text-align: center; border-radius: 50%; background: var(--ink-2); border: 1px solid var(--line); height: 28px; font-style: normal; transition: background-color .2s ease, color .2s ease; }
+.demo-side .step.hit i { background: var(--marker); color: var(--ink-3); border-color: var(--marker); }
+.demo-side .step p { font-size: .9rem; color: var(--muted); }
+.demo-side .step b { color: var(--text); font-weight: 500; }
+
+/* ---------- flow diagram ---------- */
+.flow { width: 100%; height: auto; }
+.flow .box { fill: var(--ink-2); stroke: var(--line); stroke-width: 1.5; }
+.flow .box.dev { fill: var(--ink-3); }
+.flow text { fill: var(--text); font: 500 14px var(--f-body); }
+.flow text.s { fill: var(--muted); font-size: 12px; }
+.flow .wire { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 6; }
+.flow .fence { fill: none; stroke: var(--violet); stroke-width: 1.5; stroke-dasharray: 2 5; opacity: .7; }
+.pkt { offset-rotate: 0deg; animation: travel 3.6s var(--ease-in-out) infinite; }
+@keyframes travel { from { offset-distance: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } to { offset-distance: 100%; opacity: 0; } }
+
+/* ---------- surface gallery ---------- */
+.surface { display: grid; gap: 28px; padding: 36px 0; border-top: 1px dashed var(--line); }
+.surface:first-of-type { border-top: 0; padding-top: 0; }
+@media (min-width: 1000px) { .surface { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: start; } }
+.surface .copy > * + * { margin-top: 12px; }
+.surface .copy p { color: var(--muted); }
+.stage { background: radial-gradient(120% 90% at 50% 0%, var(--ink-2), var(--ink-3)); border: 1px solid var(--line); border-radius: var(--r-lg); padding: clamp(20px, 4vw, 40px); display: grid; place-items: center; min-height: 320px; position: relative; overflow: hidden; }
+.stage-label { position: absolute; top: 12px; left: 16px; font-size: .75rem; color: var(--muted); }
+
+/* toolbar icons */
+.icons { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 18px; width: 100%; }
+.ic { display: grid; justify-items: center; gap: 10px; text-align: center; font-size: .78rem; color: var(--muted); background: none; border: 0; padding: 12px 6px; border-radius: var(--r-md); }
+.ic svg { width: 56px; height: 56px; }
+.ic-caught.pulse .ring { animation: ring 700ms var(--ease-out); }
+.ic-caught.pulse .shield { animation: nudge 360ms var(--ease-out); transform-box: fill-box; transform-origin: center; }
+@keyframes ring { from { opacity: .9; transform: scale(.7); } to { opacity: 0; transform: scale(1.5); } }
+@keyframes nudge { 40% { transform: scale(1.06); } }
+.ic .ring { transform-box: fill-box; transform-origin: center; opacity: 0; }
+
+/* popup */
+.popup { width: 340px; max-width: 100%; background: var(--ink); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: 0 30px 60px -20px rgb(0 0 0 / .7); font-size: .88rem; transform-origin: top right; }
+.pp-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.pp-head svg { width: 22px; height: 22px; }
+.pp-head b { font-family: var(--f-display); font-variation-settings: "wdth" 85; font-size: 1.05rem; }
+.status { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: .74rem; color: var(--marker); }
+.status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px color-mix(in oklab, currentColor 25%, transparent); }
+.status.off { color: var(--muted); }
+.pp-hero { padding: 18px 16px 8px; }
+.pp-count { font: 760 3.2rem/1 var(--f-display); font-variation-settings: "wdth" 78; color: var(--marker); font-variant-numeric: tabular-nums; }
+.pp-hero p { color: var(--muted); font-size: .82rem; margin-top: 6px; }
+.bars { display: flex; align-items: end; gap: 6px; height: 64px; padding: 10px 16px 0; }
+.bars span { flex: 1; height: var(--h); border-radius: 4px 4px 1px 1px; background: var(--hatch); transform: scaleY(0); transform-origin: bottom; transition: transform 420ms var(--ease-out); transition-delay: calc(var(--i) * 40ms); }
+.bars span.today { background: var(--marker); }
+.in .bars span { transform: none; }
+.days { display: flex; gap: 6px; padding: 4px 16px 12px; } .days span { flex: 1; text-align: center; font-size: .66rem; color: var(--muted); }
+.pp-list { border-top: 1px solid var(--line); padding: 6px 8px; }
+.pp-row { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px; }
+.pp-row .dot { width: 22px; height: 22px; border-radius: 6px; background: var(--ink-2); border: 1px solid var(--line); display: grid; place-items: center; font: 600 .66rem var(--f-code); color: var(--muted); }
+.pp-row span:nth-child(2) { flex: 1; }
+.switch { position: relative; width: 36px; height: 22px; border-radius: 11px; border: 0; background: var(--line); padding: 0; flex: none; transition: background-color 160ms ease; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--text); transition: transform 160ms var(--ease-out); }
+.switch[aria-checked=true] { background: var(--marker); }
+.switch[aria-checked=true]::after { transform: translateX(14px); background: var(--ink-3); }
+.switch:active::after { width: 19px; }
+.switch[aria-checked=true]:active::after { transform: translateX(11px); }
+.pp-foot { display: flex; justify-content: space-between; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); font-size: .74rem; color: var(--muted); }
+.pp-foot a { color: var(--violet); }
+
+/* onboarding */
+.welcome { width: 100%; max-width: 520px; background: var(--paper); color: var(--paper-ink); border-radius: 14px; padding: 24px; box-shadow: 0 30px 60px -20px rgb(0 0 0 / .7); }
+.welcome h4 { font: 700 1.6rem/1 var(--f-display); font-variation-settings: "wdth" 80; }
+.checks { list-style: none; padding: 0; margin: 18px 0; display: grid; gap: 10px; }
+.checks li { display: flex; gap: 12px; align-items: center; font-size: .92rem; color: var(--paper-muted); transition: color .2s ease; }
+.checks li.done { color: var(--paper-ink); }
+.checks svg { width: 22px; height: 22px; flex: none; }
+.checks .ck-bg { fill: none; stroke: var(--paper-line); stroke-width: 2; transition: fill .2s ease, stroke .2s ease; }
+.checks .ck { fill: none; stroke: var(--ink-3); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 16; stroke-dashoffset: 16; transition: stroke-dashoffset 300ms var(--ease-out) 80ms; }
+.checks li.done .ck-bg { fill: var(--marker); stroke: var(--marker); }
+.checks li.done .ck { stroke-dashoffset: 0; }
+.fake-key { display: flex; gap: 8px; align-items: center; padding: 8px 8px 8px 12px; border-radius: var(--r-md); background: #fff; border: 1px dashed var(--paper-line); font: .78rem var(--f-code); overflow: hidden; }
+.fake-key code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.try { margin-top: 10px; min-height: 60px; padding: 10px 12px; border-radius: var(--r-md); background: #fff; border: 1.5px solid var(--paper-line); font: .78rem/1.9 var(--f-code); white-space: pre-wrap; word-break: break-all; outline: none; }
+.try:focus { border-color: var(--violet); }
+.try:empty::before { content: "Paste it here"; color: var(--paper-muted); font-family: var(--f-body); }
+.welcome .btn-quiet { color: var(--paper-ink); box-shadow: inset 0 0 0 1.5px var(--paper-line); }
+
+/* rule tester */
+.rules { width: 100%; max-width: 560px; background: var(--ink); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 12px; }
+.rules label { font-size: .78rem; color: var(--muted); }
+.rules input, .rules textarea { width: 100%; padding: 10px 12px; background: var(--ink-3); border: 1.5px solid var(--line); border-radius: var(--r-md); font: .82rem/1.7 var(--f-code); color: var(--text); outline: none; transition: border-color .15s ease; }
+.rules input:focus, .rules textarea:focus { border-color: var(--violet); }
+.rules input[aria-invalid=true] { border-color: var(--alert); }
+.rules textarea { resize: vertical; min-height: 84px; }
+.rule-out { padding: 10px 12px; min-height: 60px; background: var(--ink-3); border-radius: var(--r-md); font: .82rem/1.9 var(--f-code); white-space: pre-wrap; word-break: break-all; }
+.rule-out mark { background: var(--marker); color: var(--ink-3); border-radius: 3px; padding: 0 2px; }
+.rule-meta { font-size: .78rem; color: var(--muted); min-height: 1.3em; }
+.rule-meta.err { color: var(--alert); }
+
+/* register (paper) */
+.reg { width: 100%; max-width: 560px; background: var(--paper); color: var(--paper-ink); border-radius: 14px; padding: 22px; box-shadow: 0 30px 60px -20px rgb(0 0 0 / .7); }
+.reg-top { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
+.reg-top h4 { font: 700 1.5rem/1 var(--f-display); font-variation-settings: "wdth" 80; }
+.reg-top small { color: var(--paper-muted); }
+.reg-list { margin-top: 16px; display: grid; gap: 10px; }
+.reg-row { display: grid; grid-template-columns: 1fr 1.3fr auto; gap: 12px; align-items: center; font-size: .86rem; }
+.reg-bar { height: 10px; border-radius: 5px; background: var(--paper-line); overflow: hidden; }
+.reg-bar i { display: block; height: 100%; width: 100%; border-radius: 5px; background: var(--paper-ink); transform: scaleX(0); transform-origin: left; transition: transform 600ms var(--ease-out); transition-delay: calc(var(--i) * 50ms); }
+.in .reg-bar i { transform: scaleX(var(--w)); }
+.reg-row.new .reg-bar i { background: #b98f00; }
+.reg-tag { font-size: .7rem; padding: 1px 8px; border-radius: 99px; background: #fff; border: 1px solid var(--paper-line); color: var(--paper-muted); white-space: nowrap; }
+.reg-row.new .reg-tag { background: var(--marker); border-color: var(--marker); color: var(--ink-3); }
+.reg .btn-quiet { color: var(--paper-ink); box-shadow: inset 0 0 0 1.5px var(--paper-ink); }
+
+/* uninstall */
+.bye { width: 100%; max-width: 460px; background: var(--paper); color: var(--paper-ink); border-radius: 14px; padding: 24px; box-shadow: 0 30px 60px -20px rgb(0 0 0 / .7); }
+.bye h4 { font: 700 1.4rem/1.05 var(--f-display); font-variation-settings: "wdth" 80; }
+.opts { display: grid; gap: 8px; margin-top: 16px; }
+.opt { text-align: left; padding: 10px 14px; border-radius: var(--r-md); background: #fff; border: 1.5px solid var(--paper-line); color: var(--paper-ink); font-size: .9rem; transition: transform var(--d-press) var(--ease-out), border-color .15s ease; }
+.opt:active { transform: scale(.98); }
+.opt[aria-pressed=true] { border-color: var(--paper-ink); background: var(--marker); }
+.bye-thanks { margin-top: 12px; font-size: .88rem; color: var(--paper-muted); min-height: 1.4em; }
+
+/* motion lab */
+.lab { display: grid; gap: 14px; }
+.lane { position: relative; height: 48px; border-radius: var(--r-md); background: var(--ink-3); border: 1px solid var(--line); overflow: hidden; }
+.lane i { position: absolute; top: 8px; left: 8px; width: 60px; height: 30px; border-radius: 6px; background: var(--hatch); transition: transform 600ms var(--e); }
+.lane.go i { transform: translateX(calc(var(--track) - 76px)); }
+.lane span { position: absolute; right: 12px; top: 50%; translate: 0 -50%; font: .74rem var(--f-code); color: var(--muted); }
+.freq { display: grid; gap: 10px; }
+.freq-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 12px 14px; border-radius: var(--r-md); background: var(--ink-2); border: 1px solid var(--line); font-size: .9rem; }
+.freq-row small { display: block; color: var(--muted); font-size: .8rem; }
+.freq-row code { align-self: center; color: var(--marker); font-size: .78rem; white-space: nowrap; }
+
+/* copy table */
+.say td:nth-child(2) { color: var(--marker); }
+.say td:nth-child(3) { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--alert); }
+
+footer { padding: 48px var(--gutter) 72px; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; transition-delay: 0ms !important; scroll-behavior: auto !important; }
+  .chip, .restore .val, .restore .cover, .swap { transition-duration: 150ms !important; transition-property: opacity, filter !important; }
+  .pkt { display: none; }
+}
+@media (forced-colors: active) { .tape, .restore .cover { border: 1px solid CanvasText; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="toc" aria-label="Contents">
+    <a class="brand" href="#top"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7L16 2Z" fill="#F2E15B"/><rect x="9" y="12" width="14" height="4" rx="1" fill="#120D24"/><rect x="9" y="18" width="9" height="2.4" rx="1" fill="#120D24" opacity=".45"/></svg>PasteGuard</a>
+    <ol>
+      <li><a href="#top">Overview</a></li>
+      <li><a href="#principles">Principles</a></li>
+      <li><a href="#loop">Core loop</a></li>
+      <li><a href="#trust">Trust model</a></li>
+      <li><a href="#surfaces">Surfaces</a></li>
+      <li><a href="#motion">Motion system</a></li>
+      <li><a href="#a11y">Accessibility</a></li>
+      <li><a href="#engineering">Engineering rules</a></li>
+      <li><a href="#states">State matrix</a></li>
+      <li><a href="#copy">Voice</a></li>
+    </ol>
+  </aside>
+
+<main>
+  <section id="top" class="hero">
+    <div class="hero-copy">
+      <p class="kicker">Extension design doc · v0.1 · 29 Sep 2026</p>
+      <h1 class="display">Quiet until it matters.</h1>
+      <p class="lede">How PasteGuard looks, moves and behaves inside other people's websites. Every demo on this page runs the real detection rules from <code>detect.js</code>, so you can paste into them.</p>
+      <div class="meta"><span>MV3</span><span>Chrome, Edge, Brave</span><span>Local-only detection</span><span>WCAG 2.2 AA</span><span>Owner: design eng</span></div>
+    </div>
+    <svg class="hero-art" viewBox="0 0 560 500" role="img" aria-labelledby="hero-t" data-live>
+      <title id="hero-t">Lines of a .env file getting covered by hatched tape while a shield floats above</title>
+      <g class="loop">
+        <circle class="h-ring" cx="280" cy="250" r="220" fill="none" stroke="#3B3163" stroke-width="1.5" stroke-dasharray="3 10"/>
+        <g font-family="JetBrains Mono, monospace" font-size="15">
+          <rect x="60" y="150" width="440" height="250" rx="18" fill="#251C45" stroke="#3B3163"/>
+          <circle cx="86" cy="174" r="5" fill="#3B3163"/><circle cx="104" cy="174" r="5" fill="#3B3163"/><circle cx="122" cy="174" r="5" fill="#3B3163"/>
+          <text x="148" y="179" fill="#ADA6C4" font-size="12" font-family="Rubik, sans-serif">.env</text>
+          <text x="88" y="230" fill="#ADA6C4">DATABASE_URL=</text><text x="212" y="230" fill="#FF5E7E">postgres://app:hunt…</text>
+          <text x="88" y="270" fill="#ADA6C4">STRIPE_KEY=</text><text x="194" y="270" fill="#FF5E7E">sk_live_51Hc9xQ2eZ…</text>
+          <text x="88" y="310" fill="#ADA6C4">AWS_KEY_ID=</text><text x="194" y="310" fill="#FF5E7E">AKIAIOSFODNN7EXA…</text>
+          <text x="88" y="350" fill="#ADA6C4">PORT=</text><text x="140" y="350" fill="#EDEAF7">8080</text>
+          <defs><pattern id="hatch" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="12" fill="#F2E15B"/><rect x="6" width="6" height="12" fill="#120D24"/></pattern></defs>
+          <rect class="h-tape" x="208" y="213" width="252" height="24" rx="4" fill="url(#hatch)"/>
+          <rect class="h-tape d2" x="190" y="253" width="236" height="24" rx="4" fill="url(#hatch)"/>
+          <rect class="h-tape d3" x="190" y="293" width="236" height="24" rx="4" fill="url(#hatch)"/>
+        </g>
+        <g class="h-alert"><circle cx="478" cy="160" r="15" fill="#FF5E7E"/><text x="478" y="166" text-anchor="middle" fill="#fff" font-family="Rubik" font-weight="600" font-size="15">3</text></g>
+        <g class="h-shield">
+          <path d="M280 40 238 58v28c0 26 18 47 42 53 24-6 42-27 42-53V58L280 40Z" fill="#F2E15B"/>
+          <rect x="255" y="82" width="50" height="13" rx="3" fill="#120D24"/><rect x="255" y="102" width="32" height="8" rx="3" fill="#120D24" opacity=".45"/>
+        </g>
+        <path d="M280 150v-10" stroke="#F2E15B" stroke-width="2" stroke-dasharray="2 4"/>
+      </g>
+    </svg>
+  </section>
+
+  <section id="principles">
+    <div class="head"><p class="kicker">01</p><h2 class="h-big">Six rules every screen follows</h2><p>If a design choice breaks one of these, the rule wins. They come straight from the decision report: a DLP tool that nags gets uninstalled, and a security extension that isn't trusted is worthless.</p></div>
+    <div class="grid3">
+      <div class="card"><h3>1. Silent by default</h3><p>No UI until a secret or risky package shows up. We never show a "you're protected" banner on every page load. The toolbar icon is the only thing that's always visible.</p></div>
+      <div class="card"><h3>2. Warn and redact, never block</h3><p>The default fixes the problem and keeps the user moving. Sending the original takes a deliberate press-and-hold, never an accidental click.</p></div>
+      <div class="card"><h3>3. Focus stays with the user</h3><p>Our UI never takes focus from the chat box. <kbd>Enter</kbd> and <kbd>Esc</kbd> keep working exactly as the user expects.</p></div>
+      <div class="card"><h3>4. Show what we saw, not what we know</h3><p>We describe secrets by type ("Stripe key") and never show their values in our own UI, logs or badges. Values only reappear inside the user's own conversation.</p></div>
+      <div class="card"><h3>5. Explain in place</h3><p>Every verdict can explain itself with one hover or focus: why it was flagged, what the AI saw, and how to allow it. There are no dead ends and no settings maze.</p></div>
+      <div class="card"><h3>6. Motion is information</h3><p>The hatch tape means "protected" everywhere. Anything that moves is either confirming an action or showing a change of state. Nothing moves just to look busy.</p></div>
+    </div>
+  </section>
+
+  <section id="loop">
+    <div class="head"><p class="kicker">02 · Try it</p><h2 class="h-big">The core loop, live</h2><p>Paste a <code>.env</code>, send it, and watch the answer come back with your real values restored on your screen only. You can paste your own text too. Everything runs in this tab.</p></div>
+    <div class="demo-wrap">
+      <div class="win" aria-label="Demo AI chat window">
+        <div class="win-bar">
+          <div class="win-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="win-url">chat.example.ai</div>
+          <div class="tb-icon" aria-hidden="true">
+            <svg viewBox="0 0 32 32"><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7L16 2Z" fill="#F2E15B"/><rect x="9" y="12" width="14" height="4" rx="1" fill="#120D24"/></svg>
+            <span class="badge" id="tb-badge"></span>
+          </div>
+        </div>
+        <div class="thread" id="thread" aria-live="polite"></div>
+        <div class="composer-zone">
+          <div class="chip" id="chip" role="status" aria-live="polite">
+            <svg class="chip-ico" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7L16 2Z" fill="#F2E15B" stroke="#1B1433" stroke-width="1.5"/><rect x="9" y="12" width="14" height="4" rx="1" fill="#120D24"/></svg>
+            <div class="chip-msg swap" id="chip-msg"></div>
+            <div class="chip-keys" id="chip-keys"></div>
+            <button class="hold" id="hold" type="button" aria-describedby="hold-help"><span>Hold to send original</span></button>
+            <span id="hold-help" hidden>Press and hold for about one second to send the unredacted text.</span>
+          </div>
+          <div class="composer" id="composer" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Message" data-placeholder="Paste something here, or use the sample below"></div>
+          <div class="composer-actions"><button class="send" id="send" type="button">Send</button></div>
+        </div>
+      </div>
+      <div class="demo-side card">
+        <div class="row" style="margin-bottom:8px">
+          <button class="btn" id="paste-sample" type="button">Paste sample .env</button>
+          <button class="btn btn-quiet" id="reset" type="button">Reset</button>
+        </div>
+        <div class="step" data-step="1"><i>1</i><p><b>Paste is caught before it lands.</b> A capture-phase <code>paste</code> listener runs detection in under 5 ms. The real value never reaches the page's editor.</p></div>
+        <div class="step" data-step="2"><i>2</i><p><b>Tape stamps in, the chip explains.</b> Each secret becomes a <code>PG_SECRET_n</code> pill (stamped in 260 ms, 50 ms stagger), and the chip rises from the composer in 180 ms. <kbd>Esc</kbd> undoes it instantly.</p></div>
+        <div class="step" data-step="3"><i>3</i><p><b>The AI only sees placeholders.</b> <kbd>Enter</kbd> sends. The values stay in a session-only vault in memory and are never written to disk.</p></div>
+        <div class="step" data-step="4"><i>4</i><p><b>The answer is restored for you.</b> The tape peels off (320 ms) to show the real value. Hover it to see what the AI actually saw.</p></div>
+        <div class="step" data-step="5"><i>5</i><p><b>Install commands are checked.</b> Package names in code blocks get a verdict chip. Verdicts in this demo are samples; the extension queries the npm and PyPI registries.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="trust">
+    <div class="head"><p class="kicker">03</p><h2 class="h-big">The trust model, drawn</h2><p>Coral packets are real secrets and never cross the dotted device boundary. Yellow packets are placeholders, and they are the only thing the AI site receives. We keep this diagram on the store listing and the "What we see" page.</p></div>
+    <svg class="flow" viewBox="0 0 1000 380" role="img" aria-labelledby="flow-t" data-live>
+      <title id="flow-t">Clipboard text goes to an on-device detector. Real values go to a session vault. Placeholders go to the AI site. The answer comes back and the restorer swaps values back in on screen.</title>
+      <rect class="fence" x="16" y="30" width="660" height="330" rx="22"/>
+      <text x="36" y="58" class="s">Your device (nothing below crosses this line)</text>
+      <rect class="box dev" x="40" y="90" width="150" height="70" rx="12"/><text x="62" y="122">Clipboard</text><text x="62" y="142" class="s">.env, logs, keys</text>
+      <rect class="box dev" x="260" y="90" width="170" height="70" rx="12"/><text x="282" y="122">Detector</text><text x="282" y="142" class="s">rules + entropy, &lt;5 ms</text>
+      <rect class="box dev" x="260" y="250" width="170" height="70" rx="12"/><text x="282" y="282">Session vault</text><text x="282" y="302" class="s">memory only, per tab</text>
+      <rect class="box dev" x="490" y="250" width="160" height="70" rx="12"/><text x="512" y="282">Your screen</text><text x="512" y="302" class="s">values restored</text>
+      <rect class="box" x="780" y="160" width="190" height="80" rx="12"/><text x="802" y="196">AI site</text><text x="802" y="218" class="s">sees PG_SECRET_1</text>
+      <path class="wire" id="w1" d="M190 125 H260"/>
+      <path class="wire" id="w2" d="M345 160 V250"/>
+      <path class="wire" id="w3" d="M430 125 C 600 125, 640 200, 780 200"/>
+      <path class="wire" id="w4" d="M780 215 C 700 240, 700 285, 650 285"/>
+      <path class="wire" id="w5" d="M430 285 H490"/>
+      <g class="loop">
+        <circle class="pkt" r="7" fill="#FF5E7E" style="offset-path: path('M190 125 H260')"/>
+        <circle class="pkt" r="7" fill="#FF5E7E" style="offset-path: path('M345 160 V250'); animation-delay: .9s"/>
+        <rect class="pkt" x="-9" y="-6" width="18" height="12" rx="3" fill="#F2E15B" style="offset-path: path('M430 125 C 600 125, 640 200, 780 200'); animation-delay: 1.2s"/>
+        <rect class="pkt" x="-9" y="-6" width="18" height="12" rx="3" fill="#F2E15B" style="offset-path: path('M780 215 C 700 240, 700 285, 650 285'); animation-delay: 2.2s"/>
+        <circle class="pkt" r="7" fill="#FF5E7E" style="offset-path: path('M430 285 H490'); animation-delay: 2.8s"/>
+      </g>
+    </svg>
+    <div class="grid3" style="margin-top:32px">
+      <div class="card"><h3>Permission prompt, designed</h3><p>The public build asks only for AI chat domains and the npm/PyPI registries. The install warning names four sites instead of "all websites". The team build adds <code>webNavigation</code> and <code>management</code>, but it's force-installed, so users never see a scary prompt.</p></div>
+      <div class="card"><h3>"What we see" page</h3><p>This is a paper-surface table with the columns <i>Data</i>, <i>Where it lives</i>, <i>Who can see it</i> and <i>How long</i>. Every row links to the file in the open-source repo that handles it.</p></div>
+      <div class="card"><h3>No remote anything</h3><p>No remote code, no remote fonts and no analytics inside host pages. The in-page UI uses the system font stack, so there are zero network requests on AI sites.</p></div>
+    </div>
+  </section>
+
+  <section id="surfaces">
+    <div class="head"><p class="kicker">04</p><h2 class="h-big">Nine surfaces, one language</h2><p>Each surface runs in a different context with different constraints. Specs list what to build, not how it should feel.</p></div>
+
+    <div class="surface">
+      <div class="copy">
+        <h3 class="h-mid">A · Guard chip (in page)</h3>
+        <p>It appears above the composer on a paste that contains a secret. It's a light "paper" surface, so it stands out on both light and dark host pages without us having to detect the host theme.</p>
+        <dl class="spec">
+          <dt>Mount</dt><dd>closed shadow root, <code>popover="manual"</code> (top layer, no z-index fights)</dd>
+          <dt>Anchor</dt><dd>composer rect via ResizeObserver; fallback: bottom-center toast</dd>
+          <dt>Enter</dt><dd>translateY(6px) scale(.98) → none · 180ms ease-out</dd>
+          <dt>Exit</dt><dd>opacity · 120ms ease (exit faster than enter)</dd>
+          <dt>Repeat paste</dt><dd>update in place, 200ms blur swap on the text, no re-entry</dd>
+          <dt>Dismiss</dt><dd>on send, <kbd>Esc</kbd> twice, or 8s after the editor loses focus</dd>
+          <dt>Focus</dt><dd>never stolen; role=status, aria-live=polite</dd>
+        </dl>
+      </div>
+      <div class="stage"><span class="stage-label">Try it in section 02</span>
+        <p class="fine" style="max-width:32ch;text-align:center">The live chip is in the core-loop demo. Paste there, then press <kbd>Esc</kbd> to see the exposed state with the coral ring.</p>
+      </div>
+    </div>
+
+    <div class="surface">
+      <div class="copy">
+        <h3 class="h-mid">B · Restore view (in the AI answer)</h3>
+        <p>A MutationObserver watches the answer container. When a placeholder shows up, it's replaced in place: the hatch peels away left to right, and the real value fades in from a 3px blur, so it reads as one object changing rather than two objects swapping.</p>
+        <dl class="spec">
+          <dt>Peel</dt><dd>clip-path inset(0 0 0 100%) · 320ms ease-in-out</dd>
+          <dt>Value</dt><dd>opacity + blur(3px → 0) · 320ms</dd>
+          <dt>Streaming</dt><dd>re-apply on each mutation; debounce 50ms; no flicker</dd>
+          <dt>Tooltip</dt><dd>300ms delay first, instant after · scale .97 origin bottom-left</dd>
+          <dt>Copy button</dt><dd>MAIN-world clipboard wrapper returns real values</dd>
+        </dl>
+      </div>
+      <div class="stage"><span class="stage-label">Restored value</span>
+        <p style="font-size:1rem;line-height:2">Your worker connects with <span class="restore done" tabindex="0"><span class="val">hunter2-prod-9f</span><span class="cover"><b>PG_SECRET_1</b></span><span class="tip">Restored on this screen only. The AI saw <code>PG_SECRET_1</code>.</span></span> but the host only resolves inside the VPC.</p>
+      </div>
+    </div>
+
+    <div class="surface">
+      <div class="copy">
+        <h3 class="h-mid">C · Package verdict chip</h3>
+        <p>We only check install commands (<code>npm i</code>, <code>pnpm add</code>, <code>pip install</code>, <code>uv add</code>) inside code blocks. There are four verdicts, and each color keeps its single meaning.</p>
+        <dl class="spec">
+          <dt>Checking</dt><dd>1px outline + linear shimmer (constant motion → linear)</dd>
+          <dt>Not found</dt><dd>coral fill · "Not on npm" · likely hallucinated</dd>
+          <dt>Brand new</dt><dd>marker outline · "Registered 4 days ago"</dd>
+          <dt>Fine</dt><dd>quiet outline only; never a green "safe" claim</dd>
+          <dt>Swap</dt><dd>200ms blur crossfade between states</dd>
+        </dl>
+      </div>
+      <div class="stage"><span class="stage-label">All four states</span>
+        <div style="display:grid;gap:12px;font:.82rem var(--f-code)">
+          <div>npm i zod <span class="pkg" data-state="checking">Checking</span></div>
+          <div>npm i react-form-utils-pro <span class="pkg" data-state="bad"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Not on npm</span></div>
+          <div>pip install fastapi-authx <span class="pkg" data-state="new">Registered 4 days ago</span></div>
+          <div>npm i p-retry <span class="pkg" data-state="ok">On npm</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="surface">
+      <div class="copy">
+        <h3 class="h-mid">D · Toolbar icon</h3>
+        <p>This is the only surface that's always visible. <code>chrome.action</code> can't animate, so state comes from the icon shape plus a badge. Click "Just caught" to see the one-time pulse the popup plays when it opens after a catch.</p>
+        <dl class="spec">
+          <dt>Badge</dt><dd>count in coral for 4s after a catch, then cleared</dd>
+          <dt>Title</dt><dd>"PasteGuard: 2 secrets taped on this tab"</dd>
+          <dt>Sizes</dt><dd>16 / 32 / 48 / 128 · pixel-snapped tape bar</dd>
+        </dl>
+      </div>
+      <div class="stage"><span class="stage-label">States</span>
+        <div class="icons">
+          <button class="ic" type="button" aria-label="Active on this site"><svg viewBox="0 0 32 32"><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7L16 2Z" fill="#F2E15B"/><rect x="9" y="12" width="14" height="4" rx="1" fill="#120D24"/><rect x="9" y="18" width="9" height="2.4" rx="1" fill="#120D24" opacity=".45"/></svg>Active</button>
+          <button class="ic ic-caught" id="ic-caught" type="button" aria-label="Just caught, replay pulse"><svg viewBox="0 0 40 40" overflow="visible"><circle class="ring" cx="20" cy="20" r="18" fill="none" stroke="#FF5E7E" stroke-width="2"/><g transform="translate(4 4)"><path class="shield" d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7L16 2Z" fill="#F2E15B"/><rect x="9" y="12" width="14" height="4" rx="1" fill="#120D24"/></g><circle cx="33" cy="32" r="7" fill="#FF5E7E"/><text x="33" y="35.5" text-anchor="middle" fill="#fff" font-family="Rubik" font-weight="600" font-size="10">2</text></svg>Just caught</button>
+          <button class="ic" type="button" aria-label="Idle, not an AI site"><svg viewBox="0 0 32 32"><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7L16 2Z" fill="none" stroke="#ADA6C4" stroke-width="2"/><rect x="9" y="12" width="14" height="4" rx="1" fill="#ADA6C4"/></svg>Idle</button>
+          <button class="ic" type="button" aria-label="Paused"><svg viewBox="0 0 32 32"><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7L16 2Z" fill="#3B3163"/><path d="M6 26 26 6" stroke="#ADA6C4" stroke-width="2.4" stroke-linecap="round"/></svg>Paused</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="surface">
+      <div class="copy">
+        <h3 class="h-mid">E · Popup</h3>
+        <p>People open it a few times a week, so there's one number, one chart and one toggle per site. The count only animates when it changed since the last time the popup was opened; otherwise it shows the final value immediately. The browser handles the open animation, so we add none.</p>
+        <dl class="spec">
+          <dt>Width</dt><dd>340px fixed; height to content, max 560</dd>
+          <dt>Count-up</dt><dd>only if changed · 600ms ease-out · tabular-nums</dd>
+          <dt>Bars</dt><dd>scaleY from bottom · 420ms · 40ms stagger</dd>
+          <dt>Switch</dt><dd>knob 160ms ease-out; widens on :active</dd>
+        </dl>
+      </div>
+      <div class="stage" id="popup-stage"><span class="stage-label">340 × auto</span>
+        <div class="popup" aria-label="Popup mock">
+          <div class="pp-head"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7L16 2Z" fill="#F2E15B"/><rect x="9" y="12" width="14" height="4" rx="1" fill="#120D24"/></svg><b>PasteGuard</b><span class="status" id="pp-status">On for this site</span></div>
+          <div class="pp-hero"><div class="pp-count" id="pp-count" data-to="12">12</div><p>secrets kept out of AI chats this week</p></div>
+          <div class="bars" aria-hidden="true"><span style="--h:30%;--i:0"></span><span style="--h:55%;--i:1"></span><span style="--h:10%;--i:2"></span><span style="--h:80%;--i:3"></span><span style="--h:40%;--i:4"></span><span style="--h:20%;--i:5"></span><span class="today" style="--h:65%;--i:6"></span></div>
+          <div class="days" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+          <div class="pp-list">
+            <div class="pp-row"><span class="dot">C</span><span>chat.example.ai</span><button class="switch" role="switch" aria-checked="true" aria-label="Guard on chat.example.ai" data-site></button></div>
+            <div class="pp-row"><span class="dot">A</span><span>assistant.example</span><button class="switch" role="switch" aria-checked="true" aria-label="Guard on assistant.example"></button></div>
+            <div class="pp-row"><span class="dot">G</span><span>gen.example</span><button class="switch" role="switch" aria-checked="false" aria-label="Guard on gen.example"></button></div>
+          </div>
+          <div class="pp-foot"><span>Local only. Nothing leaves this device.</span><a href="#trust">What we see</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="surface">
+      <div class="copy">
+        <h3 class="h-mid">F · Welcome tab (time-to-wow &lt; 30s)</h3>
+        <p>It opens once, on install. No account and no tour: copy a fake key, paste it, watch it get taped. The checkmarks draw themselves in with <code>stroke-dashoffset</code>, the one celebratory moment in the product. Step 3 points at the puzzle-piece menu, because unpinned extensions get forgotten.</p>
+        <dl class="spec">
+          <dt>Check</dt><dd>fill 200ms, stroke draw 300ms ease-out, 80ms delay</dd>
+          <dt>Fake key</dt><dd>obviously fake: <code>sk_live_PASTEGUARD_DEMO…</code></dd>
+          <dt>Success</dt><dd>ARIA announcement "Taped. That's all it takes."</dd>
+        </dl>
+      </div>
+      <div class="stage"><span class="stage-label">chrome-extension://…/welcome.html</span>
+        <div class="welcome">
+          <h4>Let's catch one together.</h4>
+          <ol class="checks">
+            <li id="ck1"><svg viewBox="0 0 22 22" aria-hidden="true"><circle class="ck-bg" cx="11" cy="11" r="10"/><path class="ck" d="M6.5 11.5l3 3 6-6.5"/></svg>Copy this fake key</li>
+            <li id="ck2"><svg viewBox="0 0 22 22" aria-hidden="true"><circle class="ck-bg" cx="11" cy="11" r="10"/><path class="ck" d="M6.5 11.5l3 3 6-6.5"/></svg>Paste it below</li>
+            <li id="ck3"><svg viewBox="0 0 22 22" aria-hidden="true"><circle class="ck-bg" cx="11" cy="11" r="10"/><path class="ck" d="M6.5 11.5l3 3 6-6.5"/></svg>Pin PasteGuard to your toolbar</li>
+          </ol>
+          <div class="fake-key"><code id="fake-key">STRIPE_SECRET_KEY=sk_live_PASTEGUARDDEMO00</code><button class="btn" id="copy-key" type="button">Copy</button></div>
+          <div class="try" id="try" contenteditable="true" role="textbox" aria-label="Practice paste box"></div>
+          <p class="fine" id="try-status" role="status" style="margin-top:8px;color:var(--paper-muted)"></p>
+          <div class="row" style="margin-top:12px"><button class="btn btn-quiet" id="pin" type="button">I pinned it</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="surface">
+      <div class="copy">
+        <h3 class="h-mid">G · Options: custom rules</h3>
+        <p>For DX, custom patterns (like <code>acme_internal_*</code>) come with a live test area, so users see matches while they type. Invalid regex shows an inline message and never throws. Team rules from <code>chrome.storage.managed</code> show a lock and can't be edited.</p>
+        <dl class="spec">
+          <dt>Validation</dt><dd>on input, try/catch, aria-invalid + message</dd>
+          <dt>Perf guard</dt><dd>reject patterns taking &gt;10ms on 10KB sample</dd>
+          <dt>Allowlist</dt><dd>"Always allow this pattern" from the chip lands here</dd>
+        </dl>
+      </div>
+      <div class="stage"><span class="stage-label">Rule tester</span>
+        <div class="rules">
+          <label for="rx">Pattern (JavaScript regex)</label>
+          <input id="rx" value="acme_(?:int|svc)_[a-z0-9]{8,}" spellcheck="false" aria-describedby="rx-meta">
+          <label for="rx-sample">Test text</label>
+          <textarea id="rx-sample" spellcheck="false">token = acme_svc_9f2kq81xz
+docs link acme_public_readme
+acme_int_7hh3k20pq for staging</textarea>
+          <div class="rule-out" id="rx-out" aria-label="Matches"></div>
+          <p class="rule-meta" id="rx-meta" role="status"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="surface">
+      <div class="copy">
+        <h3 class="h-mid">H · Team: AI-tool register</h3>
+        <p>This is the paid surface, so it uses paper, matching the pricing on the landing page. The first thing the admin sees is the surprise number. Tools first seen this week get a marker tag. Exporting is the main action because the register exists to be handed to an auditor.</p>
+        <dl class="spec">
+          <dt>Bars</dt><dd>scaleX from left · 600ms · 50ms stagger, once on view</dd>
+          <dt>Data</dt><dd>hostname + day + user only; never content</dd>
+          <dt>Export</dt><dd>CSV / PDF mapped to ISO 42001 inventory fields</dd>
+        </dl>
+      </div>
+      <div class="stage" id="reg-stage"><span class="stage-label">Sample data</span>
+        <div class="reg">
+          <div class="reg-top"><div><small>Acme team · this week</small><h4>9 AI tools in use</h4></div><button class="btn btn-quiet" type="button">Export register</button></div>
+          <div class="reg-list">
+            <div class="reg-row"><span>Chat assistant A</span><span class="reg-bar"><i style="--w:.92;--i:0"></i></span><span class="reg-tag">21 people</span></div>
+            <div class="reg-row"><span>Chat assistant B</span><span class="reg-bar"><i style="--w:.64;--i:1"></i></span><span class="reg-tag">14 people</span></div>
+            <div class="reg-row"><span>Code assistant</span><span class="reg-bar"><i style="--w:.45;--i:2"></i></span><span class="reg-tag">10 people</span></div>
+            <div class="reg-row new"><span>Slide generator</span><span class="reg-bar"><i style="--w:.18;--i:3"></i></span><span class="reg-tag">New this week</span></div>
+            <div class="reg-row new"><span>Meeting notetaker</span><span class="reg-bar"><i style="--w:.12;--i:4"></i></span><span class="reg-tag">New this week</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="surface">
+      <div class="copy">
+        <h3 class="h-mid">I · Uninstall page</h3>
+        <p>We set this with <code>runtime.setUninstallURL</code>. One question, one tap, and it's done. No guilt copy and no "are you sure". Every answer maps to a fix we can actually make.</p>
+      </div>
+      <div class="stage"><span class="stage-label">pasteguard.dev/bye</span>
+        <div class="bye">
+          <h4>Thanks for trying PasteGuard. What made you remove it?</h4>
+          <div class="opts" id="bye-opts">
+            <button class="opt" type="button" aria-pressed="false">It flagged things that weren't secrets</button>
+            <button class="opt" type="button" aria-pressed="false">It got in the way of my work</button>
+            <button class="opt" type="button" aria-pressed="false">I didn't trust the permissions</button>
+            <button class="opt" type="button" aria-pressed="false">My AI site isn't supported</button>
+          </div>
+          <p class="bye-thanks" id="bye-thanks" role="status"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="motion">
+    <div class="head"><p class="kicker">05</p><h2 class="h-big">Motion system</h2><p>Based on Emil Kowalski's design-engineering rules: how often something is seen decides whether it animates, exits are faster than entrances, only <code>transform</code>, <code>opacity</code>, <code>clip-path</code> and <code>filter</code> are animated, and we use custom curves because the built-in easings are too weak.</p></div>
+    <div class="grid2">
+      <div class="stack">
+        <h3 class="h-mid">Tokens</h3>
+        <div class="scroll-x"><table class="tbl">
+          <thead><tr><th>Token</th><th>Value</th><th>Used for</th></tr></thead>
+          <tbody>
+            <tr><td><code>--ease-out</code></td><td>cubic-bezier(.23,1,.32,1)</td><td>everything entering</td></tr>
+            <tr><td><code>--ease-in-out</code></td><td>cubic-bezier(.77,0,.175,1)</td><td>tape peel, on-screen movement</td></tr>
+            <tr><td><code>--ease-drawer</code></td><td>cubic-bezier(.32,.72,0,1)</td><td>side panel (v2)</td></tr>
+            <tr><td><code>--d-press</code></td><td>120ms</td><td>scale(.97) on :active</td></tr>
+            <tr><td><code>--d-pop</code></td><td>180ms</td><td>chip, badge enter</td></tr>
+            <tr><td><code>--d-exit</code></td><td>120ms</td><td>everything leaving</td></tr>
+            <tr><td><code>--d-tape</code></td><td>260ms + 50ms stagger</td><td>placeholder stamp</td></tr>
+            <tr><td><code>--d-peel</code></td><td>320ms</td><td>restore reveal</td></tr>
+            <tr><td><code>--d-hold</code></td><td>1200ms linear / 200ms release</td><td>send original</td></tr>
+          </tbody>
+        </table></div>
+        <h3 class="h-mid" style="margin-top:28px">Ease-in feels slow. Compare them.</h3>
+        <div class="lab" id="lab">
+          <div class="lane" style="--e:ease-in"><i></i><span>ease-in</span></div>
+          <div class="lane" style="--e:ease"><i></i><span>ease</span></div>
+          <div class="lane" style="--e:cubic-bezier(.23,1,.32,1)"><i></i><span>--ease-out</span></div>
+          <div class="row"><button class="btn" id="lab-go" type="button">Play all three</button><span class="fine">Same 600ms. The last one feels fastest.</span></div>
+        </div>
+      </div>
+      <div class="stack">
+        <h3 class="h-mid">Does it animate? By frequency</h3>
+        <div class="freq">
+          <div class="freq-row"><span>Enter / Esc in composer<small>many times a day, keyboard</small></span><code>none, instant</code></div>
+          <div class="freq-row"><span>Toolbar popup open<small>browser-owned</small></span><code>none</code></div>
+          <div class="freq-row"><span>Switch, hover, press<small>tens a day</small></span><code>120–160ms</code></div>
+          <div class="freq-row"><span>Guard chip, restore peel<small>a few times a day</small></span><code>180–320ms</code></div>
+          <div class="freq-row"><span>Package verdict<small>occasional</small></span><code>200ms blur swap</code></div>
+          <div class="freq-row"><span>Welcome checkmarks<small>once, ever</small></span><code>delight allowed</code></div>
+          <div class="freq-row"><span>Diagram loops<small>docs + store only</small></span><code>while visible</code></div>
+        </div>
+        <div class="card" style="margin-top:20px"><h3>Rules we check in review</h3><ul>
+          <li>No <code>transition: all</code>. Name the properties.</li>
+          <li>Never animate from <code>scale(0)</code>. Start at .94–.98 with opacity.</li>
+          <li>Interruptible UI (chip, badge) uses transitions, not keyframes.</li>
+          <li>Tooltips and popovers scale from their trigger, not from center.</li>
+          <li>Hover effects only under <code>(hover: hover) and (pointer: fine)</code>.</li>
+          <li>Loops pause off-screen and when <code>document.hidden</code>.</li>
+          <li>Reduced motion: keep opacity and blur, drop movement.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="a11y">
+    <div class="head"><p class="kicker">06</p><h2 class="h-big">Accessibility</h2><p>The in-page UI lives inside someone else's accessibility tree, so it has to be announced without interrupting and reachable without stealing focus.</p></div>
+    <div class="grid3">
+      <div class="card"><h3>Announce, don't interrupt</h3><ul><li>Chip: <code>role=status</code>, polite. "2 secrets replaced with placeholders."</li><li>Verdicts are announced once per answer, not once per badge.</li><li>Exposed sends use <code>assertive</code>. That's the only interruption we ever make.</li></ul></div>
+      <div class="card"><h3>Keyboard map</h3><ul><li><kbd>Enter</kbd> send taped · <kbd>Esc</kbd> undo tape</li><li><kbd>Alt</kbd><kbd>Shift</kbd><kbd>P</kbd> move focus to the chip; <kbd>Esc</kbd> returns it to the composer</li><li>Hold-to-send also works with a held <kbd>Space</kbd>.</li></ul></div>
+      <div class="card"><h3>Visual</h3><ul><li>Marker on ink is 12.9:1, paper-ink on paper is 15:1, alert on ink is 5.6:1.</li><li>State is never conveyed by color alone: tape pattern, icons and text too.</li><li>Targets are ≥ 24px (2.5.8) and ≥ 44px on the welcome and uninstall pages.</li><li>Forced-colors mode gets outlines on pills.</li></ul></div>
+    </div>
+  </section>
+
+  <section id="engineering">
+    <div class="head"><p class="kicker">07</p><h2 class="h-big">Engineering rules for the UI</h2><p>Industry practice for running UI inside hostile pages, plus the budgets that keep us invisible when nothing is wrong.</p></div>
+    <div class="grid2">
+      <div class="card"><h3>Isolation</h3><ul>
+        <li>One host element per page, with a <b>closed</b> shadow root and <code>:host { all: initial }</code>. Host CSS can't reach in and ours can't leak out.</li>
+        <li>Render in the top layer with <code>popover="manual"</code>, so there are no z-index wars with the site's own modals.</li>
+        <li>Build DOM with <code>textContent</code> and <code>createElement</code> only. There's a lint rule against <code>innerHTML</code>.</li>
+        <li>MAIN-world script: one wrapped function, <code>clipboard.writeText</code>, under 40 lines, audited.</li>
+        <li>Per-site adapters sit behind one interface: <code>composer()</code>, <code>answers()</code>, <code>send()</code>. They get daily Playwright checks.</li>
+      </ul></div>
+      <div class="card"><h3>Budgets</h3><div class="scroll-x" style="background:transparent;border:0"><table class="tbl">
+        <tbody>
+          <tr><td>Content script (gzip)</td><td><code>≤ 25 KB</code></td></tr>
+          <tr><td>Detect 10 KB paste</td><td><code>≤ 5 ms p95</code></td></tr>
+          <tr><td>Idle cost on AI page</td><td><code>0 timers, 1 observer</code></td></tr>
+          <tr><td>Restore per mutation</td><td><code>≤ 2 ms, 50ms debounce</code></td></tr>
+          <tr><td>Package verdict</td><td><code>≤ 600 ms, cached 24h</code></td></tr>
+          <tr><td>Popup first paint</td><td><code>≤ 100 ms</code></td></tr>
+          <tr><td>Network on AI pages</td><td><code>0 requests</code></td></tr>
+        </tbody></table></div></div>
+      <div class="card"><h3>Theming</h3><ul>
+        <li>Extension pages follow <code>prefers-color-scheme</code>, with ink as the default.</li>
+        <li>In-page UI is always paper, so it doesn't depend on the host theme and never mismatches.</li>
+        <li>Fonts: extension pages bundle Bricolage, Rubik and JetBrains Mono locally. Host pages use the system stack.</li>
+      </ul></div>
+      <div class="card"><h3>i18n and layout</h3><ul>
+        <li>All strings go through <code>chrome.i18n</code>; UI tolerates +40% string length.</li>
+        <li>Logical properties only (<code>inset-inline</code>, <code>margin-inline</code>), so RTL works for free.</li>
+        <li>Numbers use <code>Intl.NumberFormat</code>, dates use <code>Intl.RelativeTimeFormat</code> ("4 days ago").</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section id="states">
+    <div class="head"><p class="kicker">08</p><h2 class="h-big">State matrix</h2><p>Every surface has an answer for each of these before it ships.</p></div>
+    <div class="scroll-x"><table class="tbl">
+      <thead><tr><th>Situation</th><th>Guard chip</th><th>Restore</th><th>Package chip</th><th>Popup</th></tr></thead>
+      <tbody>
+        <tr><td>Nothing found</td><td>not rendered</td><td>not rendered</td><td>not rendered</td><td>"All quiet on this tab"</td></tr>
+        <tr><td>Found</td><td>taped state</td><td>peel reveal</td><td>verdict</td><td>count + today bar</td></tr>
+        <tr><td>User undid (<kbd>Esc</kbd>)</td><td>exposed ring, "Tape again"</td><td>n/a</td><td>n/a</td><td>not counted</td></tr>
+        <tr><td>Placeholder mangled by AI</td><td>n/a</td><td>fuzzy match <code>PG_SECRET 1</code>, else leave as is</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>Tab reloaded (vault gone)</td><td>n/a</td><td>dashed pill: "Value cleared on reload"</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>Offline / registry error</td><td>works</td><td>works</td><td>"Couldn't check" quiet chip + retry</td><td>works</td></tr>
+        <tr><td>Paused on site</td><td>not rendered</td><td>still restores existing</td><td>not rendered</td><td>"Paused here" + switch</td></tr>
+        <tr><td>Site adapter broken</td><td>fallback bottom toast</td><td>disabled, noted in popup</td><td>disabled</td><td>"Limited on this site"</td></tr>
+        <tr><td>Team policy locks it</td><td>no hold-to-send</td><td>same</td><td>same</td><td>lock icon, switch disabled</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="copy">
+    <div class="head"><p class="kicker">09</p><h2 class="h-big">Voice</h2><p>Plain, specific, in the user's own words. We name the secret type and the outcome, never the fear.</p></div>
+    <div class="scroll-x"><table class="tbl say">
+      <thead><tr><th>Moment</th><th>We say</th><th>We never say</th></tr></thead>
+      <tbody>
+        <tr><td>Paste caught</td><td>2 secrets taped: Stripe key, AWS key</td><td>WARNING! Sensitive data detected!</td></tr>
+        <tr><td>Restored</td><td>Restored on this screen only</td><td>Decrypted successfully</td></tr>
+        <tr><td>Fake package</td><td>Not on npm</td><td>MALICIOUS PACKAGE</td></tr>
+        <tr><td>New package</td><td>Registered 4 days ago</td><td>Suspicious</td></tr>
+        <tr><td>Sent original</td><td>Sent with 2 secrets. Rotate the Stripe key.</td><td>You leaked your keys</td></tr>
+        <tr><td>Popup, nothing yet</td><td>All quiet on this tab</td><td>You are 100% protected</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <footer>Living design doc for <code>apps/extension</code>. Tokens mirror <code>DESIGN.md</code>; detection comes from <code>apps/landing/public/detect.js</code>. The team register and package verdicts use sample data. AI sites are shown as generic placeholders.</footer>
+</main>
+</div>
+
+<script type="module">
+import { detect, redact } from '../../landing/public/detect.js'
+
+const $ = s => document.querySelector(s)
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n }
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+const wait = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms))
+
+// ---- visibility-gated loops + one-shot reveals
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.target.hasAttribute('data-live')) e.target.classList.toggle('on', e.isIntersecting && !document.hidden)
+  else if (e.isIntersecting) { e.target.classList.add('in'); e.target.dispatchEvent(new Event('reveal')); io.unobserve(e.target) }
+}), { threshold: .25 })
+document.querySelectorAll('[data-live], #popup-stage, #reg-stage').forEach(n => io.observe(n))
+document.addEventListener('visibilitychange', () => { if (document.hidden) document.querySelectorAll('[data-live]').forEach(n => n.classList.remove('on')) })
+
+// ---- toc highlight
+const links = [...document.querySelectorAll('.toc a')]
+const tocIO = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) links.forEach(a => a.toggleAttribute('aria-current', a.hash === '#' + e.target.id))
+}), { rootMargin: '-40% 0px -55% 0px' })
+document.querySelectorAll('main > section').forEach(s => tocIO.observe(s))
+
+// ---- core loop demo
+const composer = $('#composer'), chip = $('#chip'), chipMsg = $('#chip-msg'), chipKeys = $('#chip-keys'), thread = $('#thread'), badge = $('#tb-badge')
+const vault = new Map()
+const SAMPLE = `DATABASE_URL=postgres://app:hunter2-prod-9f@db.internal:5432/app
+STRIPE_SECRET_KEY=sk_live_51Hc9xQ2eZvKYlo2
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+PORT=8080
+
+Why does my worker crash on boot?`
+let lastPaste = null
+
+const step = n => document.querySelectorAll('.demo-side .step').forEach(s => s.classList.toggle('hit', +s.dataset.step <= n))
+const kbdHint = (k, label) => { const s = el('span'); s.append(el('kbd', null, k), ' ' + label); return s }
+
+function setChip(state, hits) {
+  const types = [...new Set(hits.map(h => h.type))]
+  const write = () => {
+    chipMsg.replaceChildren()
+    const n = hits.length
+    if (state === 'taped') {
+      chipMsg.append(el('b', null, `${n} secret${n > 1 ? 's' : ''} taped`), ': ' + types.join(', '), el('small', null, 'The AI will see placeholders. Your answer is restored on this screen.'))
+      chipKeys.replaceChildren(kbdHint('Enter', 'send'), kbdHint('Esc', 'undo'))
+    } else {
+      chipMsg.append(el('b', null, `${n} secret${n > 1 ? 's' : ''} visible`), ': ' + types.join(', '), el('small', null, 'Press Esc to tape them again.'))
+      chipKeys.replaceChildren(kbdHint('Esc', 'tape again'))
+    }
+    chip.dataset.state = state
+  }
+  if (chip.classList.contains('open')) { chipMsg.classList.add('out'); setTimeout(() => { write(); chipMsg.classList.remove('out') }, reduce ? 0 : 140) }
+  else write()
+  chip.classList.add('open')
+}
+const closeChip = () => chip.classList.remove('open')
+
+function renderComposer(text, mode) {
+  const hits = detect(text)
+  composer.replaceChildren()
+  if (!hits.length) { composer.textContent = text; closeChip(); return hits }
+  const { parts } = redact(text, hits)
+  let i = 0
+  for (const p of parts) {
+    if (!p.hit) { if (p.text) composer.append(p.text); continue }
+    vault.set(p.text, { value: p.hit.value, type: p.hit.type })
+    if (mode === 'taped') { const t = el('span', 'tape', p.text); t.contentEditable = 'false'; t.dataset.token = p.text; t.title = p.hit.type; t.style.setProperty('--i', i++); composer.append(t) }
+    else { const r = el('span', 'raw', p.hit.value); r.dataset.raw = p.text; composer.append(r) }
+  }
+  setChip(mode, hits)
+  badge.textContent = hits.length; badge.classList.add('on'); setTimeout(() => badge.classList.remove('on'), 4000)
+  step(2)
+  return hits
+}
+
+function paste(text) {
+  lastPaste = text
+  step(1)
+  renderComposer(text, 'taped')
+  const range = document.createRange(); range.selectNodeContents(composer); range.collapse(false)
+  const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range)
+  composer.focus({ preventScroll: true })
+}
+
+composer.addEventListener('paste', e => { e.preventDefault(); paste(e.clipboardData.getData('text/plain')) }, true)
+composer.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(false) }
+  if (e.key === 'Escape' && lastPaste) { e.preventDefault(); renderComposer(lastPaste, chip.dataset.state === 'taped' ? 'exposed' : 'taped') }
+})
+$('#paste-sample').addEventListener('click', () => paste(SAMPLE))
+$('#send').addEventListener('click', () => send(false))
+$('#reset').addEventListener('click', () => { thread.replaceChildren(); composer.replaceChildren(); vault.clear(); lastPaste = null; closeChip(); step(0) })
+
+// hold to send original: slow where the user decides, fast release
+const hold = $('#hold')
+let holdTimer
+const startHold = e => { if (e.button > 0) return; if (e.pointerId != null) hold.setPointerCapture(e.pointerId); hold.classList.add('holding'); holdTimer = setTimeout(() => { hold.classList.remove('holding'); send(true) }, 1200) }
+const endHold = () => { clearTimeout(holdTimer); hold.classList.remove('holding') }
+hold.addEventListener('pointerdown', startHold)
+hold.addEventListener('pointerup', endHold); hold.addEventListener('pointercancel', endHold)
+hold.addEventListener('keydown', e => { if (e.key === ' ' && !e.repeat) { e.preventDefault(); startHold({ button: 0 }) } })
+hold.addEventListener('keyup', e => { if (e.key === ' ') endHold() })
+
+function send(original) {
+  if (!composer.textContent.trim()) return
+  const bubble = el('div', 'msg you')
+  const tokens = []
+  let leaked = 0
+  for (const n of composer.childNodes) {
+    const key = n.dataset?.token || n.dataset?.raw
+    if (!key) { bubble.append(n.textContent); continue }
+    if (original || n.dataset.raw) { bubble.append(el('span', 'raw', vault.get(key).value)); leaked++; continue }
+    bubble.append(el('span', 'tape', key)); tokens.push(key)
+  }
+  thread.append(bubble)
+  composer.replaceChildren(); closeChip()
+  step(3)
+  answer(tokens, leaked)
+  thread.scrollTop = thread.scrollHeight
+}
+
+async function answer(tokens, leaked) {
+  const ai = el('div', 'msg ai'); thread.append(ai)
+  const p = el('p'); ai.append(p)
+  const t1 = tokens.find(t => vault.get(t)?.type === 'Database password'), t2 = tokens.find(t => vault.get(t)?.type === 'Stripe key')
+  const segs = leaked
+    ? [`Sent with ${leaked} secret${leaked > 1 ? 's' : ''}. Rotate them now; this chat may be kept by the provider.`]
+    : tokens.length
+      ? ['Your worker connects with ', t1 && { token: t1 }, t1 ? ' but ' : 'The ', 'db.internal only resolves inside the VPC, so boot fails before the retry loop. ', t2 ? 'Also rotate ' : '', t2 && { token: t2 }, t2 ? ': live keys shouldn\'t sit in a laptop .env. ' : '', 'For retries, install one of these:']
+      : ['Looks like a boot-order issue. For retries, install one of these:']
+  for (const s of segs.filter(Boolean)) {
+    if (typeof s === 'string') { for (let i = 0; i < s.length; i += 3) { p.append(s.slice(i, i + 3)); await wait(14) } continue }
+    const v = vault.get(s.token)
+    const r = el('span', 'restore'); r.tabIndex = 0
+    const val = el('span', 'val', v.value), cover = el('span', 'cover'), tip = el('span', 'tip')
+    cover.append(el('b', null, s.token)); tip.append(`Restored on this screen only. The AI saw `, el('code', null, s.token), '.')
+    r.append(val, cover, tip); p.append(r)
+    await wait(260); r.classList.add('done'); step(4)
+  }
+  if (leaked) return
+  for (const [cmd, verdict] of [['npm i pg-retry-helper-pro', 'bad'], ['npm i p-retry', 'ok']]) {
+    const pre = el('pre'); pre.append(el('code', null, cmd)); ai.append(pre)
+    const b = el('span', 'pkg swap'); b.dataset.state = 'checking'; b.textContent = 'Checking'; pre.append(b)
+    await wait(700)
+    b.classList.add('out'); await wait(140)
+    b.dataset.state = verdict; b.textContent = verdict === 'bad' ? 'Not on npm · likely hallucinated' : 'On npm'
+    b.classList.remove('out'); step(5)
+  }
+  thread.scrollTop = thread.scrollHeight
+}
+
+// ---- toolbar icon pulse
+$('#ic-caught').addEventListener('click', e => { const b = e.currentTarget; b.classList.remove('pulse'); void b.offsetWidth; b.classList.add('pulse') })
+
+// ---- popup: count-up once, switches
+$('#popup-stage').addEventListener('reveal', () => {
+  const n = $('#pp-count'), to = +n.dataset.to, t0 = performance.now()
+  if (reduce) return
+  const tick = t => { const k = Math.min(1, (t - t0) / 600); n.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(tick) }
+  requestAnimationFrame(tick)
+})
+document.querySelectorAll('.switch').forEach(s => s.addEventListener('click', () => {
+  const on = s.getAttribute('aria-checked') !== 'true'
+  s.setAttribute('aria-checked', on)
+  if (s.hasAttribute('data-site')) { const st = $('#pp-status'); st.textContent = on ? 'On for this site' : 'Paused here'; st.classList.toggle('off', !on) }
+}))
+
+// ---- welcome
+const done = id => $(id).classList.add('done')
+$('#copy-key').addEventListener('click', async e => {
+  try { await navigator.clipboard.writeText($('#fake-key').textContent) } catch {}
+  e.currentTarget.textContent = 'Copied'; done('#ck1'); $('#try').focus()
+})
+$('#try').addEventListener('paste', e => {
+  e.preventDefault()
+  const text = e.clipboardData.getData('text/plain') || $('#fake-key').textContent
+  const hits = detect(text), box = e.currentTarget
+  box.replaceChildren()
+  if (!hits.length) { box.textContent = text; $('#try-status').textContent = 'Nothing to tape in that one. Try the fake key.'; return }
+  let i = 0
+  for (const p of redact(text, hits).parts) { if (!p.hit) { box.append(p.text); continue } const t = el('span', 'tape', p.text); t.style.setProperty('--i', i++); box.append(t) }
+  done('#ck1'); done('#ck2'); $('#try-status').textContent = "Taped. That's all it takes."
+})
+$('#pin').addEventListener('click', () => done('#ck3'))
+
+// ---- rule tester
+const rx = $('#rx'), sample = $('#rx-sample'), out = $('#rx-out'), meta = $('#rx-meta')
+function test() {
+  out.replaceChildren(); meta.className = 'rule-meta'
+  let re
+  try { re = new RegExp(rx.value, 'g') } catch (err) { rx.setAttribute('aria-invalid', 'true'); meta.classList.add('err'); meta.textContent = 'That pattern has a syntax error: ' + err.message; out.textContent = sample.value; return }
+  rx.removeAttribute('aria-invalid')
+  if (!rx.value) { out.textContent = sample.value; meta.textContent = 'Type a pattern to see matches.'; return }
+  const t0 = performance.now(); let last = 0, n = 0
+  for (const m of sample.value.matchAll(re)) { if (!m[0]) break; out.append(sample.value.slice(last, m.index), el('mark', null, m[0])); last = m.index + m[0].length; n++ }
+  out.append(sample.value.slice(last))
+  meta.textContent = `${n} match${n === 1 ? '' : 'es'} · ${(performance.now() - t0).toFixed(2)} ms`
+}
+rx.addEventListener('input', test); sample.addEventListener('input', test); test()
+
+// ---- uninstall
+const opts = document.querySelectorAll('#bye-opts .opt')
+opts.forEach(o => o.addEventListener('click', () => { opts.forEach(x => x.setAttribute('aria-pressed', x === o)); $('#bye-thanks').textContent = 'Got it, thank you. That goes straight to the person who can fix it.' }))
+
+// ---- motion lab
+$('#lab-go').addEventListener('click', () => {
+  const lanes = document.querySelectorAll('.lane')
+  lanes.forEach(l => { l.style.setProperty('--track', l.clientWidth + 'px'); l.classList.remove('go') })
+  requestAnimationFrame(() => requestAnimationFrame(() => lanes.forEach(l => l.classList.add('go'))))
+  setTimeout(() => lanes.forEach(l => l.classList.remove('go')), 1400)
+})
+</script>
+</body>
+</html>

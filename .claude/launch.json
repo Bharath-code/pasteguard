@@ -1,6 +1,7 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "landing", "runtimeExecutable": "python3", "runtimeArgs": ["-m", "http.server", "4321", "--directory", "apps/landing/public"], "port": 4321 }
+    { "name": "landing", "runtimeExecutable": "python3", "runtimeArgs": ["-m", "http.server", "4321", "--directory", "apps/landing/public"], "port": 4321 },
+    { "name": "ext-design", "runtimeExecutable": "python3", "runtimeArgs": ["-m", "http.server", "4322", "--directory", "apps"], "port": 4322 }
   ]
 }
