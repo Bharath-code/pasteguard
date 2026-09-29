@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PasteGuard: stop secrets leaking into ChatGPT, Claude and Gemini</title>
+  <meta name="description" content="PasteGuard catches API keys, passwords and customer data the moment you paste them into an AI chat, and swaps them for placeholders. It also flags packages the AI made up. Everything runs in your browser.">
+  <meta name="theme-color" content="#1B1433">
+  <meta name="color-scheme" content="dark">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="PasteGuard: paste anything into AI, leak nothing">
+  <meta property="og:description" content="Catches secrets and made-up packages before they reach ChatGPT, Claude or Gemini. Runs on your device.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=JetBrains+Mono:wght@400;600&family=Rubik:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/main.js"></script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"PasteGuard","applicationCategory":"SecurityApplication","operatingSystem":"Chrome, Edge, Brave","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+  <a class="brand" href="/" aria-label="PasteGuard home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7L16 2Z" class="mark-shield"/><rect x="9" y="12" width="14" height="4" rx="1" class="mark-bar"/><rect x="9" y="18" width="9" height="2.4" rx="1" class="mark-line"/></svg>
+    <span>PasteGuard</span>
+  </a>
+  <nav aria-label="Main">
+    <a href="#try">Try it</a>
+    <a href="#packages">Fake packages</a>
+    <a href="#teams">For teams</a>
+    <a href="#pricing">Pricing</a>
+  </nav>
+  <a class="btn btn-small" href="#join">Get early access</a>
+</header>
+
+<main id="main">
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-copy">
+    <h1 id="hero-title" class="display">Paste anything into AI. Leak nothing.</h1>
+    <p class="lede">PasteGuard catches API keys, passwords and customer data the moment you paste them into ChatGPT, Claude or Gemini, and swaps them for placeholders. The AI gets the question. It never gets the secret.</p>
+    <form class="signup" data-waitlist data-plan="individual" novalidate>
+      <label class="sr-only" for="hero-email">Work or personal email</label>
+      <input id="hero-email" name="email" type="email" autocomplete="email" placeholder="you@company.com" required>
+      <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button class="btn" type="submit">Get early access</button>
+      <p class="form-status" role="status" aria-live="polite"></p>
+    </form>
+    <p class="fine">Free for individuals. Launching on Chrome, Edge and Brave. No spam, one email when it's ready.</p>
+  </div>
+
+  <div class="stage" data-stage aria-hidden="true">
+    <div class="clip">
+      <span class="clip-tab">.env</span>
+      <code>STRIPE_KEY=sk_live_51Hx…<br>DATABASE_URL=postgres://admin:…</code>
+    </div>
+    <div class="win">
+      <div class="win-bar">
+        <span class="win-dots"><i></i><i></i><i></i></span>
+        <span class="win-url">chat with any AI</span>
+        <span class="win-guard"><svg viewBox="0 0 32 32"><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7L16 2Z"/></svg>Guard on</span>
+      </div>
+      <div class="thread">
+        <div class="bubble you">
+          <p>Checkout fails in prod. Why?</p>
+          <pre>STRIPE_KEY=<b class="tok">PG_SECRET_1</b>
+DATABASE_URL=postgres://admin:<b class="tok">PG_SECRET_2</b>@db…</pre>
+        </div>
+        <div class="bubble ai">
+          <p class="ai-text" data-ai-text></p>
+        </div>
+      </div>
+      <div class="composer">
+        <p class="composer-q">Checkout fails in prod. Why?</p>
+        <pre class="composer-code">STRIPE_KEY=<span class="sec"><span class="sec-real">sk_live_51HxQm8vT2cKp</span><span class="sec-tok">PG_SECRET_1</span><span class="sec-bar"></span></span>
+DATABASE_URL=postgres://admin:<span class="sec"><span class="sec-real">hunter2!prod</span><span class="sec-tok">PG_SECRET_2</span><span class="sec-bar"></span></span>@db…</pre>
+        <div class="scan"></div>
+        <div class="toast">
+          <svg viewBox="0 0 32 32"><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7L16 2Z"/></svg>
+          <span>2 secrets swapped for placeholders. The AI will never see them.</span>
+        </div>
+        <span class="send">Send</span>
+      </div>
+    </div>
+    <p class="stage-note">The AI's answer shows your real key again, on your screen only.</p>
+  </div>
+  <button class="replay" type="button" data-replay>Replay the demo</button>
+  <p class="sr-only">Demo: a developer pastes a .env file with a Stripe key and a database password into an AI chat. PasteGuard replaces both with placeholders before sending, then shows the real values again in the AI's answer on the developer's screen only.</p>
+</section>
+
+<section class="evidence" aria-labelledby="evidence-title">
+  <h2 id="evidence-title" class="h-small">Why this exists</h2>
+  <p class="evidence-text">
+    <strong>77% of employees</strong> paste data into AI tools, mostly from personal accounts IT can't see.<a class="fn" href="#src-1" aria-label="Source 1">1</a>
+    About <strong>four in ten</strong> AI conversations contain something sensitive.<a class="fn" href="#src-2" aria-label="Source 2">2</a>
+    And when an AI made up a package called <code>huggingface-cli</code>, a researcher registered the name and it was downloaded <strong>over 30,000 times</strong> in three months.<a class="fn" href="#src-3" aria-label="Source 3">3</a>
+  </p>
+</section>
+
+<section id="try" class="try" aria-labelledby="try-title">
+  <div class="section-head">
+    <h2 id="try-title" class="h-big">Try it with a fake key.</h2>
+    <p>This is the same detection the extension runs. It happens in this tab. Nothing you type here is sent anywhere.</p>
+  </div>
+  <div class="try-grid">
+    <div class="pane">
+      <div class="pane-head">
+        <label for="try-input">What you paste</label>
+        <button class="link-btn" type="button" data-sample>Load a sample .env</button>
+      </div>
+      <textarea id="try-input" spellcheck="false" autocomplete="off" rows="9" placeholder="Paste or type anything. Try an AWS key like AKIAIOSFODNN7EXAMPLE"></textarea>
+    </div>
+    <div class="pane pane-out">
+      <div class="pane-head"><span id="try-out-label">What the AI receives</span></div>
+      <pre class="try-out" aria-labelledby="try-out-label" data-try-out></pre>
+    </div>
+  </div>
+  <p class="try-summary" role="status" aria-live="polite" data-try-summary>Nothing sensitive yet.</p>
+</section>
+
+<section id="packages" class="pkgs" aria-labelledby="pkgs-title">
+  <div class="pkgs-copy">
+    <h2 id="pkgs-title" class="h-big">AI invents packages. Attackers register them.</h2>
+    <p>Ask an AI for a library and sometimes it names one that doesn't exist. Attackers watch for those names, publish malware under them, and wait for someone to run the install command. It's called slopsquatting.</p>
+    <p>PasteGuard checks every install command in an AI answer against npm and PyPI and marks the ones that don't exist or appeared last week.</p>
+  </div>
+  <div class="pkgs-demo">
+    <div class="answer" aria-hidden="true">
+      <p>You can validate the form with <code>react-formguard-pro</code>:</p>
+      <pre><span class="cmd">npm i react-formguard-pro</span><span class="flag flag-bad">Not on npm</span>
+<span class="cmd">npm i zod</span><span class="flag flag-ok">Since 2020, 300M+ a week</span></pre>
+    </div>
+    <form class="checker" data-checker>
+      <fieldset class="eco">
+        <legend class="sr-only">Registry</legend>
+        <label><input type="radio" name="eco" value="npm" checked><span>npm</span></label>
+        <label><input type="radio" name="eco" value="pypi"><span>PyPI</span></label>
+      </fieldset>
+      <label class="sr-only" for="pkg-name">Package name</label>
+      <input id="pkg-name" name="name" placeholder="Package name, e.g. react-formguard-pro" autocomplete="off" spellcheck="false" required maxlength="214">
+      <button class="btn" type="submit">Check package</button>
+    </form>
+    <div class="verdict" role="status" aria-live="polite" data-verdict></div>
+  </div>
+</section>
+
+<section class="how" aria-labelledby="how-title">
+  <div class="section-head">
+    <h2 id="how-title" class="h-big">Your secrets never leave your laptop.</h2>
+    <p>Not to the AI. Not to us.</p>
+  </div>
+  <figure class="flow" data-live>
+    <svg viewBox="0 0 900 300" role="img" aria-labelledby="flow-desc">
+      <desc id="flow-desc">Diagram: your clipboard passes through PasteGuard on your device. Secrets are replaced before the message reaches the AI. PasteGuard's servers receive nothing.</desc>
+      <defs>
+        <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="8" class="hatch-a"/><rect x="4" width="4" height="8" class="hatch-b"/></pattern>
+      </defs>
+      <rect x="20" y="40" width="560" height="200" rx="20" class="f-device"/>
+      <text x="44" y="72" class="f-label">Your browser</text>
+      <line x1="170" y1="150" x2="760" y2="150" class="f-wire"/>
+      <g class="f-node"><rect x="70" y="110" width="110" height="80" rx="14" class="f-box"/><text x="125" y="156" class="f-txt">Clipboard</text></g>
+      <g class="f-node"><path d="M360 96 318 112v30c0 26 18 47 42 53 24-6 42-27 42-53v-30Z" class="f-shield"/><text x="360" y="222" class="f-txt">PasteGuard checks</text></g>
+      <g class="f-node"><rect x="720" y="110" width="160" height="80" rx="40" class="f-ai"/><text x="800" y="156" class="f-txt f-txt-dark">AI chat</text></g>
+      <g class="packets">
+        <g class="pk pk-1"><rect x="-26" y="-9" width="52" height="18" rx="4" class="pk-secret"/><rect x="-26" y="-9" width="52" height="18" rx="4" fill="url(#hatch)" class="pk-safe"/></g>
+        <g class="pk pk-2"><rect x="-26" y="-9" width="52" height="18" rx="4" class="pk-plain"/></g>
+        <g class="pk pk-3"><rect x="-26" y="-9" width="52" height="18" rx="4" class="pk-secret"/><rect x="-26" y="-9" width="52" height="18" rx="4" fill="url(#hatch)" class="pk-safe"/></g>
+      </g>
+      <path d="M404 104 600 30" class="f-cut"/>
+      <rect x="600" y="0" width="280" height="56" rx="12" class="f-server"/>
+      <text x="740" y="34" class="f-txt">PasteGuard servers: nothing</text>
+      <path d="M494 58 510 74M510 58 494 74" class="f-x"/>
+    </svg>
+    <figcaption>
+      <ol class="steps">
+        <li><strong>You paste.</strong> Anything: logs, a .env, a customer's email thread.</li>
+        <li><strong>PasteGuard checks it on your device.</strong> Keys, tokens, passwords, card numbers and emails get swapped for placeholders like <code>PG_SECRET_1</code>.</li>
+        <li><strong>The AI answers the question.</strong> Where it mentions a placeholder, your screen shows the real value again. The AI's copy of the chat keeps the placeholder.</li>
+      </ol>
+    </figcaption>
+  </figure>
+</section>
+
+<section class="trust" aria-labelledby="trust-title">
+  <h2 id="trust-title" class="h-big">Built to be trusted with your clipboard.</h2>
+  <p class="trust-intro">Some AI browser extensions have been caught copying people's chats.<a class="fn" href="#src-4" aria-label="Source 4">4</a> So PasteGuard is designed so it couldn't do that even if we wanted to.</p>
+  <dl class="promises">
+    <div><dt>Runs only on AI chat sites</dt><dd>It asks for access to the AI tools it protects, not to every site you visit.</dd></div>
+    <div><dt>Checks happen on your device</dt><dd>Detection is code inside the extension. It works with your Wi-Fi off.</dd></div>
+    <div><dt>Your prompts never reach our servers</dt><dd>The free version sends us nothing. The team version sends which AI tool was used and when, never what was typed.</dd></div>
+    <div><dt>Open source</dt><dd>The extension's code will be public on GitHub at launch, so anyone can check these claims.</dd></div>
+  </dl>
+</section>
+
+<section id="teams" class="teams" aria-labelledby="teams-title">
+  <div class="teams-copy">
+    <h2 id="teams-title" class="h-big">Have an answer ready when a customer asks about AI.</h2>
+    <p>Security questionnaires now ask which AI tools your staff use and how you stop data leaking into them. PasteGuard for teams gives you both answers.</p>
+    <ul class="ticks">
+      <li>Install it for everyone from Google Admin or Intune. It takes about 10 minutes.</li>
+      <li>See which AI tools and AI extensions your team actually uses.</li>
+      <li>Set rules per team: warn, swap for placeholders, or block.</li>
+      <li>Export an AI tool register and a monthly leak report for your auditor.</li>
+    </ul>
+  </div>
+  <div class="dash" data-live aria-hidden="true">
+    <div class="dash-head"><span>This week at Acme</span><span class="dash-pill">38 people</span></div>
+    <div class="dash-kpis">
+      <div><b>14</b><span>secrets stopped</span></div>
+      <div><b>9</b><span>AI tools in use</span></div>
+      <div><b class="warn">3</b><span>not approved</span></div>
+    </div>
+    <ul class="bars">
+      <li><span>ChatGPT</span><i class="b1"></i><em>31</em></li>
+      <li><span>Claude</span><i class="b2"></i><em>18</em></li>
+      <li><span>Gemini</span><i class="b3"></i><em>9</em></li>
+      <li><span>Perplexity</span><i class="b4"></i><em>6</em></li>
+      <li class="unapproved"><span>3 unapproved tools</span><i class="b5"></i><em>4</em></li>
+    </ul>
+    <span class="dash-export">Export AI register</span>
+  </div>
+  <form class="team-form" data-waitlist data-plan="team" novalidate>
+    <h3>Join the team pilot</h3>
+    <p>We're onboarding 20 teams, free until launch. We'll set it up with you on a 15-minute call.</p>
+    <div class="fields">
+      <label>Work email<input name="email" type="email" autocomplete="email" required></label>
+      <label>Company<input name="company" autocomplete="organization" maxlength="100" required></label>
+      <label>Team size
+        <select name="size" required>
+          <option value="">Choose</option>
+          <option>1–10</option><option>11–50</option><option>51–200</option><option>201–500</option><option>500+</option>
+        </select>
+      </label>
+    </div>
+    <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <button class="btn" type="submit">Join the team pilot</button>
+    <p class="form-status" role="status" aria-live="polite"></p>
+  </form>
+</section>
+
+<section id="pricing" class="pricing" aria-labelledby="pricing-title">
+  <h2 id="pricing-title" class="h-big">Pricing</h2>
+  <p class="pricing-note">Planned prices at launch. Early-access members get the first founding offer.</p>
+  <div class="plans">
+    <article class="plan">
+      <h3>Free</h3>
+      <p class="price"><b>$0</b></p>
+      <p>For anyone who pastes into AI.</p>
+      <ul><li>Secret detection and placeholders</li><li>Made-up package warnings</li><li>ChatGPT, Claude and Gemini</li></ul>
+      <a class="btn btn-ghost" href="#join">Get early access</a>
+    </article>
+    <article class="plan">
+      <h3>Pro</h3>
+      <p class="price"><b>$4</b> a month</p>
+      <p>For developers with their own rules.</p>
+      <ul><li>Everything in Free</li><li>40+ AI sites</li><li>Custom patterns for your company's keys</li><li>Sync rules across browsers</li></ul>
+      <a class="btn btn-ghost" href="#join">Get early access</a>
+    </article>
+    <article class="plan plan-team">
+      <h3>Team</h3>
+      <p class="price"><b>$4</b> per person a month</p>
+      <p>For companies that need proof. Free for up to 3 people.</p>
+      <ul><li>Everything in Pro</li><li>Install for everyone from Google Admin or Intune</li><li>AI tool register and audit log</li><li>Monthly leak report for auditors</li></ul>
+      <a class="btn" href="#teams">Join the team pilot</a>
+    </article>
+  </div>
+  <p class="founding">Founding members: lifetime Pro for $49, limited to the first 200 people on the list.</p>
+</section>
+
+<section class="faq" aria-labelledby="faq-title">
+  <h2 id="faq-title" class="h-big">Questions</h2>
+  <details><summary>Can PasteGuard read my prompts?</summary><p>The extension reads what you paste into AI chat sites so it can check it, the same way a spell checker reads what you type. The check happens on your device and nothing is sent to us. The team version reports which AI tool was used and when, never the content.</p></details>
+  <details><summary>What does it detect?</summary><p>API keys for AWS, OpenAI, Anthropic, Stripe, GitHub, Slack and Google, private keys, JWTs, database passwords, values assigned to anything named like a secret, card numbers and email addresses. Pro lets you add your own patterns.</p></details>
+  <details><summary>Will the AI's answer still make sense?</summary><p>Yes. The AI sees <code>PG_SECRET_1</code> where your key was and answers normally. On your screen the placeholder is shown as your real value again, so you can copy the answer and use it.</p></details>
+  <details><summary>How does the package check work?</summary><p>When an AI answer contains an install command, PasteGuard looks up each package on npm or PyPI. If it doesn't exist, or it was first published recently and hardly anyone uses it, you get a warning next to the command.</p></details>
+  <details><summary>Does it work in the ChatGPT or Claude desktop apps?</summary><p>No. It's a browser extension, so it protects AI tools you use in Chrome, Edge or Brave.</p></details>
+  <details><summary>Can I turn it off for one message?</summary><p>Yes. Every warning has an option to send the original text, and you can allow a pattern so it stops asking.</p></details>
+</section>
+
+<section id="join" class="final" aria-labelledby="final-title">
+  <h2 id="final-title" class="display display-final">Paste freely.</h2>
+  <form class="signup" data-waitlist data-plan="individual" novalidate>
+    <label class="sr-only" for="final-email">Email</label>
+    <input id="final-email" name="email" type="email" autocomplete="email" placeholder="you@company.com" required>
+    <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <button class="btn" type="submit">Get early access</button>
+    <p class="form-status" role="status" aria-live="polite"></p>
+  </form>
+</section>
+
+</main>
+
+<footer class="foot">
+  <ol class="sources">
+    <li id="src-1"><a href="https://www.secondtalent.com/resources/shadow-ai-statistics/" rel="noopener">LayerX, Enterprise AI and SaaS Data Security Report 2025</a></li>
+    <li id="src-2"><a href="https://www.cyberhaven.com/blog/sensitive-data-flowing-into-ai-tools" rel="noopener">Cyberhaven Labs, sensitive data in AI tools</a></li>
+    <li id="src-3"><a href="https://www.aikido.dev/blog/slopsquatting-ai-package-hallucination-attacks" rel="noopener">Aikido, slopsquatting research summary</a></li>
+    <li id="src-4"><a href="https://labs.cloudsecurityalliance.org/research/csa-research-note-ai-browser-extension-attack-surface-202604/" rel="noopener">Cloud Security Alliance, AI browser extension attack surface</a></li>
+  </ol>
+  <p>© 2026 PasteGuard. Made in India.</p>
+</footer>
+</body>
+</html>

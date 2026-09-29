@@ -1,0 +1,13 @@
+{
+  "name": "slopsquatting-study",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "prompts": "node study.mjs prompts",
+    "run": "node study.mjs run",
+    "check": "node study.mjs check",
+    "report": "node study.mjs report",
+    "test": "node --test"
+  }
+}

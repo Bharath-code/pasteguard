@@ -1,0 +1,7 @@
+name = "pasteguard-landing"
+pages_build_output_dir = "public"
+compatibility_date = "2026-09-01"
+
+[[kv_namespaces]]
+binding = "WAITLIST"
+id = "88190aab6c2b4de3bf3dd25a1440a015"

@@ -1,0 +1,13 @@
+{
+  "name": "pasteguard-landing",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx wrangler@latest pages dev",
+    "deploy": "npx wrangler@latest pages deploy",
+    "test": "node --test test/"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
