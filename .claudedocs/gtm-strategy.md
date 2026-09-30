@@ -162,7 +162,7 @@ Realistic: **MVP live in ~10–14 days** (CWS review can add 1–7 days). **Team
 
 ## 8. Milestones & metrics
 
-**North-star metric:** *weekly protected users*, meaning users with at least one catch or package check in the week. For teams: *weekly active paid teams*.
+**North-star metric:** *weekly protected developers*: installs with at least one protective event in the week (a secret taped, a past leak surfaced, or a package verdict other than "looks fine"). For teams: *weekly active paid teams*. Full definition, input tree and guardrails are in `product-strategy.md` §6.
 
 | Month | Installs (cumulative) | Weekly protected | Paid teams | MRR | Status |
 |---|---|---|---|---|---|

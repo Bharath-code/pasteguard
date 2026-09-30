@@ -74,9 +74,12 @@
 ## 5. Product: wow moments, UX, DX, AX
 
 ### Holy-sh*t moments (design these first)
-1. **Reversible redaction.** You paste `AKIA…` into ChatGPT. An inline chip says *"AWS secret detected → sent as `{{SECRET_1}}`"*. The AI's answer comes back, and **the real value is restored on your screen only**. It's safe and it doesn't break your flow. This is the demo GIF.
+> **Updated 2026-09-30:** the store scan found reversible redaction already shipped by several free competitors, so it is now a supporting feature, not the headline. See `product-strategy.md` §0 and §3.
+
+1. **"This chat already has a leak."** On the first visit to an AI chat after install, a local scan of the visible conversation says *"This conversation contains an AWS key you sent earlier. Rotate it →"*. It shows the type only, never the value. This is the start of the demo GIF.
 2. **Fake-package flag inside the AI answer.** Claude suggests `npm i react-form-utils-pro` and a red inline badge appears: *"Not on npm."* Or: *"Registered 4 days ago · 11 downloads · 1 maintainer"*.
-3. **Team setup in 10 minutes.** The admin force-installs through Workspace, and within an hour the dashboard shows *"Your team used 9 AI tools this week"*. That tends to be a shock, because they thought it was 2.
+3. **Reversible redaction (supporting).** You paste `AKIA…`, it's sent as `PG_SECRET_1`, and the real value is restored on your screen only, where the site's own scripts can't read it.
+4. **Team setup in 10 minutes.** The admin force-installs through Workspace, and within an hour the dashboard shows *"Your team used 9 AI tools this week"*. That tends to be a shock, because they thought it was 2.
 
 ### UX principles
 - Stay silent until something matters. **Never block by default; warn and redact** (a DLP that nags gets uninstalled).
@@ -117,7 +120,7 @@ Exit option: extensions reportedly sell for 24–40× MRR (Chrome Goldmine / Exi
 
 Following your pasted playbook, pick **one** repeatable channel producing 100+ visitors/week before stacking more:
 1. **Primary: reply-marketing.** Spend 10 min/day on Reddit (r/webdev, r/devops, r/sysadmin, r/cybersecurity, r/ExperiencedDevs) and HN threads about "leaked key in ChatGPT", "slopsquatting" or "shadow AI policy". Answer helpfully and link only when asked.
-2. **Chrome Web Store SEO.** Title and first 132 chars: "Prevent secret leaks in ChatGPT & Claude". Target keywords: *chatgpt privacy, api key leak, redact, prompt security*. Screenshot 1 is the reversible-redaction GIF.
+2. **Chrome Web Store SEO.** Title and first 132 chars: "Catch fake packages and leaked keys in ChatGPT & Claude". Target keywords: *chatgpt privacy, api key leak, fake npm package, slopsquatting, prompt security*. Screenshot 1 is the chat-leak scan and package-flag GIF (updated 2026-09-30, see `product-strategy.md` §3).
 3. **Newsjacking.** Every AI-extension breach or slopsquatting story → a same-day X/LinkedIn post with the GIF.
 4. **Later (once the funnel converts):** MSP and vCISO partners, a Vanta/Drata marketplace listing, and a free "AI Policy Generator" tool as lead magnet (programmatic SEO).
 

@@ -12,7 +12,7 @@ A local-first Chrome extension that stops secrets being pasted into AI chats and
 | `apps/extension` | MV3 extension, not started. Planned file layout in its `README.md`. | — |
 | `apps/extension/design/index.html` | Living UI/UX design doc: surfaces, motion tokens, a11y, budgets, state matrix, voice. Interactive demos import `detect.js`. | preview `ext-design` (serves `apps/` on :4322 → `/extension/design/`) |
 | `research/slopsquatting` | Zero-dependency study: how often LLMs recommend nonexistent packages. Feeds the "Slopsquatting Index" content. | `npm test` · `node study.mjs prompts\|run\|check\|report` |
-| `.claudedocs` | Strategy reports: `extension-decision-report.md` (product, feasibility, kill criteria), `gtm-strategy.md` (market size, moat, GTM). | — |
+| `.claudedocs` | Strategy reports: `extension-decision-report.md` (product, feasibility, kill criteria), `gtm-strategy.md` (market size, moat, GTM), `product-strategy.md` (competitor matrix, wow moments, horizons, north star), `extension-prd-architecture.md` (PRD, stack, architecture, screen flow, build plan). | — |
 
 Node ≥ 22 everywhere. Tests use `node --test`, no frameworks.
 
