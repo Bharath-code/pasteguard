@@ -29,7 +29,7 @@ These are the reasons to spike before building anything else.
 ### 1a. Restored values must not enter the page's DOM
 The design doc's restore view (surface B) swaps `PG_SECRET_1` → real value in the AI answer. If we write that value as a normal text node, **the AI site's own JS can read it**: `document.body.innerText`, its analytics, or a session-replay SDK. That breaks the promise quietly.
 
-**Design:** replace each placeholder with a `<pg-v>` host element that has a **closed shadow root** holding the value. Page JS sees `<pg-v>` with no readable text (`el.shadowRoot === null` for closed roots). Re-apply when React re-renders (already planned: MutationObserver, 50 ms debounce).
+**Design:** replace each placeholder with a `<pg-v>` host element that keeps the placeholder as light-DOM text and has a **closed shadow root** (no slot) rendering the value. Shadow-only hosts failed the real-site spike: ChatGPT's Copy button builds text from the DOM and lost the value (`apps/extension/spike/RESULTS.md`). Native ⌘C on a selection still skips it, so keep the `copy` handler.. Page JS sees `<pg-v>` with no readable text (`el.shadowRoot === null` for closed roots). Re-apply when React re-renders (already planned: MutationObserver, 50 ms debounce).
 **Spike:** confirm (1) `innerText`/`textContent` of ancestors exclude closed-shadow text, (2) user text selection + ⌘C still copies the real value (or we handle `copy` ourselves), (3) streaming re-renders don't flicker past the 2 ms budget.
 
 ### 1b. The clipboard wrapper must not hold secrets in the page's world

@@ -1,0 +1,27 @@
+<!doctype html><meta charset=utf-8><title>spike 1a</title>
+<div id=answer><p>Use <code>PG_SECRET_1</code> as the key.</p></div>
+<script>
+const SECRET='AKIAIOSFODNN7EXAMPLE';
+function restore(root){
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  const nodes=[];while(w.nextNode())nodes.push(w.currentNode);
+  for(const n of nodes){
+    const i=n.data.indexOf('PG_SECRET_1');if(i<0)continue;
+    const tail=n.splitText(i);tail.data=tail.data.slice('PG_SECRET_1'.length);
+    const h=document.createElement('pg-v');h.textContent='PG_SECRET_1';
+    const sr=h.attachShadow({mode:'closed'});
+    const s=document.createElement('span');s.textContent=SECRET;sr.append(s);
+    tail.before(h);
+  }
+}
+restore(document.getElementById('answer'));
+const a=document.getElementById('answer');
+const r={};
+r.innerText=a.innerText;r.textContent=a.textContent;
+r.bodyInnerText=document.body.innerText;
+r.shadowRoot=document.querySelector('pg-v').shadowRoot;
+r.leaks=[r.innerText,r.textContent,r.bodyInnerText,a.innerHTML].some(t=>t.includes(SECRET));
+r.selection=(()=>{getSelection().selectAllChildren(a);return getSelection().toString()})();
+r.selectionHasSecret=r.selection.includes(SECRET);r.selectionHasPlaceholder=r.selection.includes('PG_SECRET_1');
+window.RESULT=r;
+</script>

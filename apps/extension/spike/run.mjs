@@ -1,0 +1,15 @@
+import {chromium} from 'playwright';
+import {fileURLToPath} from 'node:url';
+import {dirname,join} from 'node:path';
+const dir=dirname(fileURLToPath(import.meta.url)),ext=join(dir,'ext');
+const ctx=await chromium.launchPersistentContext('',{channel:'chromium',headless:true,args:[`--disable-extensions-except=${ext}`,`--load-extension=${ext}`]});
+await ctx.grantPermissions(['clipboard-read','clipboard-write'],{origin:'http://localhost:4323'});
+const p=await ctx.newPage();
+await p.goto('http://localhost:4323/copy.html');
+await p.click('#b');
+await p.waitForFunction(()=>document.documentElement.dataset.pgCopy,null,{timeout:3000}).catch(()=>{});
+const status=await p.evaluate(()=>document.documentElement.dataset.pgCopy);
+const clip=await p.evaluate(()=>navigator.clipboard.readText().catch(e=>'ERR '+e.name));
+const pageSeesVault=await p.evaluate(()=>Object.getOwnPropertyNames(window).some(k=>k.includes('vault')||k.includes('PG')));
+console.log({status,clip,pageSeesVault});
+await ctx.close();
