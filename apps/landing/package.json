@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "npx wrangler@latest pages dev",
     "deploy": "npx wrangler@latest pages deploy",
-    "test": "node --test test/"
+    "sync": "cp ../../packages/core/src/detect.js public/detect.js",
+    "test": "npm run sync && node --test test/"
   },
   "engines": {
     "node": ">=22"

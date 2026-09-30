@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { detect, redact } from '../public/detect.js'
+import { detect, redact } from '../src/detect.js'
 
 test('finds secrets, keeps only the value for assignments and db urls', () => {
   const text = 'AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE\nSTRIPE_SECRET_KEY=sk_live_51HxExampleExampleEx\nDATABASE_URL=postgres://admin:hunter2pass@db.acme.io/prod'
