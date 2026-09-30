@@ -28,3 +28,31 @@ Rules:
 
 ## 7. Thank-you (same day)
 > Thanks for your time today, it was really useful. {one specific thing they said}. I'll send the AI-questionnaire compilation when it's ready. And if anyone else comes to mind who's in the middle of SOC 2, I'd love an intro.
+
+---
+
+## Drafts: first three leads (2026-09-30)
+Signals come from `leads.csv` (treg LinkedIn job search). We haven't confirmed that any of them is doing SOC 2, so the messages only mention the job post. Each connection note is under 300 characters.
+
+### Recrew AI (22 people · cyber security engineer hire, Gurugram · CTO or co-founder)
+**Connection note**
+> Hi {name}, saw Recrew AI is hiring a cyber security engineer. I'm researching how small AI teams answer the new AI questions in customer security reviews. Open to a 20-min chat? Not selling, and I'll share the compiled question list.
+
+**Follow-up (day 3, if they accepted but didn't reply)**
+> Thanks for connecting. At 20-ish people, the first big customer's security questionnaire usually lands on the CTO's desk. Has that happened at Recrew yet? If you've had one with AI questions in it, I'd love to hear how you handled it. 20 minutes, whenever suits.
+
+### Prolaio (86 people · Sr. Director InfoSec & Cloud Ops hire, Chicago · CTO until the director starts)
+**Connection note**
+> Hi {name}, saw Prolaio is hiring a Sr. Director of InfoSec & Cloud Ops. I'm researching how growing teams answer the AI section of customer security questionnaires. Open to a 20-min chat? Not selling. I'll share the anonymized question list.
+
+**Follow-up (day 3)**
+> Thanks for connecting. Curious who handles customer security reviews at Prolaio while that director role is open, and whether AI questions have started showing up in them. A 20-min chat would help my research a lot, and I'll send you the compilation either way.
+
+### HuntingCube (244 people · founding security engineer hire, Bengaluru · CTO or VP Engineering)
+**Connection note**
+> Hi {name}, saw HuntingCube is hiring a founding security engineer. That's often when security questionnaires start piling up. I'm researching how teams answer the new AI questions in them. Open to a 20-min chat? Not selling. I'll share what I learn.
+
+**Follow-up (day 3)**
+> Thanks for connecting. Out of curiosity, what triggered the first security hire: a customer, an audit, or something else? I'm talking to ~10 teams at this stage about how they handle security reviews and AI use. Happy to share what others are doing in return.
+
+**Before sending:** fill in `{name}`, and add one line about the person's recent post if it's relevant. Send one follow-up only. Log `first_touch` and `followup` in `leads.csv`.
