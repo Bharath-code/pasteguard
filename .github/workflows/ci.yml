@@ -10,4 +10,5 @@ jobs:
       - run: npm ci
       - run: npm test -w packages/core
       - run: npm run typecheck -w packages/core
+      - run: npm run gates -w packages/core
       - run: npm test -w apps/landing

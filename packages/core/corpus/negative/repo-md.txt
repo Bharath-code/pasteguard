@@ -1,0 +1,1256 @@
+# Customer discovery sprint: 10 eng-lead conversations in 14 days (2026-09-30 → 2026-10-14)
+
+Files: `interview-script.md` (Mom Test script) · `outreach.md` (messages) · `leads.csv` (tracker).
+
+## What we're testing
+Research on 2026-09-30 found that public write-ups of AI questionnaire sections focus on **AI in the vendor's product** (model provenance, training on customer data, AI subprocessors) [1][2]. Fewer mention **staff use of AI tools**, though some do: which tools, what tier, data-handling terms, who has admin oversight [3]. Our team tier assumes the second kind of question is common and painful, so that assumption is the first thing to test.
+
+| # | Hypothesis | Confirmed when | Killed when |
+|---|---|---|---|
+| H1 | SaaS teams of 20–200 get asked about **staff** AI use in security questionnaires | ≥ 5 of 10 show or describe a real question | ≤ 2 of 10 have seen one |
+| H2 | Today they answer with a policy doc and no enforcement, and it feels weak | They describe a workaround or discomfort unprompted | "We just say yes, nobody checks" and they're fine with it |
+| H3 | Engineers have pasted secrets or customer data into AI chat | A specific incident, or a rule they made after one | No incident, no rule, no worry |
+| H4 | They'd pay ~$4/user for enforcement + evidence | ≥ 3 accept a pilot commitment (below) | Interest, but no commitment of time, intro or money |
+| H5 | AI-suggested packages are a felt risk | A story of a wrong, fake or suspicious package from AI | Never came up, even when asked about the last AI-coding mistake |
+
+**Decision on day 14:** H1 + H4 confirmed → build the team tier next (PRD P2). H1 killed → reposition the team tier around secret-leak incidents and audit logs instead of questionnaires, or drop it. Record this in `extension-decision-report.md` §9.
+
+## Who to talk to
+- **Company:** B2B SaaS, 20–200 people, sells to US/EU mid-market or enterprise, with SOC 2 in progress or renewed in the last 12 months. India-based teams selling abroad come first (your network).
+- **Role:** CTO, VP/Head of Engineering, or Head of Security/GRC. That's the person who fills in the questionnaire, or gets pulled in to.
+- **Not:** enterprises (Chrome Enterprise Premium's buyers), agencies, or companies with no enterprise customers yet.
+
+## Where to find them (company-level signals only)
+Work through these in order. Warm paths convert far better than cold ones.
+1. **Your network (day 1).** Ask 15 people: *"Who do you know that's going through SOC 2 or security reviews right now?"* One intro beats 20 cold messages.
+2. **vCISOs and SOC 2 consultants.** Each has 5–20 clients in exactly this state. Ask for 2 intros, and offer them the questionnaire compilation (below) as thanks. They're also the partner channel from gtm §2.
+3. **Trust-center footprints.** Google `"Trust Center" "SOC 2" "Powered by Vanta"`, and the same with `SafeBase`, `Drata`, `Sprinto`. Filter by size on LinkedIn.
+4. **Hiring signals.** LinkedIn Jobs: `"SOC 2"` or `GRC` or `"compliance analyst"` at companies of 11–200 employees. A company hiring for SOC 2 is in the middle of it.
+5. **"Achieved SOC 2" posts** on LinkedIn from the last 12 months. Founders post these, and they're renewing the audit now.
+6. **Communities:** SaaSBoomi, r/SaaS, r/cybersecurity, Indie Hackers, and founder Slack groups. Look for threads complaining about security questionnaires; reply helpfully first.
+7. **Our waitlist:** every signup from a company email domain.
+
+Log each company in `leads.csv` with **source URLs for each signal**. You add the person's name yourself from LinkedIn. Don't collect personal emails or phone numbers from third-party enrichment tools. LinkedIn messages and warm intros are enough for 10 calls.
+
+**Funnel math:** warm intros often reply at 30–50%, cold LinkedIn messages at 5–15% (rough rule of thumb, not measured here). Plan on **~15 warm asks + ~60 cold touches → 10 calls**.
+
+## The founding pilot offer (only at the end of a call, and only if they showed pain)
+Nothing of the team tier is built yet, so the pilot is **concierge**: we deliver by hand what the product will later automate.
+
+| They get (days 1–60) | We ask for |
+|---|---|
+| Free extension for the whole team, plus a guided install (force-install for Google Workspace) | 3 × 30-min feedback calls |
+| An **AI usage section** for their next questionnaire: policy text + control description + evidence, written with them | The AI section of their last questionnaire (redacted is fine) |
+| A monthly Leak Report (counts only) and the team tier as it ships | **Founding price:** $2/user/mo (50% off $4), min $29/mo, locked for 12 months after the pilot |
+
+**Commitment ladder:** ask for the highest step they'll take.
+1. **Money:** a $99 refundable deposit that holds a founding spot. This is the strongest signal.
+2. **Reputation:** an intro to one peer going through SOC 2.
+3. **Time:** the 3 calls + the questionnaire section.
+
+"Sounds great, keep me posted" counts as **no commitment**.
+
+## Give-back asset (makes asking easier)
+Compile the AI questions we collect (anonymized, with no company names) into a public *"AI questions in security questionnaires, 2026"* page, with model answers. Every interviewee gets it first. It also serves as the gtm §6 lead magnet.
+
+## 14-day schedule
+| Days | Do | Output |
+|---|---|---|
+| 1 | Network asks (15), vCISO asks (5), list 40 companies from sources 3–5 | 40 rows in `leads.csv` |
+| 2–5 | 10–15 cold touches/day, follow up on day 3 after each | 8–12 calls booked |
+| 4–12 | Calls (≤ 2/day), notes written within 1 hour of each | Filled `H1–H5` columns |
+| 13 | Synthesis: count evidence per hypothesis | 1-page memo |
+| 14 | Decide per the table above, update the decision report | Go / reposition / stop |
+
+## Sources
+1. Aetos, "Enterprise buyers now have an AI section on their security questionnaire": https://www.aetos-data.com/answers-insights/enterprise-security-ai-questionnaires
+2. LowerPlane, "Enterprise AI security questionnaires": https://lowerplane.com/blog/enterprise-ai-security-questionnaires/
+3. Everything-PR, "Client AI security questionnaire": https://everything-pr.com/client-ai-security-questionnaire
+
+# Interview script (Mom Test), 30 minutes
+
+## Rules (reread before every call)
+1. **Talk about their life, not our idea.** No pitch until the last 5 minutes, and only if they showed pain.
+2. **Ask about specific past events,** not opinions or the future. "Tell me about the last time…" not "Would you…?"
+3. **Talk less.** Aim for them speaking 80% of the time. Silence is fine.
+4. **Compliments are noise.** "That's a cool idea" = zero data. Ask what they did about it.
+5. **Dig into emotion and workarounds.** "What did you do then?" "What did that cost you?"
+6. **Always end with a commitment ask** (README pilot offer). No commitment = not a customer yet.
+
+## Opening (2 min)
+> "Thanks for the time. I'm researching how small SaaS teams handle security reviews now that customers ask about AI. I'm not selling anything today. I want to learn how it actually works for you. Mind if I take notes?"
+
+## 1. Context (3 min)
+- Where are you with SOC 2 right now? What triggered it?
+- Who on the team fills in security questionnaires? How many did you get in the last quarter?
+- Which compliance platform, if any? (Vanta / Drata / Sprinto / consultant / spreadsheet)
+
+## 2. Questionnaires and AI: tests H1, H2 (8 min)
+- Walk me through the last security questionnaire you answered. Who sent it, and how long did it take?
+- Were there questions about AI? What exactly did they ask? *(If yes:)* Could you show me, or paste the AI section afterwards, redacted?
+- Were any of them about **how your own team uses AI tools**, rather than AI in your product?
+- What did you answer? What evidence did you attach?
+- How did you feel about that answer? Did the customer push back or follow up?
+- If a customer asked "prove it", what would you show them today?
+
+## 3. AI use on the team: tests H3 (7 min)
+- Which AI tools does your team use day to day? How do you know? Is that list written down anywhere?
+- Has anyone ever pasted something into ChatGPT or Claude they shouldn't have? Tell me about the last time. *(Keys, customer data, logs.)*
+- What happened next? Did you rotate anything, write a rule, or talk to the team?
+- Do you have an AI usage policy? When did you last check that people follow it?
+
+## 4. AI-written code: tests H5 (4 min)
+- Tell me about the last time AI-generated code caused a problem.
+- Has an AI ever suggested a package or dependency that turned out wrong, fake, or suspicious? What did you do?
+- How do new dependencies get reviewed today?
+
+## 5. Spend and alternatives: tests H4 (3 min)
+- What have you spent on SOC 2 and security reviews this year? (Tools, auditor, consultant, hours.)
+- Have you looked at anything to control AI use? What happened with that? *(Listen for Chrome Enterprise Premium, DLP tools, "we just blocked ChatGPT".)*
+- If this problem vanished tomorrow, what would change for you?
+
+## 6. Close (3 min)
+**If they showed real pain (a questionnaire question they struggled with, or an incident):**
+> "Here's what I'm building: a browser extension that stops secrets going into AI chats and flags fake packages, plus a team register that becomes the evidence for exactly that questionnaire section. I'm looking for 5 founding teams for a 60-day pilot. I'd write your AI questionnaire answer with you, and you'd lock in 50% off for a year. The spots are held with a $99 refundable deposit. Would you want one?"
+
+Then walk down the commitment ladder (README): deposit → intro → time.
+
+**If they showed no pain:**
+> "This was really useful. Who else do you know going through SOC 2 who might see this differently?"
+
+Always ask: *"Can I send you the compiled AI-questionnaire list when it's ready?"*
+
+## After the call (within 1 hour)
+Fill in `leads.csv`:
+- `h1`–`h5`: `+` (evidence for), `-` (evidence against) or `0` (not discussed), each with a one-line quote in `notes`.
+- `commitment`: `deposit` / `intro` / `time` / `none`.
+- The strongest verbatim quote. It's the raw material for landing-page copy later.
+
+**Bad-data alarms.** Discount the call if you hear:
+- compliments ("love it");
+- fluff about the future ("we'd definitely use that");
+- hypotheticals ("if you built X, then…").
+
+Ask *"When did that last happen?"* to turn them back into facts.
+
+# Outreach messages
+
+Rules:
+- Ask for learning, not a sale.
+- Name the specific signal you saw.
+- Keep it under 80 words and make one ask.
+- Send each message yourself, personalized. No bulk sends.
+- Never claim users, customers or results we don't have.
+
+## 1. Warm ask to your network
+> Hey {name}, quick one. I'm researching how small SaaS teams handle security reviews now that customers ask about AI use. Do you know anyone (CTO, eng lead, security lead) going through SOC 2 or answering security questionnaires right now? A 20-minute chat would help me a lot, and I'll share what I learn across teams.
+
+## 2. vCISO / SOC 2 consultant
+> Hi {name}, I saw you help startups through SOC 2. I'm compiling the AI questions that now show up in security questionnaires, especially about staff use of ChatGPT and similar tools, plus model answers. Would you trade 20 minutes of what you're seeing for an early copy? Happy to credit you or keep it anonymous.
+
+## 3. Cold LinkedIn (connection note, ≤ 300 chars)
+> Hi {name}, saw {company} {signal: "is hiring a GRC analyst" / "shared its SOC 2 report" / "has a Vanta trust center"}. I'm researching how teams answer the new AI questions in security questionnaires. Open to a 20-min chat? Not selling. I'll share the compiled question list.
+
+## 4. Follow-up (day 3, once)
+> Following up once. I'm collecting real examples of AI questions in security questionnaires (anonymized). If a 20-min chat doesn't fit, even a forwarded redacted AI section would help, and I'll send you the full compilation.
+
+## 5. Community post (SaaSBoomi / r/SaaS / Indie Hackers)
+> **What AI questions are you getting in security questionnaires?**
+> I'm compiling the AI sections that now show up in SIG / CAIQ / custom questionnaires, especially questions about how your own team uses ChatGPT, Claude and Copilot. If you've answered one recently, what did they ask and what did you answer? I'll post the anonymized compilation with model answers back here.
+
+## 6. Booking confirmation
+> Thanks! Here's a link for 20 minutes: {calendar}. No prep needed. If you have a recent questionnaire with AI questions, having it open would help (you don't need to share it).
+
+## 7. Thank-you (same day)
+> Thanks for your time today, it was really useful. {one specific thing they said}. I'll send the AI-questionnaire compilation when it's ready. And if anyone else comes to mind who's in the middle of SOC 2, I'd love an intro.
+
+---
+
+## Drafts: first three leads (2026-09-30)
+Signals come from `leads.csv` (treg LinkedIn job search). We haven't confirmed that any of them is doing SOC 2, so the messages only mention the job post. Each connection note is under 300 characters.
+
+### Recrew AI (22 people · cyber security engineer hire, Gurugram · CTO or co-founder)
+**Connection note**
+> Hi {name}, saw Recrew AI is hiring a cyber security engineer. I'm researching how small AI teams answer the new AI questions in customer security reviews. Open to a 20-min chat? Not selling, and I'll share the compiled question list.
+
+**Follow-up (day 3, if they accepted but didn't reply)**
+> Thanks for connecting. At 20-ish people, the first big customer's security questionnaire usually lands on the CTO's desk. Has that happened at Recrew yet? If you've had one with AI questions in it, I'd love to hear how you handled it. 20 minutes, whenever suits.
+
+### Prolaio (86 people · Sr. Director InfoSec & Cloud Ops hire, Chicago · CTO until the director starts)
+**Connection note**
+> Hi {name}, saw Prolaio is hiring a Sr. Director of InfoSec & Cloud Ops. I'm researching how growing teams answer the AI section of customer security questionnaires. Open to a 20-min chat? Not selling. I'll share the anonymized question list.
+
+**Follow-up (day 3)**
+> Thanks for connecting. Curious who handles customer security reviews at Prolaio while that director role is open, and whether AI questions have started showing up in them. A 20-min chat would help my research a lot, and I'll send you the compilation either way.
+
+### HuntingCube (244 people · founding security engineer hire, Bengaluru · CTO or VP Engineering)
+**Connection note**
+> Hi {name}, saw HuntingCube is hiring a founding security engineer. That's often when security questionnaires start piling up. I'm researching how teams answer the new AI questions in them. Open to a 20-min chat? Not selling. I'll share what I learn.
+
+**Follow-up (day 3)**
+> Thanks for connecting. Out of curiosity, what triggered the first security hire: a customer, an audit, or something else? I'm talking to ~10 teams at this stage about how they handle security reviews and AI use. Happy to share what others are doing in return.
+
+**Before sending:** fill in `{name}`, and add one line about the person's recent post if it's relevant. Send one follow-up only. Log `first_touch` and `followup` in `leads.csv`.
+
+# Chrome Extension Decision Report — 2026-09-29
+
+## TL;DR
+- **Build:** a merged version of #4 and #5, working name **"PasteGuard"**. It's a free, local-only guard for developers that stops secrets from being pasted into AI chats and flags hallucinated or brand-new packages *inside ChatGPT/Claude answers*. The paid **Team** tier turns it into an **AI-tool register** you can export as ISO 42001 / EU AI Act Art. 4 inventory evidence.
+- **Kill:** #5 as a standalone product (Socket already ships it free), and #2 and #3 as revenue plays.
+- **Keep as a side wedge:** #1, but only if it's repositioned (see below). As first pitched it has a fatal flaw.
+- **Verdict:** proceed, **gated by kill criteria** (see §8). Don't pivot yet. None of these has been validated with users.
+
+---
+
+## 1. Reality check on each idea (the research changed the ranking)
+
+| # | Idea | What research found | Verdict |
+|---|------|---------------------|---------|
+| 1 | LLM API DevTools panel | **Fatal flaw:** production apps call OpenAI and Anthropic *from the server* (keys can't live in the browser). The browser only sees your own backend's stream, so "decode OpenAI/Anthropic streams" rarely applies. Free SSE viewers already exist (SSE Inspector, SSE Viewer, Stream Panel, sse-devtools-panel), plus the OSS LLM-Inspector. Server-side observability (Helicone, Langfuse) owns cost tracking. | Reposition as an **AI SDK / AG-UI UI-stream inspector** (tool-call parts, reasoning, TTFT, tokens/sec). Good for building an audience; weak for revenue. |
+| 2 | Docs → Markdown | Crowded, low willingness to pay, and Firecrawl and others already do it. | Skip. At most a weekend project to grow an audience. |
+| 3 | Cloudflare dashboard power-ups | Small audience that expects it to be free, and every dashboard redesign breaks the extension. | Skip for revenue. |
+| 4 | Shadow AI detector | The market is real and validated by money: SentinelOne bought Prompt Security for about $300M (2025), and Harmonic, LayerX, Nightfall and ShadowLock (MSP-focused) all compete. **Chrome Enterprise Premium has native GenAI DLP.** Enterprise buyers are taken. The **SMB, dev-team, compliance-evidence** segment is underserved. | **Build, with a narrowed angle.** |
+| 5 | npm/GitHub risk badges | **Socket's free extension already does this** on npm/PyPI/Go/Maven pages, and it has VC funding. | Kill it standalone. **Salvage the unique slice:** flag hallucinated packages *in AI chat answers*, which Socket doesn't cover. That slice folds into #4. |
+| 6 | PR context for GitHub | Overlaps with Refined GitHub. Team analytics competes with LinearB, Swarmia and Graphite. | Skip. |
+
+### Scored ranking (1–5, higher is better)
+
+| Idea | Pain intensity | Willingness to pay | Distribution | Defensibility | Fit with your assets | Speed to MVP | **Total** |
+|---|---|---|---|---|---|---|---|
+| **#4+5 merged (PasteGuard)** | 4 | 4 (team) | 4 | 3 | 5 (compliance scanner, git-scope) | 4 | **24** |
+| #1 repositioned | 3 | 2 | 4 | 2 | 4 | 5 | 20 |
+| #4 as pitched | 4 | 4 | 2 | 2 | 5 | 3 | 20 |
+| #6 | 2 | 3 | 3 | 1 | 4 | 3 | 16 |
+| #5 standalone | 3 | 2 | 3 | 1 | 3 | 4 | 16 |
+| #2 | 2 | 1 | 4 | 1 | 2 | 5 | 15 |
+| #3 | 2 | 1 | 2 | 2 | 5 | 4 | 16 |
+
+---
+
+## 2. The pain (why people pay)
+
+**Individual devs:** "I just pasted a `.env` into ChatGPT." "The AI told me to `npm i` a package that doesn't exist, or one someone registered last week." Both are real and documented:
+- Slopsquatting is now in the OWASP NPM Security and Secure-Coding-with-AI cheat sheets. A hallucinated `huggingface-cli` package got 30k+ real downloads.
+- Malicious "AI helper" extensions with 900k+ installs exfiltrated chat histories (OX Security, Jan 2026). Urban VPN intercepted AI chats from 8M users. **Trust is the whole game:** being local-only and open source is the differentiator, not a footnote.
+
+**Team leads / CTO / compliance at 20–500-person companies:**
+- "An auditor or customer security questionnaire asks: *which AI tools does your staff use, and with what data?* We have no answer."
+- EU AI Act **Art. 4 AI literacy has applied since 2 Feb 2025**, and guidance recommends keeping an AI-system inventory. High-risk obligations moved to **2 Dec 2027** (Omnibus, in force 27 Jul 2026). That lowers the urgency for high-risk systems, but inventory and literacy evidence is needed *now*.
+- ISO 42001 certification requires an AI-system inventory. Vanta and Drata customers are being asked for it in vendor reviews.
+
+**Buyer ≠ user.** Devs install it free. The team lead pays for the register. This is the "individual first, then team budget" motion.
+
+---
+
+## 3. Competitor map
+
+| Segment | Players | Their gap you can exploit |
+|---|---|---|
+| Enterprise AI DLP | Prompt Security (SentinelOne), Harmonic, LayerX, Nightfall, SquareX | Sales-led, priced for enterprise, heavy agents, long rollouts. Out of reach for a 40-person startup. |
+| Browser-native | **Chrome Enterprise Premium** GenAI DLP | Paid add-on, Google-admin-centric, generic DLP rather than dev-specific (no package checks, no dev secret formats), and no compliance-register export. **This is the biggest platform risk.** |
+| MSP tools | ShadowLock | Built for MSP resale, not self-serve for devs. |
+| Free/OSS toys | Prompt Seal, ShadowGuard, SHADOW-AI (GitHub) | No team tier, no register, no maintenance commitment. Validates demand but isn't a business. |
+| Package risk | Socket extension, slopcheck CLI, Aikido | Registry pages and CI only. **None annotate AI chat answers in place.** |
+
+**Positioning line:** *"The AI safety net for dev teams. Catches secrets and fake packages before they happen, and gives you the AI-tool register your auditor asks for. Local-first, open source, set up in 10 minutes."*
+
+---
+
+## 4. How to beat competitors and take share
+1. **Win the bottom they ignore.** Self-serve, flat pricing, and a 10-minute Google Workspace force-install. Enterprise vendors won't chase $150/mo accounts.
+2. **Trust as a weapon.** Open-source client, narrow host permissions (AI domains only, not `<all_urls>`), detection 100% on-device, and the server gets metadata only (tool, timestamp, user, event type; never content). Publish a "what we see" page. Every exfiltration headline becomes free marketing for you.
+3. **Dev-specific detection** that generic DLP misses: gitleaks-grade secret rules, `.env` blocks, private keys, JWTs, connection strings, internal hostnames, plus in-chat package verification.
+4. **Compliance output, not dashboards.** One click exports an AI-system register (CSV/PDF), mapped to ISO 42001 inventory and AI Act Art. 4 evidence. Your existing code scanner adds the "AI APIs used in code" half. **Browser plus code together gives a complete AI inventory**, and no single competitor has both.
+5. **Built-in virality:** every blocked secret shows a small "Protected by PasteGuard" line on the team's weekly digest. A "Share your AI hygiene score" card works for build-in-public posts.
+
+---
+
+## 5. Product: wow moments, UX, DX, AX
+
+### Holy-sh*t moments (design these first)
+> **Updated 2026-09-30:** the store scan found reversible redaction already shipped by several free competitors, so it is now a supporting feature, not the headline. See `product-strategy.md` §0 and §3.
+
+1. **"This chat already has a leak."** On the first visit to an AI chat after install, a local scan of the visible conversation says *"This conversation contains an AWS key you sent earlier. Rotate it →"*. It shows the type only, never the value. This is the start of the demo GIF.
+2. **Fake-package flag inside the AI answer.** Claude suggests `npm i react-form-utils-pro` and a red inline badge appears: *"Not on npm."* Or: *"Registered 4 days ago · 11 downloads · 1 maintainer"*.
+3. **Reversible redaction (supporting).** You paste `AKIA…`, it's sent as `PG_SECRET_1`, and the real value is restored on your screen only, where the site's own scripts can't read it.
+4. **Team setup in 10 minutes.** The admin force-installs through Workspace, and within an hour the dashboard shows *"Your team used 9 AI tools this week"*. That tends to be a shock, because they thought it was 2.
+
+### UX principles
+- Stay silent until something matters. **Never block by default; warn and redact** (a DLP that nags gets uninstalled).
+- One-key actions: `Enter` = send redacted, `Esc` = edit, "Always allow this pattern" = learn.
+- Zero onboarding. It works immediately on install. The first success is simulated with a harmless "try pasting this fake key" demo on the welcome page. **Time-to-wow under 30 s.**
+- Accessibility: chips are keyboard-reachable with aria-live announcements, and meet contrast in both themes.
+
+### DX (developer experience)
+- An open-source rules file (YAML) with custom patterns, e.g. `acme_internal_*`, shared across the team.
+- A CLI and pre-commit hook that reuse the same rules (fits the git-scope brand).
+
+### AX (agent experience)
+- A read-only register API plus an MCP server so compliance agents (Vanta/Drata automations, Claude) can pull "AI tools in use" as evidence.
+
+---
+
+## 6. Business model & pricing
+
+| Tier | Price | What's in it |
+|---|---|---|
+| Free (individual) | ₹0 / $0 | Secret guard, reversible redaction, package check, local stats |
+| Pro (individual) | $5/mo | Custom rules, more AI sites, history export (optional, low priority) |
+| **Team** | **$4/user/mo, min $49/mo** | Force-install, admin policies (`chrome.storage.managed`), AI-tool register, weekly digest, audit log |
+| Compliance add-on | +$99/mo | ISO 42001 / AI Act evidence export, code-scanner merge, 12-month retention |
+
+**Math to ₹1Cr ARR (~$120k, ~$10k MRR):**
+- Team route: avg 30 seats × $4 = $120, +$99 add-on on half = ~$170/account → **~60 paying teams**.
+- Pure-PLG route (#1 style, $9/mo): ~1,100 payers. At a 2–5% freemium conversion (vendor-blog benchmarks, likely optimistic) that needs 25k–55k active users.
+- Team is roughly 20× fewer customers. That's why #4 wins.
+
+Payments: Stripe checkout on your own site (the Chrome Web Store has no payments). Licenses are verified by a Cloudflare Worker, and team seats sync from Google Workspace.
+
+Exit option: extensions reportedly sell for 24–40× MRR (Chrome Goldmine / ExitBid, vendor data), so it can be sold even as a lifestyle business.
+
+---
+
+## 7. Finding users (distribution system, not a launch)
+
+Following your pasted playbook, pick **one** repeatable channel producing 100+ visitors/week before stacking more:
+1. **Primary: reply-marketing.** Spend 10 min/day on Reddit (r/webdev, r/devops, r/sysadmin, r/cybersecurity, r/ExperiencedDevs) and HN threads about "leaked key in ChatGPT", "slopsquatting" or "shadow AI policy". Answer helpfully and link only when asked.
+2. **Chrome Web Store SEO.** Title and first 132 chars: "Catch fake packages and leaked keys in ChatGPT & Claude". Target keywords: *chatgpt privacy, api key leak, fake npm package, slopsquatting, prompt security*. Screenshot 1 is the chat-leak scan and package-flag GIF (updated 2026-09-30, see `product-strategy.md` §3).
+3. **Newsjacking.** Every AI-extension breach or slopsquatting story → a same-day X/LinkedIn post with the GIF.
+4. **Later (once the funnel converts):** MSP and vCISO partners, a Vanta/Drata marketplace listing, and a free "AI Policy Generator" tool as lead magnet (programmatic SEO).
+
+**Funnel: track these 4 numbers from day 1**
+
+| Stage | Metric | Target (first 90 days) |
+|---|---|---|
+| Visitor → install | CWS listing conversion | ≥ 15% |
+| Install → activated | first redaction/package flag within 7 days | ≥ 40% |
+| Activated → retained | W4 retention | ≥ 30% |
+| Retained → team | installs from companies that start team trial | ≥ 3% |
+
+Instrument with PostHog. Opt-in only, and events carry no content. Talk to every uninstaller (uninstall URL → 1-question survey) and every trial that doesn't convert.
+
+---
+
+## 8. Risks & mitigation
+
+| Risk | Severity | Mitigation |
+|---|---|---|
+| **Chrome Enterprise Premium / Microsoft Purview bundle it** | High | Target orgs not paying for CEP. Lead with dev-specific detection + compliance export. Support Edge, Brave and Firefox too. |
+| **Trust**: "read and change data on sites" warning scares users | High | Narrow host permissions, OSS client, local detection, a published data map, and aim for the CWS "Featured" badge. |
+| Desktop apps & CLIs (ChatGPT app, Claude Code, Cursor) bypass the browser | Medium | Be upfront about it. Cover the gap with the pre-commit/CLI and your code scanner. The browser is still the main surface for chat AI. |
+| AI sites change their DOM and break the content scripts | Medium | Hook at the `paste`/`beforeinput` event level, not DOM selectors. Run synthetic Playwright tests daily against each site. |
+| Regulatory urgency softened (high-risk → Dec 2027) | Medium | Sell on security-questionnaire / ISO 42001 pain today; AI Act is a secondary argument. |
+| Enterprise sales cycles | Medium | Keep deals self-serve under $500/mo. No SSO/SOC 2 until pulled by 3+ customers. |
+| CWS review delays or policy strikes | Low–Med | Minimal permissions, a clear privacy policy, no remote code (MV3). |
+
+---
+
+## 9. Kill criteria (proceed vs pivot)
+
+**Ship MVP in 2 weeks** (MV3, no backend: secret guard + reversible redaction on chatgpt.com, claude.ai, gemini.google.com, plus the package check via a cached Cloudflare Worker proxy of npm/PyPI metadata).
+
+| Checkpoint | Proceed if | Else |
+|---|---|---|
+| Day 30 | ≥ 500 installs, ≥ 40% activation | Rewrite the CWS listing and GIF once; if it still misses, pivot to #1-repositioned |
+| Day 60 | ≥ 25 team-waitlist signups from company emails, 10 user interviews done | Keep it free as an audience asset, and point effort at the compliance scanner |
+| Day 90 | ≥ 3 paid teams | Scale: MSP partners and marketplace listings |
+
+---
+
+## 10. Next 14 days
+1. **Day 1–2:** Search the CWS for "chatgpt privacy", "prompt security", "redact". Record install counts and **1–2★ complaints** in a table (that's the feature spec). *Not done in this report: CWS install numbers weren't verified.*
+2. **Day 1–2:** Build the landing page and waitlist ("Team: AI-tool register"). Post a demo mock GIF to X and r/webdev as a demand smoke test before coding the team tier.
+3. **Day 3–10:** Build the MVP (paste interception, gitleaks-derived rules, reversible redaction, package badge).
+4. **Day 11–12:** Put the privacy/data-map page and the OSS repo live.
+5. **Day 13–14:** Show HN ("I built a local-only guard that stops secrets and fake packages in ChatGPT"), and start the daily reply-marketing routine.
+
+---
+
+## Sources
+- [LLM-Inspector](https://github.com/PradSharma554/LLM-Inspector) · [SSE Inspector](https://sse-inspector.onecat.dev/) · [SSE Viewer](https://github.com/maltoze/sse-viewer) · [sse-devtools-panel](https://github.com/FatMii/sse-devtools-panel)
+- [SentinelOne acquires Prompt Security](https://www.sentinelone.com/press/sentinelone-to-acquire-prompt-security-to-advance-genai-security/) · [Harmonic DLP for GenAI](https://www.harmonic.security/solutions/dlp-for-genai) · [ShadowLock](https://shadowlock.io/) · [LayerX ChatGPT security tools](https://layerxsecurity.com/generative-ai/best-chatgpt-security-tools/)
+- [CSA: AI browser extension attack surface](https://labs.cloudsecurityalliance.org/research/csa-research-note-ai-browser-extension-attack-surface-202604/) · [ShadowGuard](https://github.com/Ahmad-Amin/shadow-guard) · [SHADOW-AI](https://github.com/anurag123-lab/SHADOW-AI) · [Prompt Seal (Medium)](https://medium.com/code-your-own-path/stop-leaking-secrets-into-chatgpt-free-browser-extension-for-safer-ai-prompts-41cb8c837a09)
+- [Chrome Enterprise GenAI DLP](https://security.googleblog.com/2024/04/prevent-generative-ai-data-leaks-with.html) · [Chrome Enterprise Premium](https://chromeenterprise.google/products/chrome-enterprise-premium/)
+- [Socket web extension](https://socket.dev/blog/socket-web-extension) · [Aikido on slopsquatting](https://www.aikido.dev/blog/slopsquatting-ai-package-hallucination-attacks) · [Cloudsmith slopsquatting](https://cloudsmith.com/blog/slopsquatting-and-typosquatting-how-to-detect-ai-hallucinated-malicious-packages) · [slopcheck](https://github.com/0xToxSec/slopcheck)
+- [Gibson Dunn: AI Act Omnibus](https://www.gibsondunn.com/eu-ai-act-omnibus-agreement-postponed-high-risk-deadlines-and-other-key-changes/) · [Jones Walker: Aug 2 still matters](https://www.joneswalker.com/en/insights/blogs/ai-law-blog/yes-august-2-still-matters-the-eu-approved-a-high-risk-ai-delay-but-most-trans.html?id=102nbon) · [Inside Privacy: AI literacy guidance](https://www.insideprivacy.com/artificial-intelligence/european-commission-provides-guidance-on-ai-literacy-requirement-under-the-eu-ai-act/)
+- [ExtensionPay revenue examples](https://extensionpay.com/articles/browser-extensions-make-money) · [Chrome Goldmine revenue benchmarks](https://chromegoldmine.com/blog/chrome-extension-monetization/chrome-extension-revenue-benchmarks/) · [Fungies monetization guide](https://fungies.io/monetize-chrome-extension-2026/)
+
+---
+
+## 11. Technical feasibility (verified 2026-09-29)
+
+**Verdict: feasible.** Paste guard + package check are low-risk. Reversible redaction is feasible but the most brittle part → ship it as "best-effort, this tab only".
+
+### Spike results (actually tested)
+| Test | Result |
+|---|---|
+| Capture-phase `paste` listener cancels a paste in ProseMirror (ChatGPT/Claude editor family) and re-inserts redacted text via synthetic `ClipboardEvent` + `DataTransfer` | ✅ secret absent, placeholder inserted |
+| Fallback `document.execCommand('insertText')` into ProseMirror | ✅ works |
+| npm registry / downloads API / PyPI JSON: CORS | ✅ `access-control-allow-origin: *` |
+| Nonexistent package → registry status | ✅ clean `404` on both npm & PyPI (deterministic "doesn't exist" signal) |
+| highlight.js keeps `{{SECRET_1}}` in one DOM text node | ⚠️ bash/python yes; **JS template literal split it** → restore must match on concatenated text & map back to nodes, or use identifier-style placeholder (`PG_SECRET_1`) that highlighters keep as one token |
+
+### Component matrix
+| Component | Feasibility | Approach | Main risk |
+|---|---|---|---|
+| Secret detection | High | Port gitleaks rules (MIT) to JS regex + entropy + keyword prefilter; Luhn cards, Verhoeff Aadhaar, PAN | False positives → "allow pattern" learning; Go RE2 `(?i)` → JS flags |
+| Paste interception | High (tested) | `window` capture-phase `paste` | Site adds own capture handler first (unlikely) |
+| Typed secrets / Enter-to-send | Medium | Capture `keydown` Enter + send-button click, scan editor text, block & offer redact | Races with site handlers; DOM selector per site |
+| File/drag-drop upload | Medium | Intercept `drop`/`input[type=file]` change, FileReader for text files | PDF/images out of scope v1 |
+| Reversible restore in answer | Medium | MutationObserver on response container, text-node replace, re-apply on each React re-render during streaming | Flicker while streaming; model mangles placeholder; mapping lost on reload (keep in `chrome.storage.session` = memory only, never disk) |
+| Copy button returns real secret | Medium | `world: "MAIN"` content script wraps `navigator.clipboard.writeText` to substitute placeholders | Patching page globals — keep tiny & audited |
+| Package check in answers | High (tested) | Parse only install commands (`npm i`, `pnpm add`, `pip install`, `uv add`) in code blocks → background SW fetch (host perms for registries) → 404 / age / weekly downloads / edit-distance to top-N list | Python import≠package name (only check install cmds); private scopes → org allowlist |
+| Team force-install | High | Google Admin `ExtensionInstallForcelist` (free Chrome Browser Cloud Mgmt) / Intune for Edge | BYOD & unmanaged browsers not covered |
+| Team policy | High | `chrome.storage.managed` + `managed_schema` | — |
+| User identity | High | `chrome.identity.getProfileUserInfo` (`identity.email`) | Only on signed-in profiles |
+| AI-tool register | High | Team build: `webNavigation` hostname → match curated AI-domain list locally, report hostname only | Needs history-level permission → team build only (admin-installed, no scary prompt) |
+| AI-extension inventory (bonus wow) | High | `chrome.management.getAll()` → flag AI extensions installed | `management` permission → team build only |
+| Backend | High | Cloudflare Worker + D1 (events, licenses), Stripe checkout on site | — |
+| MV3 rules | High | Rules = JSON data (allowed), no remote code; SW is event-driven | 30s SW idle — nothing long-running needed |
+
+### Hard limits (be honest in marketing)
+- Can't see desktop apps (ChatGPT/Claude apps), CLIs (Claude Code, Cursor), mobile, or API calls → pair with pre-commit/CLI + code scanner.
+- Users can disable it unless force-installed; Incognito off unless allowed/forced.
+- Per-site adapters (chatgpt.com, claude.ai, gemini.google.com, …) break on redesigns → daily Playwright synthetic tests.
+
+### Two builds, one codebase
+- **Public (CWS):** host perms = AI chat domains + registries only. Minimal warning, fast review.
+- **Team (unlisted/force-installed):** + `webNavigation`, `management`, `identity.email`.
+
+# PasteGuard extension: PRD, architecture and build plan (2026-09-30)
+
+Reads with: `extension-decision-report.md` (§5 UX, §9 kill criteria, §11 feasibility), `apps/extension/design/index.html` (surfaces A–I, budgets, state matrix, voice). This doc does not repeat them. It decides **how** we build.
+
+---
+
+## 0. The one promise, and what "accurate" means
+
+> **"Secrets you paste into AI chats never leave your device. Packages the AI invents get flagged before you install them."**
+
+To make this promise and keep it, we define accuracy as numbers we publish and enforce in CI:
+
+| Promise | Measured by | Gate (CI fails below) |
+|---|---|---|
+| We catch listed secret types | Recall on the public positive corpus (format-valid fake keys, gitleaks fixtures, MIT) | ≥ 98% per rule, ≥ 99% overall |
+| We don't nag | False positives per 1 MB of the negative corpus (real code, logs, UUIDs, git SHAs, hashes, base64 images, lockfiles) | ≤ 1 per MB |
+| The secret never reaches the site | E2E test: paste into mock chat → assert the value is absent from the network log, the page DOM, and page-world JS | 0 leaks, every build |
+| "Not on npm" is true | Verdict matches the registry status code | 100% (it's a 404, deterministic) |
+| We stay invisible | Budgets from the design doc (≤ 25 KB content script, ≤ 5 ms p95 detect on 10 KB, 0 network on AI pages) | Size and bench checks in CI |
+
+Marketing only uses these numbers, and each links to the corpus in the OSS repo. If we can't measure a claim, we don't make it.
+
+---
+
+## 1. Two findings that change the design (staff-engineer review)
+
+These are the reasons to spike before building anything else.
+
+### 1a. Restored values must not enter the page's DOM
+The design doc's restore view (surface B) swaps `PG_SECRET_1` → real value in the AI answer. If we write that value as a normal text node, **the AI site's own JS can read it**: `document.body.innerText`, its analytics, or a session-replay SDK. That breaks the promise quietly.
+
+**Design:** replace each placeholder with a `<pg-v>` host element that keeps the placeholder as light-DOM text and has a **closed shadow root** (no slot) rendering the value. Shadow-only hosts failed the real-site spike: ChatGPT's Copy button builds text from the DOM and lost the value (`apps/extension/spike/RESULTS.md`). Native ⌘C on a selection still skips it, so keep the `copy` handler.. Page JS sees `<pg-v>` with no readable text (`el.shadowRoot === null` for closed roots). Re-apply when React re-renders (already planned: MutationObserver, 50 ms debounce).
+**Spike:** confirm (1) `innerText`/`textContent` of ancestors exclude closed-shadow text, (2) user text selection + ⌘C still copies the real value (or we handle `copy` ourselves), (3) streaming re-renders don't flicker past the 2 ms budget.
+
+### 1b. The clipboard wrapper must not hold secrets in the page's world
+The plan puts a `world: "MAIN"` script around `navigator.clipboard.writeText` to make the AI's Copy button return real values. If that script holds the vault, **the page can read the vault**, because MAIN world is the page's JS heap.
+
+**Design:** the MAIN-world wrapper holds nothing. It intercepts `writeText(text)`, and if `text` contains `PG_SECRET_` it dispatches a DOM event with the placeholder text and resolves. The **isolated-world** content script substitutes the values and calls `navigator.clipboard.writeText` itself, using the same user activation. Secrets never touch page memory.
+**Spike:** confirm the transient user activation still holds when the isolated world writes, on all three sites.
+
+### 1c. The paste handler must decide synchronously
+`preventDefault()` has to run inside the `paste` event, so we can't `await` the service worker. So **detection runs in the content script, synchronously**, which is why rules count against the 25 KB budget. For pastes over 256 KB: always `preventDefault`, scan in chunks with `scheduler.yield()`, then insert.
+
+---
+
+## 2. PRD
+
+### Users
+| Persona | Job to be done | Buys? |
+|---|---|---|
+| **Dev (primary)** | "Let me paste my stack trace / .env / config into ChatGPT without thinking about it." | Free; the viral loop |
+| **Eng lead / founder** | "Prove to a customer's security questionnaire that we control AI use." | Team $4/user |
+| **Security/IT at 20–200 person co** | "Know which AI tools people use; stop keys leaking." | Team + compliance add-on |
+
+### Scope by release
+**P0 (MVP, public build, chatgpt.com, claude.ai, gemini.google.com)**
+1. Paste guard: detect → tape (redact to `PG_SECRET_n`) → chip (A). `Enter` sends taped, `Esc` undoes, hold 1 s to send the original.
+2. Reversible restore in answers (B), closed-shadow values, "this tab only".
+3. Copy button returns real values (1b).
+4. Package check (C): install commands in code blocks → npm/PyPI → Not found / new (< 30 days) / low downloads / looks like a popular package (edit distance ≤ 2 to the top 5k names).
+5. Toolbar icon states (D), popup (E): weekly count, pause on this site.
+6. Welcome tab (F): time-to-wow < 30 s with a fake key.
+7. Allow list: "Always allow this" stores **SHA-256 of the value**, never the value.
+8. Uninstall URL → 1-question survey on the landing site (I).
+9. **Chat-leak scan:** on the first visit to each conversation, run `detect()` over the visible user turns (through `adapter`), then show one chip: *"This conversation contains an AWS key. Rotate it →"*. Type only, never the value, once per conversation. This is wow moment #1 in `product-strategy.md` §3.
+10. **Rotate links:** a static map of about 30 providers (Stripe, AWS, OpenAI, GitHub…) → their key-management page. Shown after hold-to-send-original and on chat-scan findings.
+
+**P1 (days 15–45)**: typed secrets on Enter/send-click; custom rules (G); drag-drop of text files; Edge listing (same zip); more AI sites via a generic adapter.
+
+**P2 (team, gated by day-60 kill criterion)**: team build, `chrome.storage.managed` policy, AI-tool register (H), weekly digest, Stripe/merchant-of-record billing, evidence export.
+
+### Non-goals (said out loud)
+Desktop apps, CLIs, mobile, API traffic; images/PDF scanning; blocking by default; any server-side content processing; Python import scanning.
+
+### Default rule set: a product decision
+The `Email address` rule in today's `detect.js` will fire on almost every support ticket or log someone pastes. **Recommend: secrets on by default, PII (email, phone, card, Aadhaar/PAN) off by default** under a "Personal data" toggle. Cards stay on because they are Luhn-checked and rarely false.
+
+---
+
+## 3. Tech stack (with the calls on Tailwind, shadcn and zod)
+
+| Layer | Choice | Why |
+|---|---|---|
+| Extension framework | **WXT** (Vite-based) | Actively maintained MV3 framework: manifest generated from code, HMR, Chrome/Edge/Firefox targets from one codebase, `--mode` for public vs team builds, zip + submit commands. Plasmo is the alternative; its maintenance has slowed. |
+| Language | **TypeScript, `strict`** | Message contracts and the vault are where bugs become leaks. |
+| In-page UI (A, B, C) | **Vanilla TS + a 20-line `h()` helper + plain CSS in the closed shadow root** | 25 KB budget, hostile host page, 3 tiny components. Any framework costs budget and gains nothing here. |
+| Extension pages (popup, options, welcome) | **Preact + signals** (~5 KB) | Real component model for the options page (rules editor, site list, allow list) at 1/10th of React. |
+| Styling | **Plain CSS with the DESIGN.md tokens** (one `tokens.css`, shared by in-page and pages) | The design doc is already written in token CSS and can be lifted verbatim. |
+| Tailwind | **Skip** | It adds a build step and a second vocabulary for tokens we already have. It also can't reach into the closed shadow root without injecting a generated stylesheet. Revisit if the page count passes ~6. |
+| shadcn/ui | **Skip** | It's React + Radix + Tailwind (too heavy for pages, unusable in-page), and its look fights DESIGN.md. Use native `<dialog>`, `popover`, `<details>` and `:focus-visible`, which the design doc already uses. |
+| Validation | **zod (`zod/mini`) in the service worker, pages and Worker. Hand-written type guards in content scripts.** | Validate at every trust boundary (below). `zod/mini` tree-shakes small; content scripts stay in budget with guards. |
+| Core logic | **`packages/core`: zero dependencies, pure functions** | Detect, redact, placeholder match, install-command parse, verdict, typosquat. Runs in Node, the extension and the landing page. Tests: `node --test` (repo convention). |
+| E2E | **Playwright** with the unpacked extension, against local **mock chat pages** (ProseMirror, textarea, contenteditable) | Deterministic CI. Real sites checked by a daily logged-out smoke run where the site allows it, otherwise a manual weekly check. |
+| Backend (P2 only) | **Cloudflare Worker + D1 + KV** | Already on Cloudflare; free tier covers the pilot. |
+| Analytics | **Opt-in, extension pages only, counts only** (PostHog or a Worker counter) | Nothing runs on AI pages. Events: install, activated, weekly_active, uninstall. No content, no URLs. |
+| Errors | **No automatic error reporting.** "Copy diagnostic" button in the popup with scrubbed stacks. | A crash report from a paste handler can contain the paste. |
+
+### Trust boundaries (where validation is mandatory)
+| From → to | Trust | Guard |
+|---|---|---|
+| Page (MAIN world) → content script (DOM events) | **Hostile** | Type guard + only accept placeholder-shaped strings; never return vault data |
+| Content script → service worker (`runtime.sendMessage`) | Low (renderer can be compromised) | `zod/mini` schema per message, check `sender.id` and `sender.tab` |
+| Registry responses → service worker | External | `zod/mini`, and treat any parse failure as "Couldn't check" |
+| `chrome.storage.*` on read | Ours but versioned | Schema + migration on read |
+| `chrome.storage.managed` (team) | Admin | Schema from `managed_schema.json` |
+
+`externally_connectable`: none. `web_accessible_resources`: none in P0.
+
+---
+
+## 4. System design
+
+### High-level architecture
+```mermaid
+flowchart LR
+  subgraph Page["AI chat tab (chat.example.ai)"]
+    MW["MAIN world<br/>clipboard shim (<40 lines, holds nothing)"]
+    subgraph CS["Content script (isolated world)"]
+      AD["Site adapter<br/>composer() · answers() · send()"]
+      PG["Paste guard<br/>sync detect → tape"]
+      RS["Restorer<br/>MutationObserver → &lt;pg-v&gt; closed shadow"]
+      PK["Package scanner<br/>install cmds in code blocks"]
+      UI["UI host<br/>closed shadow root · popover=manual"]
+      VM["Tab vault (memory)"]
+    end
+  end
+  SW["Service worker<br/>vault mirror · registry fetch + 24h cache · stats · badge"]
+  ST[("storage.session<br/>vault, per tab")]
+  SL[("storage.local<br/>settings · allow-list hashes · counts · pkg cache")]
+  REG["npm / PyPI registries"]
+  PGS["Extension pages<br/>popup · options · welcome"]
+  MW -- "placeholder text only" --> CS
+  PG --> VM
+  VM <--> SW
+  PK -- "package names" --> SW
+  SW --> REG
+  SW --- ST
+  SW --- SL
+  PGS <--> SW
+```
+
+What crosses each line: only **package names** go to registries, and only placeholders go to the AI site. Real values stay in isolated-world memory and `storage.session`.
+
+### Core flows
+**Paste:** `paste` (window, capture, `document_start`) → `detect(text)` sync → no hits: do nothing → hits: `preventDefault`, `redact` with the tab's running counter, insert through the adapter (synthetic paste → `execCommand` fallback), store the mapping in the tab vault and SW mirror, show chip A, badge +n.
+
+**Restore:** observer on `adapter.answers()` → debounce 50 ms → find `PG_SECRET_\d+` in concatenated text (placeholders can be split across highlighter spans) → swap in `<pg-v>` → fuzzy match `PG_SECRET 1` / `pg_secret_1` → unknown id: leave as is.
+
+**Package:** observer finds `<pre><code>` → parse install commands (`packages/core`) → message SW → cache hit (24 h) or fetch `registry.npmjs.org/<name>` + `api.npmjs.org/downloads` / `pypi.org/pypi/<name>/json` → verdict → chip C. Scoped packages that 404 say "Not on public npm" (could be private), not "Not on npm".
+
+### Data model (P0)
+```ts
+type Vault = { [tabId: number]: { next: number; map: Record<string, string> } } // storage.session
+type Settings = { v: 1; paused: string[]; pii: boolean; allow: string[] /* sha256 */ } // storage.local
+type Stats = { week: string; caught: number; byType: Record<string, number> } // storage.local, counts only
+type PkgCache = Record<string, { verdict: Verdict; at: number }> // storage.local, 24h TTL
+```
+
+**Open decision: vault on reload.** The design doc's state matrix says "Value cleared on reload". A `storage.session` mirror keyed by tab would let restore survive a reload. It's still memory-only, cleared on tab close (`tabs.onRemoved`) and browser quit. Recommend the mirror, and change the state to "cleared when the tab closes".
+
+### Monorepo layout
+```
+packages/core/            zero deps · node --test
+  src/rules.ts            generated from gitleaks (MIT) + ours, with keyword prefilters
+  src/detect.ts redact.ts entropy.ts match.ts install.ts verdict.ts typosquat.ts
+  corpus/positive/ corpus/negative/   accuracy gates (§0)
+apps/extension/           WXT
+  entrypoints/background.ts
+  entrypoints/chat.content/{index,guard,restore,packages}.ts
+  entrypoints/clipboard.content.ts    world: MAIN
+  entrypoints/{popup,options,welcome}/
+  adapters/{chatgpt,claude,gemini,generic}.ts   one interface
+  ui/{h.ts,chip.ts,pill.ts,verdict.ts,tokens.css}
+  wxt.config.ts           --mode public | team → permissions
+apps/landing/             unchanged; build copies core → public/detect.js (stays dependency-free)
+apps/worker/              P2 only
+```
+This moves the "single source of truth" from `apps/landing/public/detect.js` to `packages/core`. CLAUDE.md needs a one-line update when it lands.
+
+### Security and supply chain
+- An extension that guards secrets is a target. Enable 2FA on the CWS developer account, opt into **verified CRX uploads**, and publish only from CI.
+- Pin dependencies, commit the lockfile, and keep runtime dependencies to **Preact and zod only**. Everything else is dev-only.
+- Lint: ban `innerHTML`, `eval`, `new Function`, and `outerHTML`. `console.*` is stripped in production builds.
+- Publish the source and a reproducible build so anyone can diff the store zip.
+
+---
+
+## 5. Screen flow
+
+The surface letters match the design doc.
+```mermaid
+flowchart TD
+  I0([Install from CWS]) --> F["F · Welcome tab<br/>copy fake key → paste → see tape → pin"]
+  F --> AI["Open an AI chat<br/>(nothing shown: silent by default)"]
+  AI -->|paste with secret| A["A · Guard chip<br/>'2 secrets taped: Stripe key, AWS key'"]
+  A -->|Enter| S1["Sent taped"]
+  A -->|Esc| X["Exposed ring · 'Tape again'"]
+  A -->|hold 1s| S2["Sent original · assertive: 'Rotate the Stripe key'"]
+  X -->|Enter| S2
+  S1 --> B["B · Answer arrives<br/>placeholders restored on this screen only"]
+  B -->|Copy| CP["Clipboard gets real values"]
+  B -->|install cmd in code| C["C · Package chip<br/>Not on npm · Registered 4 days ago · ✓ quiet"]
+  A & C --> D["D · Toolbar badge count"]
+  D --> E["E · Popup<br/>weekly count · pause here · 'All quiet on this tab'"]
+  E --> G["G · Options<br/>custom rules · allow list · personal data toggle"]
+  E -.team build.-> H["H · AI-tool register (admin)"]
+  I0 -.uninstall.-> U["I · Uninstall survey (landing site)"]
+```
+
+**Time-to-value path:** Install → F (≤ 30 s) → first real catch. We call a user activated at their first real-site catch (A) or package flag (C) within 7 days (target ≥ 40%, from decision report §7).
+
+---
+
+## 6. The C-suite view (one line each, then the call)
+
+| Seat | Concern | Call |
+|---|---|---|
+| **CEO** | Focus. Two weeks to MVP, then kill criteria decide. | P0 = paste + restore + package check on 3 sites. Nothing from P2 before the day-60 gate. |
+| **CTO** | The promise is technical; a leak kills the company. | The spike (§1) comes first. Accuracy gates in CI (§0). Two builds from one codebase. |
+| **Staff eng** | Hostile page, sync paste, streaming re-renders, DOM churn. | Adapters behind one interface, mock-page E2E, budgets enforced in CI. |
+| **CFO** | Zero budget. | P0 costs **$5 once** (CWS fee), since registries are called directly from the service worker and we run no server. P2 runs on the Cloudflare free tier. For billing from India, compare a merchant of record (Paddle or similar, handles global VAT/GST) against Stripe before day 90. |
+| **CMO** | One asset sells it: the restore GIF. | The GIF and the CWS title ("Stop secret leaks in ChatGPT & Claude") ship with the MVP, plus the "What we see" page and the public accuracy numbers from §0. |
+| **GTM** | Distribution beats features. | Reply marketing + CWS SEO + newsjacking (report §7). The team waitlist on the landing page is the day-60 signal. |
+| **PM** | Accuracy and nag rate decide retention. | Personal-data rules off by default, allow-list learning, and uninstall survey reviewed weekly. |
+
+---
+
+## 7. Build plan (14 days)
+
+| Days | Milestone | Done when |
+|---|---|---|
+| 1–2 | **Spike §1a/1b/1c** on mock + real pages | 3 yes/no answers written down; design adjusted if any is no |
+| 2–4 | `packages/core`: gitleaks port, prefilter, corpus, gates | CI shows recall/FP per rule; detect ≤ 5 ms p95 on 10 KB |
+| 4–6 | WXT scaffold, adapters ×3, paste guard + chip A, chat-leak scan + rotate links | E2E: secret absent from network/DOM on mock pages; scan finds seeded leak, shows type only |
+| 6–8 | Restore B + clipboard shim | Streaming restore within budget; Copy returns the real value |
+| 8–10 | Package check C + SW cache | Verdicts for 404 / new / low-download / typosquat fixtures |
+| 10–12 | Icon D, popup E, welcome F, allow list, uninstall URL | Fresh-profile install reaches its first catch in < 30 s |
+| 12–14 | Privacy page, OSS repo, store assets, submit | CWS submitted; Show HN draft ready |
+
+# PasteGuard — Go-To-Market, Moat, Market Size, Blitz Plan (2026-09-29)
+
+Companion to `extension-decision-report.md`. FX assumption: $1 ≈ ₹88 → **₹1Cr ≈ $113k ARR ≈ $9.5k MRR**.
+
+## 0. Correction from new research
+- ISO 42001: only **~350–500 orgs certified worldwide** (spring 2026). That's too small to lead with. Keep it as an add-on.
+- **Lead trigger = SOC 2 and customer security questionnaires.** There are 15–20k SOC 2 reports a year, Vanta has 16k customers and Drata 8.5k. Questionnaires now routinely ask *"What AI tools do employees use, and how do you prevent data leakage into them?"*
+- The pain is backed by data: **77% of employees paste data into GenAI tools, 82% of it from unmanaged accounts**, and ~35% of pasted data is sensitive (LayerX report). Cyberhaven puts it at **39.7% of AI interactions involving sensitive data**.
+
+---
+
+## 1. Market size
+
+### Top-down (context only, analyst figures)
+- Shadow AI Risk & Governance market: **$1.39B (2026) → $8.64B (2032), 35.6% CAGR**. North America is 44% of it (MarketsandMarkets).
+- AI governance software: $0.61B (2026) → $2.63B (2030) (The Business Research Co.).
+
+### Bottom-up (the numbers to plan with)
+| Layer | Definition | Math | Size |
+|---|---|---|---|
+| **TAM** | Every professional developer plus the tech-org seats around them that use AI chat in a browser | 36.5M professional devs × $48/yr (the $4/mo seat price) | **~$1.75B/yr**, in line with the $1.39B analyst figure |
+| **SAM** | Tech SMBs (10–500 staff) facing SOC 2 or security questionnaires, reachable self-serve, in English-speaking markets plus India | ~40k companies (GRC-platform users + SOC 2 filers, deduplicated estimate) × 60 avg seats × $48 | **~$115M/yr** |
+| **SOM (36 mo)** | 0.5% of SAM accounts | 200 teams × ~$1.9k/yr, plus individual Pro | **~$0.4–0.5M ARR (≈ ₹3.5–4.4Cr)** |
+| **Year-1 target** | ₹1Cr | 60 teams × $1.9k (~$115k); the individual plan is upside | **60 paying teams** |
+
+The SAM company count is an estimate. Vanta (16k) + Drata (8.5k) + Secureframe/Sprinto/others, minus overlap, plus SOC 2 filers not using a GRC platform. Validate it by counting public "trust center" pages.
+
+---
+
+## 2. Two plans, two motions
+
+### Individual: product-led, the plan exists for distribution
+| | Free | **Pro — $4/mo · $36/yr · ₹199/mo India PPP** |
+|---|---|---|
+| Secret guard + reversible redaction | 3 AI sites | All AI sites (~40) |
+| Fake-package check | ✅ | ✅ + PyPI/crates/Go |
+| Custom rules (YAML) | — | ✅ |
+| Sync rules across devices | — | ✅ |
+| "Protection report" history | 7 days | Unlimited + export |
+
+- **Job of this plan:** installs, reviews, CWS ranking, and a signal about which companies are using it. Revenue from it is a bonus. Expect 1–3% to pay.
+- **Founding-member offer:** $49 lifetime Pro for the first 200 buyers. It brings in cash early, earns testimonials, and proves people will pay. Close it permanently after the 200.
+- Upgrade triggers are in-context, never nags. Example: *"You've been protected 12 times this month. Add custom rules for your company's internal keys → Pro."*
+
+### Team: product-led lead → founder-led close
+| | **Team — $4/user/mo annual ($5 monthly), min $49/mo** | Compliance add-on +$99/mo |
+|---|---|---|
+| Force-install (Google Admin / Intune) | ✅ | |
+| Org policies (block / warn / redact) | ✅ | |
+| AI-tool register + AI-extension inventory | ✅ | |
+| Weekly digest + audit log (12 mo) | ✅ | |
+| Questionnaire answer pack (AI usage policy, controls, evidence PDF) | | ✅ |
+| Code scanner merge (browser + codebase inventory) | | ✅ |
+| ISO 42001 / AI Act Art. 4 evidence export | | ✅ |
+
+Free for teams of 1–3 seats, so early-stage startups stay in the funnel.
+
+**The bottom-up upgrade engine:**
+1. **Domain clustering.** A free user signs in, optionally, to sync. Once **3+ users share one company domain**, email the most active one: *"3 people at acme.com use PasteGuard. You've blocked 9 secrets this month. Want the team dashboard free for 14 days?"*
+2. **Champion kit.** A "Send to my security lead" button generates a 1-page **Leak Report** PDF: *"In 30 days, PasteGuard stopped 14 secrets (3 AWS, 2 Stripe, 9 .env) from reaching ChatGPT/Claude."* It is the most important upsell asset.
+3. **Trigger-based outreach.** Reach teams at the moment they buy: SOC 2 audit prep, a customer questionnaire, a key-leak incident, or writing an AI policy. Lead magnets for each (see §6).
+4. **Founder-led close.** A 15-minute demo, the admin install done live on the call, and a dashboard with real data before the call ends. No SSO or SOC 2 of your own until 3+ deals ask for it.
+5. **Partners.** vCISOs, SOC 2 consultants, and MSPs (India and US) get 20% recurring revenue share. They bundle PasteGuard into their compliance packages.
+
+---
+
+## 3. Strategy in one page
+
+1. **Wedge:** individual devs, with a free and delightful product (reversible redaction + fake-package flags).
+2. **Beachhead:** 20–200-person SaaS startups going through SOC 2, especially India-based SaaS selling to US and EU customers. You know this market, and they're price-sensitive toward incumbents.
+3. **Expand:** teams → compliance add-on → code + browser AI inventory (your scanner) → MSP channel.
+4. **Positioning:** *"Answer 'how do you stop AI data leaks?' on your next security questionnaire, in 10 minutes, for $4/seat."*
+5. **Principles:**
+   - Trust beats features.
+   - Warn and redact, don't block.
+   - The team plan must be something employees don't hate: metadata only, never prompt content.
+   - Price below the procurement threshold (under $500/mo, so it's a card purchase).
+
+---
+
+## 4. Moat (honest version)
+
+**Not a moat:** regex rules, extension code, the idea. A funded competitor or Google could copy features in weeks.
+
+**Moats to build deliberately, in order:**
+| Moat | How it compounds | Starts |
+|---|---|---|
+| **Trust brand** | OSS client, local-only, published data map, public security audit later. Every "malicious AI extension" headline strengthens you. Trust is slow to build and hard to copy. | Day 1 |
+| **Slopsquatting dataset** (data network effect) | Anonymized counts of *which package names LLMs hallucinate*, across all users and models. Published as a monthly **"Slopsquatting Index"**. Registries, Socket and security teams want it, and it feeds detection that only you have. | Month 1 |
+| **Detection quality loop** | Every "false positive / allow" click (anonymized pattern class only) tunes rules. More users → fewer false positives → better reviews → more users. | Month 2 |
+| **Audit-evidence switching cost** | Teams keep 12 months of register and audit log as SOC 2 evidence. Leaving means losing evidence mid-audit-cycle. | Month 3 |
+| **Distribution compounding** | CWS reviews, ranking, SEO pages, and the Index all accumulate, and a later entrant starts at zero. | Ongoing |
+| **Ecosystem lock-in** | Vanta/Drata integrations plus MCP/API, so evidence flows automatically into GRC platforms. | Month 6+ |
+| **Code + browser inventory** | Your scanner covers the half that browser-only vendors can't reach. | Month 6+ |
+
+---
+
+## 5. Risk mitigation (expanded)
+
+| Risk | Likelihood / impact | Mitigation | Early warning signal |
+|---|---|---|---|
+| No team willingness to pay | Med / High | Waitlist + pre-sell *before* building the team tier. Kill criteria at day 60 and 90. | <25 company-email waitlist signups by day 60 |
+| Google / Microsoft bundle it in the browser | Med / High | Target orgs without Chrome Enterprise Premium. Stay dev-specific. Stay multi-browser (Chrome, Edge, Firefox, Brave). | CEP price cut or free tier |
+| Trust / permission fear | High / High | Narrow host permissions, OSS, local detection, data-map page, no content ever leaves the device | Install→uninstall >30% in week 1 |
+| **Employee-monitoring backlash (EU works councils, GDPR)** | Med / Med | Register is aggregate by default; pseudonymous users option; DPA template; EU data residency (Cloudflare jurisdiction) | Objections in demos |
+| CWS takedown or review delay | Low / High | Clean MV3, no remote code, a clear privacy policy. Also list on Edge and Firefox stores. Team build can be self-hosted CRX via policy | Review >7 days |
+| AI site redesign breaks features | High / Med | Paste guard is site-agnostic; restore is per-site adapter; daily Playwright checks; status page | Synthetic test fails |
+| **Your own extension gets hijacked** (supply-chain irony) | Low / Catastrophic | Hardware 2FA on the CWS publisher account, signed releases, reproducible builds, no remote code | — |
+| Solo-founder bandwidth | High / Med | Ship narrow. Automate support (docs + in-app FAQ). Kill Pro features nobody uses. | >20% time on support |
+| Being copied by OSS | Med / Low | Being OSS yourself is the defense; the moats are the data and the trust | — |
+
+---
+
+## 6. Zero-budget blitz marketing
+
+### The centerpiece: original research (worth more than any ad budget)
+**"The 2026 Slopsquatting Report."** Ask GPT, Claude, Gemini and open models 1,000 real coding questions. Measure the % of hallucinated packages, which of those names **are already registered by someone**, and what the registered ones contain.
+- Cost: ~$20–50 of API credits plus 3 days.
+- Why it works: security press (The Register, BleepingComputer, Dark Reading), HN, and newsletters (tl;dr sec, JavaScript Weekly, Python Weekly) love new data. Every article links to the free extension.
+- Re-run it monthly as the **Slopsquatting Index**, which doubles as a moat and a recurring PR hook.
+- Responsible disclosure: report malicious squatted packages to npm and PyPI before publishing.
+
+### Launch stack (weeks 3–4). Stagger it, one big bet per day
+| Day | Channel | Asset |
+|---|---|---|
+| Mon | Publish report on your blog + X/LinkedIn thread | Charts, top-10 hallucinated names |
+| Tue | **Show HN**, 8–10am PT | "I measured how often AI invents npm/PyPI packages, and built a guard" |
+| Wed | Reddit: r/netsec (research), r/cybersecurity, r/webdev, r/devops, r/sysadmin, each with a tailored post and no cross-spam | Findings first, tool second |
+| Thu | **Product Hunt** + Peerlist + IndieHackers | 30-s GIF: reversible redaction |
+| Fri | Newsletter submissions: tl;dr sec, JS Weekly, Python Weekly, Console.dev, TLDR | Report link |
+| Next week | dev.to / Hashnode deep-dive, a LinkedIn carousel, and pitches to 3 podcasts | |
+
+### Always-on distribution system (the "100 visitors/week you can repeat")
+1. **Reply marketing, 15 min a day.** Threads on "leaked API key", "ChatGPT privacy at work", "AI policy for startup", "slopsquatting".
+2. **Free tools + programmatic SEO**, all sharing one backend:
+   - "Is this package real?" checker page, one indexable page per hallucinated name in the Index
+   - "Leaked your OpenAI/AWS/Stripe key? Rotate it in 5 min" guides (high-intent search)
+   - **AI Acceptable-Use Policy generator** → team-trial lead magnet
+   - **"AI usage" security-questionnaire answer template** → team-trial lead magnet
+3. **Newsjacking.** Every AI-extension breach or leak story gets a same-day post with the GIF.
+4. **Build in public.** Share installs, catches and MRR weekly on X and LinkedIn (you already do this).
+5. **Directories:** CWS featured nomination, AlternativeTo, awesome-security / awesome-chrome-extensions PRs, SaaSHub, There's An AI For That.
+6. **Talks:** OWASP chapters and Bangalore/Chennai meetups, titled *"I found N packages AI invented and attackers registered."*
+7. **Signal-based cold email for teams:** 20/day, manual and personalized. Targets are companies with a public SOC 2 trust center, and domains clustering in your user base. Comply with CAN-SPAM/GDPR (B2B legitimate interest, easy opt-out).
+8. **In-product loops:** "Protect a teammate" invites; the Leak Report PDF is shareable; the "Protected by PasteGuard" footer goes on the team digest.
+
+---
+
+## 7. How fast can we build (with Claude Code)
+
+| Week | Build | Market |
+|---|---|---|
+| **1** | D1 CWS competitor scan (1–2★ reviews → spec). D1–2 1-day spike on real chatgpt.com/claude.ai. D2–6 MVP: paste guard, ported gitleaks rules, reversible redaction, package badge (3 sites). D7 onboarding page with a fake-key demo. **Submit to CWS.** | Landing page + waitlist (team). Start the Slopsquatting study run. Daily build-in-public. |
+| **2** | CWS review buffer. Fix bugs, add Firefox/Edge builds, PostHog opt-in analytics, uninstall survey | Finish the report. Line up newsletter and press contacts. |
+| **3–4** | Pro licensing (Stripe on site + Worker), sync | **Launch blitz** (§6) |
+| **5–7** | Team build: Worker + D1, admin dashboard, force-install guide, register, Leak Report PDF | Domain-cluster emails, first 10 demos |
+| **8–10** | Compliance add-on v0 (questionnaire pack) | First paid pilots; partner outreach to 10 vCISOs |
+
+Realistic: **MVP live in ~10–14 days** (CWS review can add 1–7 days). **Team tier by ~week 7.**
+
+---
+
+## 8. Milestones & metrics
+
+**North-star metric:** *weekly protected developers*: installs with at least one protective event in the week (a secret taped, a past leak surfaced, or a package verdict other than "looks fine"). For teams: *weekly active paid teams*. Full definition, input tree and guardrails are in `product-strategy.md` §6.
+
+| Month | Installs (cumulative) | Weekly protected | Paid teams | MRR | Status |
+|---|---|---|---|---|---|
+| 1 | 1,000 | 300 | 0 | $0 (+ LTD cash) | target |
+| 3 | 5,000 | 1,500 | 5 | ~$0.8k | target |
+| 6 | 15,000 | 4,500 | 25 | ~$4k | target |
+| 12 | 40,000 | 12,000 | 60 | **~$9.5k (₹1Cr ARR)** | target |
+
+These are targets, not forecasts. Hitting ₹1Cr in 12 months is aggressive for zero budget; **12–18 months is realistic**. The report plus the HN launch is the biggest lever for pulling it earlier.
+
+Funnel numbers (from the pasted playbook): visitor→install, install→activated, activated→W4 retained, retained→team trial→paid. **Fix the worst stage before adding channels.** Talk to every uninstaller and every trial that doesn't convert.
+
+---
+
+## Sources
+- [SlashData: 47.2M developers](https://www.slashdata.co/post/global-developer-population-trends-2025-how-many-developers-are-there) · [ShiftMag](https://shiftmag.dev/there-are-47-million-developers-in-the-world-5200/)
+- [MarketsandMarkets: Shadow AI Risk & Governance $1.39B→$8.64B](https://www.prnewswire.com/news-releases/shadow-ai-risk--governance-market-worth-8-64-billion-by-2032--exclusive-report-by-marketsandmarkets-302889440.html) · [Business Research Co: AI governance](https://www.thebusinessresearchcompany.com/report/ai-governance-global-market-report)
+- [Second Talent shadow AI stats (LayerX 77%/82%)](https://www.secondtalent.com/resources/shadow-ai-statistics/) · [Cyberhaven: sensitive data into AI](https://www.cyberhaven.com/blog/sensitive-data-flowing-into-ai-tools) · [usecure](https://usecure.io/blog/genai-data-leakage-employees-pasting-confidential-data-into-ai-tools)
+- [Atoro: ISO 42001 certified count](https://atoro.io/how-many-companies-are-iso-42001-certified/) · [BCG among first 100](https://www.bcg.com/news/27january2026-bcg-certified-international-standard-ai-management-systems)
+- [SOC 2 statistics 2026](https://blog.getagency.com/articles/soc-2-compliance-statistics-2026) · [Sacra: Vanta](https://sacra.com/c/vanta/) · [Drata vs Vanta](https://www.brightdefense.com/resources/drata-vs-vanta-a-comparison/)
+- [CompanyData: 442,817 software companies](https://companydata.com/world/software-companies/)
+
+# PasteGuard: competition, wow moments, company horizon, north star (2026-09-30)
+
+Builds on `extension-decision-report.md` (§3 competitor map, §5 wow moments, §9 kill criteria), `gtm-strategy.md` (market size, moat, GTM) and `extension-prd-architecture.md` (PRD, stack). Sources are numbered [n] at the end.
+
+---
+
+## 0. What the new research changed
+
+The 2026-09-29 report compared us to enterprise DLP vendors and a few open-source toys. It never scanned the Chrome Web Store (report §10 marked that as not done). A scan on 2026-09-30 found that **the free, local-only secret-redaction market is crowded**:
+
+- At least 10 free extensions redact secrets and personal data locally before a paste reaches an AI chat [1–9].
+- **Reversible redaction is already shipped.** Veild [1] and Secret Sanitizer [2] put real values back into the clipboard when you copy. Private Prompt [7] and Privacy Protector [8] restore values inside the AI's reply.
+- **Chrome Enterprise Premium** now costs $6/user/month and includes paste DLP and shadow-AI visibility [10].
+
+**What this means:**
+1. Reversible redaction is now table stakes. It can't be our holy-sh*t moment or our demo GIF any more.
+2. "Local-only redactor" is not a position. Everyone says "100% local".
+3. What we found **no competitor doing**:
+   - checking packages *inside AI answers*;
+   - a published, measured accuracy score;
+   - restored values the AI site itself can't read (our closed shadow-root design);
+   - scanning the chat you already had;
+   - the team AI-tool register priced under Chrome Enterprise Premium.
+
+   Those five are where we compete.
+
+---
+
+## 1. Competitor matrix
+
+✅ = claimed on their own page · — = not found · ? = not checked. We don't guess, and we recheck every quarter.
+
+| | PasteGuard (planned) | Veild [1] | Secret Sanitizer [2] | PasteSecure [3] | Private Prompt [7] | Socket ext. [11] | Chrome Ent. Premium [10] |
+|---|---|---|---|---|---|---|---|
+| Secret detection on paste | ✅ | ✅ | ✅ 70+ patterns | ✅ | ✅ | — | ✅ generic DLP |
+| Restore via copy | ✅ | ✅ | ✅ (15 min) | ? | ? | — | — |
+| Restore shown in the answer | ✅ | — | — | ? | ✅ | — | — |
+| Restored value hidden from the site's own JS | ✅ closed shadow | ? | ? | ? | ? | — | n/a |
+| Package check inside AI answers | ✅ | — | — | — | — | — (registry pages only) | — |
+| Scans existing chat for past leaks | ✅ (P1) | — | — | — | — | — | — |
+| Published accuracy numbers | ✅ | — | — | — | — | — | — |
+| Open source | ✅ | ? | ✅ MIT | ? | ? | ? | — |
+| Team register / admin | ✅ (P2) | — | — | — | — | ✅ (their platform) | ✅ |
+| Price | Free · Team $4/user | Free | Free | Free | ? | Free ext. | $6/user [10] |
+
+**How to read it:** individual devs have free choices. We win on **"it catches what they miss, and proves it"**. Teams have one paid choice at $6 that bundles a lot more. We win on **dev-specific, cheaper, 10-minute setup, audit export**.
+
+---
+
+## 2. Competitive risks and mitigation
+
+| Risk | Why it's real | Mitigation | Watch signal |
+|---|---|---|---|
+| **Commoditized free tier.** "Just another redactor" | 10+ free clones [1–9] | Lead the store listing and GIF with package check + chat scan, not redaction. Publish accuracy numbers others can't match without a corpus. | Listing conversion < 15% |
+| A clone adds package checks | Easy to copy technically | Moat is the **Slopsquatting Index** data (which names models invent, which got registered). The checker is the free part; the dataset is ours. | A competitor adds it |
+| Chrome Enterprise Premium moves down-market | Google has the distribution | Target the SMBs not paying for it: dev-specific rules, $4 < $6, Edge/Firefox support, code + browser inventory. | CEP price change |
+| Veild-style tools add team tiers | Natural next step | Ship the team waitlist → pilot faster than them. Our advantage is the audit export mapped to SOC 2 questionnaires. | Their pricing page |
+| Trust ("another extension reading my chats") | Malicious AI extensions in the news (report §2) | OSS + reproducible build + "verify us in DevTools: zero requests" + restore the site can't read. | 1★ reviews mentioning privacy |
+| We claim something a competitor disproves | Kills credibility | Matrix cells only from their own pages, re-verified quarterly. Accuracy claims only from our CI numbers. | — |
+
+---
+
+## 3. Wow moments, redesigned
+
+Rule: a holy-sh*t moment is **value the user didn't know they needed, shown in under 60 seconds, on their real data, provably local.**
+
+| # | Moment | Why it lands | Unique? | Phase |
+|---|---|---|---|---|
+| **1** | **"This chat already has a leak."** On the first visit to a chat after install, we scan the *visible conversation* locally: *"This conversation contains an AWS key you sent earlier. Rotate it →"* (type only, never the value). | Turns a hypothetical fear into a real, personal finding in the first minute. Pure urgency, zero effort. | Not found in the scan | P0.5 (cheap: `detect()` over `adapter.answers()` + user turns) |
+| **2** | **"Not on npm."** A red badge appears on `npm i react-form-utils-pro` inside Claude's answer, before you copy it. | Visible proof that the AI lies, at the exact moment it matters. Best GIF. | Not found in the scan | P0 |
+| **3** | **"Registered 4 days ago · 1 maintainer."** A real package the AI suggested, that someone just claimed | Scarier than #2: it looks legitimate | Not found in the scan | P0 |
+| **4** | **One-click rotate.** After a hold-to-send-original, or with #1: *"Rotate the Stripe key"* links straight to the provider's key page | Turns guilt into a 20-second fix. Delight comes from relief. | Not found in the scan | P0 (static map of ~30 providers → key pages) |
+| **5** | **"Verify us."** The welcome page opens DevTools-style proof: live counter of network requests = 0 while you paste | Trust as a demo, not a promise | Veild shows similar [1] | P0 |
+| **6** | **Team: "Your team used 9 AI tools this week."** | Admin thought it was 2 | Chrome Enterprise Premium has it [10], not at $4 | P2 |
+| **7** | **Monthly "AI hygiene receipt."** 3 secrets kept out, 2 fake packages caught, shareable card with no values | Social proof loop + retention | — | P1 |
+
+**Demo GIF, in order:** #1 → #2 → restore. Redaction appears as the means, not the headline.
+
+### Delight layers (Kano)
+- **Must-be (absence = uninstall):** no false alarms, no typing lag, never breaks the chat. These are the CI gates in `extension-prd-architecture.md` §0.
+- **Performance (more = better):** secret types covered, sites supported, speed of verdicts.
+- **Delighters:** wow moments #1, #4, #7, the tape motion, and copy that sounds like a person ("Restored on this screen only").
+
+---
+
+## 4. Product principles
+
+These extend the design doc's six rules. Check every feature against them.
+
+1. **One promise, provable.** If a claim can't be measured in CI or seen in DevTools, we don't make it.
+2. **Value before ask.** No sign-up, no settings, and no permission beyond the AI sites before the first catch.
+3. **Silent until it matters, then specific.** Name the type, the outcome and the fix. Never the fear.
+4. **Fix, don't scold.** Every warning carries a fix (tape, rotate, "not on npm → did you mean `zod`?").
+5. **Earn every permission.** The public build asks for AI sites and registries only.
+6. **The user's data never becomes our product.** Aggregate counts only, opt-in.
+7. **Scope follows evidence.** New surfaces only after the kill-criteria gate for the current one passes.
+
+---
+
+## 5. From product to company
+
+### Vision and mission
+- **Vision:** *Every developer and every AI agent can use AI without leaking what matters or installing what's fake.*
+- **Mission (today):** Be the trusted safety layer between developers and AI chat, then between teams and every AI tool they use.
+- **Category we're building:** the **AI data boundary for dev teams**: what goes into AI (secrets) and what comes out of AI (packages, commands) that can hurt you.
+
+### Three horizons
+| Horizon | When | Product | Who pays | Proof it's working |
+|---|---|---|---|---|
+| **H1: Extension** | 0–6 months | Browser guard: secrets in, packages out, chat scan | Nobody yet (distribution) | Weekly protected developers (below), reviews, the Index cited by press |
+| **H2: Team boundary** | 3–18 months | Force-install, AI-tool register, policy, SOC 2 questionnaire pack, Leak Report | Eng leads at 20–200 person SaaS, $4/user | 60 paid teams → ₹1Cr ARR (gtm §8) |
+| **H3: Agent boundary** | 12–36 months | The same rules and package checks where AI **acts**: Claude Code/Cursor hooks, pre-commit, CLI, an MCP gateway that screens tool calls and `npm install`s agents run | Security + platform teams | Agents protected per week; one rule set across browser, IDE, CI |
+
+**Why H3 is the big bet:** the browser's hard limit (decision report §11) is that desktop apps, CLIs and agents bypass it. Agents are now the ones reading `.env` files and running `pip install`. The same `packages/core` (detect + package verdict) runs in Node, so a CLI, a pre-commit hook and an agent hook each reuse it for a few hundred lines. **Architecture decision this forces now:** keep `packages/core` pure and runtime-agnostic. That's already the plan.
+
+### What makes it a company, not an extension
+| Asset | Built by | Compounds because |
+|---|---|---|
+| Trust brand | OSS, published accuracy, zero-request proof | Every malicious-extension headline helps us |
+| Slopsquatting Index (data) | Opt-in aggregate counts of names models invent + registry lookups | Nobody else sees AI answers at this layer. The Index gets press, registries and security vendors want it, and detection improves. |
+| Evidence switching cost | 12 months of team register and audit log | Leaving mid-audit loses SOC 2 evidence |
+| One rule set, every surface | Browser → IDE → CI → agents | A team's custom rules live with us |
+| Distribution | Store reviews, SEO, the Index, partners (vCISO/MSP) | A late entrant starts at zero |
+
+### How to think bigger without losing focus
+- Ask "what would make this 10× more valuable to a team?". Answer: covering agents and CI, not more PII types.
+- Only **H1 gets built now**. H2 is gated by the day-60 waitlist, H3 by 3 paying teams asking for it. The horizon guides architecture choices today (pure core, rules as data), not the backlog.
+
+---
+
+## 6. North star
+
+### North star metric: **weekly protected developers (WPD)**
+> Distinct installs that, in a 7-day window, had at least one **protective event**: a secret taped, a past leak surfaced, or a package verdict shown that was not "✓ looks fine".
+
+**Why this one:**
+- It measures *value delivered*, not installs (vanity) or time spent (wrong for a silent tool).
+- It needs the product to work (accurate detection, working adapters) **and** people to keep it installed.
+- It predicts revenue, since team upsells come from domains with many protected devs (gtm §2).
+
+**Why not "secrets caught":** it can fall *because we're working*, as users learn and paste fewer secrets. It also rewards false positives. It stays as a reported number, not the goal.
+
+### Input metrics (what the team moves)
+```
+WPD = active installs × % who use AI chat weekly × % with a protective event
+        │                 │                           │
+        │                 │                           └ detection coverage, package-check reach, chat-scan
+        │                 └ supported sites, adapter health
+        └ store conversion, activation (first catch ≤ 7 days ≥ 40%), W4 retention ≥ 30%
+```
+
+### Guardrails (must not get worse while WPD rises)
+| Guardrail | Limit |
+|---|---|
+| False positives per MB (CI corpus) | ≤ 1 |
+| "Allow" clicks per protective event (field) | ≤ 15% |
+| Week-1 uninstall rate | ≤ 20% |
+| Adapter health (sites working) | ≥ 95% of days |
+| Leaks in E2E | 0 |
+
+### H2 north star (once the team tier ships)
+**Weekly active paid teams**: teams with ≥ 1 admin viewing the register or exporting evidence in the week. Gtm §8 targets: 5 by month 3, 60 by month 12.
+
+---
+
+## 7. Changes to earlier docs (applied 2026-09-30)
+- Decision report §5: move reversible redaction from wow #1 to supporting feature. Wow #1 becomes the chat scan, #2 becomes the package flag.
+- PRD P0: add the chat-leak scan (#1) and the rotate links (#4). Both are small and reuse existing core functions.
+- CWS listing title: lead with *"Catch fake packages and leaked keys in ChatGPT & Claude"*.
+- Gtm §8 north star: keep "weekly protected users", with the precise definition and guardrails above.
+
+---
+
+## Sources
+1. Veild: https://www.veild.dev/
+2. Secret Sanitizer (MIT): https://github.com/souvikghosh957/secret-sanitizer-extension
+3. PasteSecure, CWS: https://chromewebstore.google.com/detail/pastesecure-redact-sensit/ebolpbgeaeammpddffibagpobicfnhoc
+4. PrivacyScrubber, CWS: https://chromewebstore.google.com/detail/privacyscrubber-%E2%80%94-pii-red/pimoejgefeilajmmbpghifdmhdlkgjol
+5. Caviard, CWS: https://chromewebstore.google.com/detail/caviard-%E2%80%93-redact-personal/ncdaondhpapnhbeadnbcgpfmknhcoafh
+6. Private Guard, CWS: https://chromewebstore.google.com/detail/private-guard-%E2%80%94-pii-redac/jjkghegjofelkblppppihfacdoemjban
+7. Private Prompt: https://safeyourprompt.com/
+8. Privacy Protector for ChatGPT, CWS: https://chromewebstore.google.com/detail/privacy-protector-for-cha/ajoplockplhgenpmncdanppmdndpaeei
+9. Prompt Seal (Medium): https://medium.com/code-your-own-path/stop-leaking-secrets-into-chatgpt-free-browser-extension-for-safer-ai-prompts-41cb8c837a09
+10. Chrome Enterprise Premium, pricing summary: https://druce.ai/governance/wiki/vendors/chrome-enterprise · product: https://chromeenterprise.google/products/chrome-enterprise-premium/
+11. Socket web extension: https://socket.dev/blog/socket-web-extension
+12. Slopsquatting background: https://en.wikipedia.org/wiki/Slopsquatting · https://www.aikido.dev/blog/slopsquatting-ai-package-hallucination-attacks
+
+---
+
+## 8. Scorecard and odds (2026-09-30, judgment, not data)
+
+### Scorecard today (1–5, higher is better)
+| Dimension | Score | Why |
+|---|---|---|
+| Pain (team: "how do you stop AI leaks?" on questionnaires) | 4 | Documented in gtm §0; individual pain is lower (≈3) |
+| Differentiation | 2 | Package check in answers + chat scan are unique today, but copyable in weeks |
+| Willingness to pay | 2 | Individuals ≈1 (10+ free clones). Team ≈3, with **zero** conversations so far |
+| Distribution | 3 | Crowded store; the Slopsquatting study is a real press asset, **not yet run** |
+| Moat | 1 | None today; all moats in §5 are still to be built |
+| Timing | 4 | Slopsquatting in OWASP guidance, agents installing packages, SOC 2 questions on AI |
+| Founder fit | 4 | Compliance scanner, dev audience, India SaaS network |
+| Speed to MVP | 4 | Core logic exists; feasibility spike passed |
+| Platform risk (5 = low) | 2 | Chrome Enterprise Premium, plus AI chat sites could add their own key warnings (unverified whether any do yet) |
+| Evidence of demand | 1 | No interviews, no pilot, waitlist count unknown |
+| **Total** | **27 / 50** | A time-boxed bet worth making, not a safe one |
+
+The four lowest scores (evidence, moat, WTP, differentiation) are the ones the next 60 days must raise. Code alone raises none of them.
+
+### Odds (founder's-eye judgment, to revisit at each gate)
+| Gate | Rough odds | What moves it |
+|---|---|---|
+| Day 30: ≥ 500 installs, ≥ 40% activation | ~50–60% | The study published + Show HN on the same day |
+| Day 90: ≥ 3 paid teams | ~25–35% | 10 team conversations before the team tier is built |
+| ₹1Cr ARR within 18 months | ~10–15% | Team tier converting from domain clusters; one channel partner |
+
+### Wedge (revised)
+- **Acquire with:** *"The AI answer checker"*. Fake and brand-new packages flagged inside ChatGPT/Claude, backed by our own published study. Nobody else owns this story.
+- **Keep with:** secret taping + chat-leak scan (parity, done better, provably local).
+- **Monetize with:** the SOC 2 / security-questionnaire answer for 20–200 person SaaS teams, at $4/user (under Chrome Enterprise Premium's $6).
+
+### What "win" means
+Not "most installs among redactors", because that market is free and crowded. Win = **the default AI-safety tool a 50-person SaaS team installs when a customer asks how they control AI**, and the name security press cites for slopsquatting data.
+
+### Changes to the plan this forces
+1. **Run the slopsquatting study now**, in parallel with the build (~$20–50 of API credits). It is the wedge, the launch and the first moat.
+2. **Pre-sell before building the team tier:** 10 conversations with eng leads in SOC 2 prep within 14 days. Ask to see their questionnaire's AI questions. Offer a founding pilot price.
+3. **Narrow the MVP to chatgpt.com + claude.ai.** Add Gemini after launch.
+4. Kill criteria (decision report §9) stay as they are.
+
+# PasteGuard monorepo
+
+@DESIGN.md
+
+A local-first Chrome extension that stops secrets being pasted into AI chats and flags hallucinated packages inside AI answers. Paid Team tier = AI-tool register for audits. Solo founder, zero budget, pre-MVP.
+
+## Layout
+| Path | What | Commands |
+|---|---|---|
+| `apps/landing` | Static site (no framework) on Cloudflare Pages + `functions/api/waitlist.js` (KV `WAITLIST`, 5 req/min per hashed IP). Live: https://pasteguard-landing.pages.dev | `npm test` · `npm run dev` · `npm run deploy` |
+| `packages/core` | `src/detect.js` is the single source of truth for secret detection rules + `redact()`; `apps/landing/public/detect.js` is a synced copy (`npm run sync`). | `npm test -w packages/core` |
+| `apps/extension` | MV3 extension, not started. Planned file layout in its `README.md`. | — |
+| `apps/extension/design/index.html` | Living UI/UX design doc: surfaces, motion tokens, a11y, budgets, state matrix, voice. Interactive demos import `detect.js`. | preview `ext-design` (serves `apps/` on :4322 → `/extension/design/`) |
+| `research/slopsquatting` | Zero-dependency study: how often LLMs recommend nonexistent packages. Feeds the "Slopsquatting Index" content. | `npm test` · `node study.mjs prompts\|run\|check\|report` |
+| `.claudedocs` | Strategy reports: `extension-decision-report.md` (product, feasibility, kill criteria), `gtm-strategy.md` (market size, moat, GTM), `product-strategy.md` (competitor matrix, wow moments, horizons, north star), `extension-prd-architecture.md` (PRD, stack, architecture, screen flow, build plan). | — |
+
+Node ≥ 22 everywhere. Tests use `node --test`, no frameworks.
+
+## Before building, read
+- Extension UI → `apps/extension/design/index.html` first; its specs (durations, easing, states, copy) are binding.
+- Extension logic → `.claudedocs/extension-decision-report.md` §11 (feasibility spike results, component matrix, hard limits).
+- Anything user-facing → copy rules in `DESIGN.md` and the design doc's Voice table.
+
+## Product decisions (don't relitigate without new evidence)
+- Warn and redact, never block by default. Sending the original takes press-and-hold.
+- Detection 100% on-device. Server only ever gets metadata (tool, timestamp, user, event type), never content.
+- Placeholders are `PG_SECRET_n` (identifier-style, so syntax highlighters keep them as one token). Vault = `chrome.storage.session`, memory only.
+- Package check only parses install commands (`npm i`, `pnpm add`, `pip install`, `uv add`…) in code blocks, never Python imports.
+- Two builds, one codebase: public (AI chat domains + registries only) and team (adds `webNavigation`, `management`, `identity.email`, force-installed).
+- Kill criteria and 30/60/90-day gates live in the decision report §9. Check them before adding scope.
+
+## Rules
+- Security: never use `innerHTML` with user input (use `textContent`/`createElement`). Never log, store or display secret values outside the user's own conversation.
+- Landing: stay dependency-free. Keep the CSP in `apps/landing/public/_headers` in sync when adding origins.
+- Extension: MV3, no remote code, no remote fonts or network requests on AI pages. In-page UI lives in a closed shadow root in the top layer (`popover="manual"`). Minimal host permissions, never `<all_urls>`.
+- Motion: follow the design doc's frequency table. Keyboard actions never animate; animate only transform/opacity/clip-path/filter; always honour `prefers-reduced-motion`.
+- Research ethics: never install or execute packages, never register hallucinated names, report malicious packages to the registry before publishing.
+- Claims: every stat needs a numbered source. Never invent users, logos, testimonials or data. Sample data must be labelled as sample.
+- Mock AI sites in docs and marketing use generic names (`chat.example.ai`), not real brands.
+
+## Verify changes
+- Logic: run the relevant `npm test`.
+- Landing or design doc: open the preview (`landing` on :4321, `ext-design` on :4322), check the console, click through the demo, check phone width (375px) and reduced motion.
+
+# PasteGuard design system
+
+Derived from the Sentry DESIGN.md in VoltAgent/awesome-design-md. Kept from it: the spacing scale, radius scale, dark violet canvas with light "paper" surfaces for pricing, and a playful dev-tool tone. Replaced: all colors and fonts, so the page doesn't read as Sentry.
+
+## Concept
+Redaction as the visual language. Hatched tamper-tape bars (`--hatch`) mean "protected". A highlighter-yellow marker is the brand. Coral means "a secret is exposed".
+
+## Color (each has one meaning)
+| Token | Hex | Meaning |
+|---|---|---|
+| `--ink` | #1B1433 | canvas |
+| `--ink-2` / `--ink-3` | #251C45 / #120D24 | raised / inset surfaces |
+| `--line` | #3B3163 | hairlines, idle controls |
+| `--paper` | #F4F2FB | light surfaces (pricing, AI output, dashboards) |
+| `--marker` | #F2E15B | protected, primary action, placeholders |
+| `--alert` | #FF5E7E | exposed secret, danger only |
+| `--violet` | #9C8CFF | links, focus ring |
+
+## Type
+- Display: Bricolage Grotesque, `wdth` 75–85, weight 700–760, tight leading (.9–1).
+- UI/body: Rubik 400/500/600, 1.65 line-height, lines ≤ 40em.
+- Code: JetBrains Mono. Only for real code, keys and package names.
+- Sentence case everywhere. No all-caps eyebrows, no arrows in buttons.
+
+## Spacing and radius
+Spacing 2/4/8/12/16/24/32, section `clamp(72px, 10vw, 136px)`. Radius 6 / 10 / 18 / pill.
+
+## Motion
+- One orchestrated moment: the hero paste → scan → redact → send → restore sequence.
+- Other motion only responds to the user (live redaction, package verdicts), or is a looping diagram that runs only while on screen (`[data-live]` + IntersectionObserver).
+- Animate transform/opacity only. `prefers-reduced-motion` shows final states.
+
+## Copy
+Plain, specific, user's words. CTAs name the outcome ("Get early access", "Check package", "Join the team pilot"). Every stat has a numbered source in the footer. Never invent users, logos or testimonials.
+
+# PasteGuard
+
+Stops secrets and AI-invented packages from reaching ChatGPT, Claude and Gemini.
+
+| Path | What | Run |
+|---|---|---|
+| `apps/landing` | Landing page + waitlist API (Cloudflare Pages) | `cd apps/landing && npm run dev` (wrangler) or `python3 -m http.server -d apps/landing/public 4321` |
+| `apps/extension` | Chrome MV3 extension | not started |
+| `research/slopsquatting` | Slopsquatting study | see its README |
+| `.claudedocs` | Decision report, GTM strategy | |
+
+## Deploy the landing page
+```bash
+cd apps/landing
+npx wrangler kv namespace create WAITLIST   # paste the id into wrangler.toml
+npx wrangler pages deploy
+```
+The waitlist API allows 5 requests per minute per IP (counted in KV under `rl:` keys that expire after 2 minutes).
+Export signups: `npx wrangler@latest kv key list --binding WAITLIST --remote --prefix team:` (or `--prefix individual:`).
+
+# Extension (MV3), not started
+
+Planned layout, per the feasibility section of `.claudedocs/extension-decision-report.md`:
+- `content/paste-guard.js`: capture-phase `paste` listener on AI chat sites (tested in the ProseMirror spike)
+- `content/restore.js`: per-site adapters that put real values back in AI answers
+- `main-world/clipboard.js`: wraps `navigator.clipboard.writeText` so "Copy" returns real values
+- `background.js`: registry lookups for the package check
+- `rules/`: detection rules shared with `apps/landing/public/detect.js`
+
+# Spike results (2026-09-30, mock pages only)
+
+Run: `python3 -m http.server 4323` in this folder, open `shadow.html`; `npm i && npx playwright install chromium && node run.mjs` for 1b.
+
+| # | Question | Result |
+|---|---|---|
+| 1a.1 | Closed-shadow `<pg-v>` text hidden from `innerText`/`textContent`/`innerHTML`, `shadowRoot === null` | Yes |
+| 1a.2 | Selection + ⌘C copies the real value | **No.** `getSelection().toString()` skips shadow text, so a native copy yields "Use  as the key". Need our own `copy` handler (isolated world) that rebuilds the text, and it must `stopImmediatePropagation` so page listeners never see the real value in `clipboardData`. |
+| 1a.3 | Restore pass on streaming re-render stays under 2 ms | Yes on mock: 51 text chunks, p50 0 ms, max 0.3 ms. Re-measure on real sites. |
+| 1b | Isolated world can write the real value using the click's user activation while MAIN wrapper holds nothing | Yes (Chromium 153): clipboard = real key, page-world has no vault. |
+| 1c | Sync paste decision | Already covered by the earlier ProseMirror spike. |
+
+Not tested: real chatgpt.com / claude.ai / gemini.google.com (need logged-in sessions), Firefox/Safari.
+Known gap in 1b: the page can dispatch a fake `pg-copy` event; it needs live user activation and only ever gets values written to the clipboard, never read back, but validate the event source (`isTrusted` doesn't apply to CustomEvent, so gate on `navigator.userActivation.isActive`).
+
+## Real-site pass (2026-09-30, Claude in Chrome, spike extension loaded)
+
+Sites: chatgpt.com (logged out), gemini.google.com (logged in). claude.ai not tested. Prompt sent: code block containing only `PG_SECRET_1`.
+
+| Variant | ChatGPT | Gemini |
+|---|---|---|
+| A. Shadow-only `<pg-v>` (value only in closed shadow, no light text) | Restore OK, page can't read it. **Site Copy button pasted `export KEY=` (value lost)**, wrapper never fired because the text had no placeholder. | not run |
+| B. `<pg-v>` keeps `PG_SECRET_1` as light-DOM text; closed shadow renders the value, no slot | Restore OK, no leak, survived re-render. Site Copy button, wrapper and isolated-world write gave the real key. | Same: restore OK (1.1 ms), no leak, Copy gave the real key. |
+
+**Design change:** use variant B. Placeholders are not secret, so page JS reading `PG_SECRET_1` is fine. DOM-derived copies (site Copy buttons, native selection) now carry the placeholder, which the wrapper and our `copy` handler substitute. This fixes site Copy buttons that read `textContent`. It does NOT fix native ⌘C on a selection: `innerText` and `getSelection().toString()` still skip the unslotted light text (re-verified on the mock), so the isolated-world `copy` handler is still required.
+
+
+## Second pass: claude.ai and the copy handler
+
+| Test | claude.ai | gemini |
+|---|---|---|
+| Restore in answer, no page leak | Pass (1.5 ms) | Pass |
+| Site Copy button | **Failed first.** claude.ai copies with `navigator.clipboard.write([ClipboardItem])`, not `writeText`. Fixed by also wrapping `write` in the MAIN-world script (reads the `text/plain` blob, relays placeholder text only). Then pass. | Pass (`writeText`) |
+| Native selection + ⌘C via isolated-world `copy` handler | Pass | Pass after fix |
+
+Findings:
+- Wrap **both** `clipboard.writeText` and `clipboard.write`. Other sites may use `execCommand('copy')`, not yet seen.
+- A triple-click or drag to line end ends the range just before `<pg-v>`, so the range excludes it. The handler extends the range over an adjacent `<pg-v>` (`setEndAfter`). A selection that deliberately stops before the value still copies without it, which is correct.
+- The handler builds text from `cloneContents()` and calls `stopImmediatePropagation`, so page listeners never see the real value.
+
+Not tested: ChatGPT native ⌘C (handler is site-independent), streaming flicker on live answers, `execCommand('copy')` sites.
+
+# Slopsquatting study
+
+How often do AI models recommend packages that don't exist, and have attackers already registered any of those names?
+
+Zero dependencies. Node 22+.
+
+## Run
+
+```bash
+node study.mjs prompts                      # 640 prompts (80 tasks × 8 phrasings, npm + PyPI). --limit 200 for a pilot
+export LLM_API_KEY=...                      # any OpenAI-compatible gateway key
+export LLM_BASE_URL=https://ai-gateway.vercel.sh/v1   # default; OpenRouter: https://openrouter.ai/api/v1
+node study.mjs run --models anthropic/claude-sonnet-5.5,openai/<model>,google/<model> --concurrency 4
+node study.mjs check                        # registry lookups, cached in data/registry.json (--fresh to recheck)
+node study.mjs report                       # data/report.md + data/results.json
+npm test
+```
+
+Model IDs depend on your gateway. Copy them from its model list. `run` is resumable: it skips prompt/model pairs that already succeeded.
+
+## Method
+- Tasks mix everyday and niche asks (niche asks are where models invent names). Prompts are shuffled with a fixed seed (`--seed`), so runs are reproducible.
+- Packages are extracted **only** from install commands (`npm i`, `yarn/pnpm/bun add`, `pip install`, `uv/poetry/pdm add`) and `package.json` dependency blocks. Python `import` lines are ignored because import name ≠ package name (`cv2` → `opencv-python`).
+- **Hallucinated:** the registry returned 404 at check time.
+- **Suspicious:** exists, first published < 180 days ago, and < 500 weekly downloads (npm) or no download data (PyPI).
+- Temperature 0.7 (recorded per row). Report the date, the model IDs and the gateway.
+
+## Ethics (non-negotiable)
+- Never install, download tarballs of, or execute any package. The scripts read registry metadata only.
+- **Never register hallucinated names yourself**, not even "defensively". That pollutes the registries and the data.
+- "Suspicious" is a triage list. Review each package's contents manually before naming it publicly. Report confirmed malicious packages to npm (`npm report` / security@npmjs.com) and PyPI (the "Report project as malware" link) **before** publishing.
+- Re-run `check --fresh` monthly. Names moving from *hallucinated* → *registered* is the headline for the Slopsquatting Index.

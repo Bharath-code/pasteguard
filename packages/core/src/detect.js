@@ -17,10 +17,24 @@ export const RULES = [
   { id: 'jwt', type: 'JWT', re: /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g, keywords: ['eyj'] },
   ...EXTRA,
   { id: 'db-password', type: 'Database password', re: /\b[a-z][a-z0-9+]*:\/\/[^\s:@/]+:([^\s@/]+)@/gid, group: 1, keywords: ['://'] },
-  { id: 'assignment', type: 'Secret value', re: /\b[A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PASSWD|API_KEY|PRIVATE_KEY)[A-Z0-9_]*\s*[=:]\s*["']?([^\s"']{8,})/gd, group: 1, check: v => shannon(v) >= 3.5, keywords: ['secret', 'token', 'passw', 'api_key', 'private_key'] },
-  { id: 'card', type: 'Card number', re: /\b(?:\d[ -]?){12,18}\d\b/g, check: s => luhn(s.replace(/\D/g, '')) },
+  { id: 'assignment', type: 'Secret value', re: /\b[A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PASSWD|API_KEY|PRIVATE_KEY)[A-Z0-9_]*\s*[=:]\s*["']?([^\s"']{8,})/gd, group: 1, check: v => shannon(v) >= 3.5, generic: true, keywords: ['secret', 'token', 'passw', 'api_key', 'private_key'] },
+  { id: 'card', type: 'Card number', re: /(?<![\w-])(?:\d[ -]?){12,18}\d\b/g, check: s => cardShape(s.replace(/\D/g, '')) && luhn(s.replace(/\D/g, '')) },
   { id: 'email', type: 'Email address', re: /\b[\w.+-]+@[\w-]+(?:\.[\w-]+)+\b/g, pii: true, keywords: ['@'] },
 ]
+
+const CARD_SHAPES = [
+  /^4(?:\d{12}|\d{15}|\d{18})$/,
+  /^(?:5[1-5]\d{2}|222[1-9]|22[3-9]\d|2[3-6]\d{2}|27[01]\d|2720)\d{12}$/,
+  /^3[47]\d{13}$/,
+  /^(?:6011|65\d{2}|64[4-9]\d)\d{12}(?:\d{3})?$/,
+  /^3(?:0[0-5]|[68]\d)\d{11,16}$/,
+  /^35(?:2[89]|[3-8]\d)\d{12,15}$/,
+  /^62\d{14,17}$/,
+  /^(?:5018|5020|5038|5893|6304|6759|676[1-3])\d{8,15}$/,
+]
+
+/** @param {string} d */
+const cardShape = d => CARD_SHAPES.some(re => re.test(d))
 
 /** @param {string} d */
 function luhn(d) {
@@ -41,31 +55,44 @@ export function detect(text, opts = {}) {
   const rules = [...RULES.filter(r => opts.pii || !r.pii), ...custom]
   /** @type {Hit[]} */
   const hits = []
+  /** @type {Set<Hit>} */
+  const generic = new Set()
   for (const r of rules) {
     if (r.keywords && !r.keywords.some(k => lower.includes(k))) continue
     for (const m of text.matchAll(r.re)) {
       const [start, end] = r.group ? /** @type {RegExpIndicesArray} */ (m.indices)[r.group] : [m.index, m.index + m[0].length]
       const value = text.slice(start, end)
-      if (!r.check || r.check(r.group ? value : m[0])) hits.push({ start, end, type: r.type, value, rule: r.id })
+      if (r.check && !r.check(r.group ? value : m[0])) continue
+      /** @type {Hit} */
+      const hit = { start, end, type: r.type, value, rule: r.id }
+      hits.push(hit)
+      if (r.generic) generic.add(hit)
     }
   }
-  return hits.sort((a, b) => a.start - b.start || (b.end - b.start) - (a.end - a.start))
-    .filter((h, i, all) => !all.slice(0, i).some(p => h.start < p.end && p.start < h.end))
+  return hits.sort((a, b) => a.start - b.start || +generic.has(a) - +generic.has(b) || (b.end - b.start) - (a.end - a.start))
+    .reduce((/** @type {Hit[]} */ kept, h) => {
+      const p = kept[kept.length - 1]
+      if (!p || h.start >= p.end) kept.push(h)
+      return kept
+    }, [])
 }
 
-/** @param {string} text @param {ReturnType<typeof detect>} [hits] */
-export function redact(text, hits = detect(text)) {
-  const ids = new Map()
-  let out = ''
-  let last = 0
+/** @typedef {{ text: string, hit?: Hit }} Part */
+
+/** @param {string} text @param {Hit[]} [hits] @param {{ next: number, ids: Map<string, string> }} [state] */
+export function redact(text, hits = detect(text), state = { next: 1, ids: new Map() }) {
+  const seen = new Set()
+  /** @type {Part[]} */
   const parts = []
+  let out = '', last = 0
   for (const h of hits) {
-    if (!ids.has(h.value)) ids.set(h.value, `PG_SECRET_${ids.size + 1}`)
-    const token = ids.get(h.value)
+    if (!state.ids.has(h.value)) state.ids.set(h.value, `PG_SECRET_${state.next++}`)
+    const token = /** @type {string} */ (state.ids.get(h.value))
+    seen.add(token)
     parts.push({ text: text.slice(last, h.start) }, { text: token, hit: h })
     out += text.slice(last, h.start) + token
     last = h.end
   }
   parts.push({ text: text.slice(last) })
-  return { text: out + text.slice(last), parts, count: ids.size }
+  return { text: out + text.slice(last), parts, count: seen.size, state }
 }

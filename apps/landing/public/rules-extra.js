@@ -20,7 +20,7 @@
 // Not in gitleaks, written from vendor token formats: azure-storage-key, gcp-service-account, supabase-secret-key,
 // vercel-token.
 
-/** @typedef {{ id: string, type: string, re: RegExp, group?: number, check?: (v: string) => boolean, keywords?: string[], pii?: true }} Rule */
+/** @typedef {{ id: string, type: string, re: RegExp, group?: number, check?: (v: string) => boolean, keywords?: string[], pii?: true, generic?: true }} Rule */
 
 const END = String.raw`(?![\w-])`
 const SEP = String.raw`(?:[ \t\w.-]{0,20})[\s'"]{0,3}(?:=|>|:{1,3}=|\|\||:|=>|\?=|,)[\x60'"\s=]{0,5}`
@@ -80,7 +80,7 @@ export const EXTRA = [
   tok('linear-api-key', 'Linear API key', String.raw`\blin_api_[a-zA-Z0-9]{40}`, ['lin_api_']),
   tok('notion-api-token', 'Notion token', String.raw`\bntn_[0-9]{11}[A-Za-z0-9]{32}[A-Za-z0-9]{3}`, ['ntn_']),
   tok('supabase-secret-key', 'Supabase secret key', String.raw`\bsb_secret_[A-Za-z0-9_-]{20,}`, ['sb_secret_']),
-  tok('vercel-token', 'Vercel token', String.raw`\bvc[apickr]_[A-Za-z0-9]{24,}`, ['vca_', 'vcp_', 'vci_', 'vck_', 'vcr_']),
+  tok('vercel-token', 'Vercel token', String.raw`\bvc[apickr]_[A-Za-z0-9]{24,}`, ['vca_', 'vcp_', 'vci_', 'vcc_', 'vck_', 'vcr_']),
   tok('doppler-api-token', 'Doppler token', String.raw`\bdp\.pt\.[a-zA-Z0-9]{43}`, ['dp.pt.']),
   tok('1password-service-account-token', '1Password service account token', String.raw`\bops_eyJ[a-zA-Z0-9+/]{250,}={0,3}`, ['ops_']),
   tok('postman-api-token', 'Postman API key', String.raw`\bPMAK-[a-fA-F0-9]{24}-[a-fA-F0-9]{34}`, ['pmak-']),
