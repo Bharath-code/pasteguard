@@ -32,3 +32,13 @@ test('same secret gets the same placeholder', () => {
 test('clean text untouched', () => {
   assert.equal(redact('why does my useEffect run twice?').text, 'why does my useEffect run twice?')
 })
+
+test('a hit overlapping only a dropped hit is kept', () => {
+  const extra = [
+    { type: 'A', re: /^.{10}/g },
+    { type: 'B', re: /(?<=^.{5}).{15}/g },
+    { type: 'C', re: /(?<=^.{12}).{3}/g },
+  ]
+  const hits = detect('x'.repeat(20), { extra })
+  assert.deepEqual(hits.map(h => [h.type, h.start, h.end]), [['A', 0, 10], ['C', 12, 15]])
+})

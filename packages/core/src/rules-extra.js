@@ -36,15 +36,11 @@ const kv = (id, type, names, value, keywords) => ({
 
 /** @type {Rule[]} */
 export const EXTRA = [
-  tok('github-app-token', 'GitHub token', String.raw`\bgh[us]_[0-9a-zA-Z]{36}`, ['ghu_', 'ghs_']),
-  tok('github-oauth', 'GitHub token', String.raw`\bgho_[0-9a-zA-Z]{36}`, ['gho_']),
-  tok('github-fine-grained-pat', 'GitHub token', String.raw`\bgithub_pat_\w{82}`, ['github_pat_']),
   tok('gitlab-pat', 'GitLab token', String.raw`\bglpat-[\w-]{20}`, ['glpat-']),
   tok('gitlab-pat-routable', 'GitLab token', String.raw`\bglpat-[0-9a-zA-Z_-]{27,300}\.[0-9a-z]{2}[0-9a-z]{7}\b`, ['glpat-']),
   tok('gitlab-runner-authentication-token', 'GitLab token', String.raw`\bglrt-[0-9a-zA-Z_\-]{20}`, ['glrt-']),
   tok('gitlab-deploy-token', 'GitLab token', String.raw`\bgldt-[0-9a-zA-Z_\-]{20}`, ['gldt-']),
   tok('gitlab-cicd-job-token', 'GitLab token', String.raw`\bglcbt-[0-9a-zA-Z]{1,5}_[0-9a-zA-Z_-]{20}`, ['glcbt-']),
-  tok('slack-bot-token', 'Slack token', String.raw`\bxoxb-[0-9]{10,13}-[0-9]{10,13}[a-zA-Z0-9-]*`, ['xoxb']),
   tok('slack-user-token', 'Slack token', String.raw`\bxox[pe](?:-[0-9]{10,13}){3}-[a-zA-Z0-9-]{28,34}`, ['xoxp-', 'xoxe-']),
   tok('slack-app-token', 'Slack token', String.raw`\bxapp-\d-[A-Z0-9]+-\d+-[a-z0-9]+`, ['xapp'], 'gi'),
   tok('slack-webhook-url', 'Slack webhook URL', String.raw`(?:https?://)?hooks\.slack\.com/(?:services|workflows|triggers)/[A-Za-z0-9+/]{43,56}`, ['hooks.slack.com']),
@@ -95,7 +91,6 @@ export const EXTRA = [
   tok('age-secret-key', 'age secret key', String.raw`\bAGE-SECRET-KEY-1[QPZRY9X8GF2TVDW0S3JN54KHCE6MUA7L]{58}`, ['age-secret-key-1']),
   tok('rubygems-api-token', 'RubyGems token', String.raw`\brubygems_[a-f0-9]{48}`, ['rubygems_']),
   tok('perplexity-api-key', 'Perplexity API key', String.raw`\bpplx-[a-zA-Z0-9]{48}`, ['pplx-']),
-  tok('anthropic-admin-api-key', 'Anthropic key', String.raw`\bsk-ant-admin01-[a-zA-Z0-9_\-]{93}AA`, ['sk-ant-admin01']),
   kv('telegram-bot-api-token', 'Telegram bot token', 'telegr', '[0-9]{5,16}:A[a-z0-9_\\-]{34}', ['telegr']),
   tok('shippo-api-token', 'Shippo token', String.raw`\bshippo_(?:live|test)_[a-fA-F0-9]{40}`, ['shippo_']),
 ]

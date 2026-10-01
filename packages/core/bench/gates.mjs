@@ -6,11 +6,10 @@ let fail = false
 const need = RULES.filter(r => !r.pii).map(r => r.id).filter(id => !TEMPLATES[id])
 if (need.length) { console.error('no positive template for', need); fail = true }
 
-const typeOf = new Map(RULES.map(r => [r.id, r.type]))
 const byRule = new Map()
 for (const { rule, text } of positives()) {
   const s = byRule.get(rule) ?? { n: 0, hit: 0 }; s.n++
-  if (detect(text).some(h => h.rule === rule || h.type === typeOf.get(rule))) s.hit++
+  if (detect(text).some(h => h.rule === rule)) s.hit++
   byRule.set(rule, s)
 }
 let N = 0, H = 0
@@ -22,9 +21,10 @@ for (const [rule, { n, hit }] of byRule) {
 if (H / N < 0.99) { console.error(`overall recall ${(H / N * 100).toFixed(2)}%`); fail = true }
 
 const dir = new URL('../corpus/negative/', import.meta.url)
-let bytes = 0, fps = 0
+let bytes = 0, fps = 0, synth = 0
 for (const f of await readdir(dir)) {
   const t = await readFile(new URL(f, dir), 'utf8'); bytes += t.length
+  if (f.includes('sample')) synth += t.length
   for (const h of detect(t)) { fps++; console.error(`FP ${f}: ${h.rule} at ${h.start}`) }
 }
 if (bytes < 2e6) { console.error(`negative corpus ${bytes} bytes, need 2 MB`); fail = true }
@@ -38,5 +38,6 @@ times.sort((a, b) => a - b)
 const p95 = times[Math.floor(times.length * 0.95)]
 if (p95 > 5) { console.error(`p95 ${p95.toFixed(2)}ms`); fail = true }
 
+console.log(`note: negative corpus is ${(synth / bytes * 100).toFixed(0)}% synthetic (${(synth / 1e6).toFixed(2)} of ${(bytes / 1e6).toFixed(2)} MB), FP/MB is mostly measured on generated data`)
 console.log(`recall ${(H / N * 100).toFixed(2)}% · FP ${perMB.toFixed(2)}/MB · p95 ${p95.toFixed(2)}ms`)
 process.exit(fail ? 1 : 0)

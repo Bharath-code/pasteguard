@@ -15,13 +15,13 @@ const write = (name, text) => writeFileSync(new URL(name, out), text)
 
 const root = execFileSync('git', ['rev-parse', '--show-toplevel']).toString().trim()
 const files = execFileSync('git', ['ls-files'], { cwd: root }).toString().split('\n')
-  .filter(f => /\.(md|js|mjs|html)$/.test(f) && !f.includes('corpus/') && !/(^|\/)test\/|\.test\./.test(f) && !f.includes('node_modules'))
+  .filter(f => /\.(md|js|mjs|html|css|json|toml|yml|csv|svg)$/.test(f) && !f.includes('corpus/') && !/(^|\/)test\/|\.test\./.test(f) && !f.includes('node_modules'))
 const AWS_DOC_KEY = 'AKIA' + 'IOSFODNN7EXAMPLE'
-const bucket = { md: [], js: [], html: [] }
+const bucket = { md: [], js: [], html: [], other: [] }
 for (const f of files) {
   const t = readFileSync(`${root}/${f}`, 'utf8')
   if (t.includes(AWS_DOC_KEY)) continue
-  bucket[f.endsWith('.md') ? 'md' : f.endsWith('.html') ? 'html' : 'js'].push(t)
+  bucket[f.endsWith('.md') ? 'md' : f.endsWith('.html') ? 'html' : /\.m?js$/.test(f) ? 'js' : 'other'].push(t)
 }
 for (const [k, v] of Object.entries(bucket)) write(`repo-${k}.txt`, v.join('\n'))
 
