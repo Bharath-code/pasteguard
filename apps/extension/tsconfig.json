@@ -1,0 +1,6 @@
+{
+  "extends": "./.wxt/tsconfig.json",
+  "compilerOptions": { "strict": true, "jsx": "react-jsx", "jsxImportSource": "preact", "noEmit": true },
+  "include": [".wxt/wxt.d.ts", "entrypoints", "src", "scripts", "wxt.config.ts"],
+  "exclude": ["spike", "design", ".output"]
+}

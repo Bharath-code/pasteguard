@@ -1,0 +1,4 @@
+{
+  "name": { "message": "PasteGuard" },
+  "description": { "message": "Stop secret leaks in ChatGPT & Claude. Flags packages the AI made up." }
+}

@@ -12,3 +12,14 @@ jobs:
       - run: npm run typecheck -w packages/core
       - run: npm run gates -w packages/core
       - run: npm test -w apps/landing
+  extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run lint -w apps/extension
+      - run: npm run typecheck -w apps/extension
+      - run: npm run build -w apps/extension
+      - run: npm run size -w apps/extension
