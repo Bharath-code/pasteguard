@@ -18,17 +18,19 @@ export class TabVault {
     this.#send = send
   }
 
-  async hydrate(): Promise<void> {
+  async hydrate(): Promise<boolean> {
     try {
       const r = await this.#send({ t: 'vault.get' })
-      if (!isReply(r)) return
+      if (!isReply(r)) return false
       for (const [id, e] of Object.entries(r.map)) {
+        if (this.byId.has(id)) continue
         this.byId.set(id, e)
-        this.state.ids.set(e.value, id)
+        if (!this.state.ids.has(e.value)) this.state.ids.set(e.value, id)
       }
       this.state.next = Math.max(this.state.next, r.next)
+      return true
     } catch {
-      return
+      return false
     }
   }
 

@@ -68,3 +68,15 @@ test('mirrored stays true on ok replies and goes false on failure or partial', a
   await tick()
   assert.equal(boom.mirrored, false)
 })
+
+test('late hydrate never overwrites local entries and advances next to the max', async () => {
+  const k2 = ['AKIA', 'IOSFODNN7', 'EXAMPLY'].join('')
+  const { vault } = mk({ next: 5, map: { PG_SECRET_1: { value: 'remote-other', type: 'T' }, PG_SECRET_4: { value: k2, type: 'T' } } })
+  const text = `k ${key}`
+  vault.put(redact(text, detect(text), vault.state))
+  assert.equal(await vault.hydrate(), true)
+  assert.equal(vault.byId.get('PG_SECRET_1')?.value, key)
+  assert.equal(vault.state.ids.get(key), 'PG_SECRET_1')
+  assert.equal(vault.byId.get('PG_SECRET_4')?.value, k2)
+  assert.equal(vault.state.next, 5)
+})

@@ -62,6 +62,7 @@ test('paused site: paste passes through untouched', async ({ page, paste, sw }) 
 test('custom rule from settings is applied, invalid rule is skipped', async ({ page, paste, sw }) => {
   await sw.settings({ rules: [{ type: 'Broken', source: '(' }, { type: 'Project code', source: 'ZZPROJ-\\d{4}' }] })
   await page.goto('http://localhost:4323/textarea.html')
+  await page.waitForTimeout(800)
   await paste(page, 'ticket ZZPROJ-1234 open')
   await expect(page.locator('[data-composer]')).toHaveValue('ticket PG_SECRET_1 open')
 })

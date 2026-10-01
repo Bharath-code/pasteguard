@@ -16,7 +16,7 @@ type Extra = { type: string; re: RegExp }
 
 export interface GuardCtx {
   adapter: Adapter
-  vault: Pick<TabVault, 'state' | 'hydrate' | 'put'>
+  vault: Pick<TabVault, 'state' | 'put'> & { hydrate: () => Promise<boolean> }
   settings: () => GuardSettings
   ui: GuardUI
   send: (m: Msg) => Promise<unknown>
@@ -27,6 +27,7 @@ export const BIG_PASTE = 256 * 1024
 export const CHUNK = 64 * 1024
 export const OVERLAP = 512
 export const ALLOW_TIMEOUT_MS = 1500
+export const HYDRATE_TIMEOUT_MS = 4000
 export const EDITABLE_INSERT_CAP = 256 * 1024
 const KEY_TAIL_MAX = 16 * 1024
 const EDITABLE = 'textarea, input, [contenteditable]:not([contenteditable=false])'
@@ -90,7 +91,7 @@ export function compileRules(rules: GuardSettings['rules']): Extra[] {
 export function installGuard(ctx: GuardCtx): void {
   const { adapter, vault, ui, send } = ctx
   let own = false
-  let ready: Promise<void> | undefined
+  let ready: Promise<boolean> | undefined
   let queue: Promise<void> = Promise.resolve()
   let compiled: { src: GuardSettings['rules']; extra: Extra[] } | undefined
 
@@ -138,8 +139,13 @@ export function installGuard(ctx: GuardCtx): void {
   const run = async (target: HTMLElement, text: string, hits: Hit[] | null, safe: { text?: string }): Promise<void> => {
     const found = hits ?? (await chunkedDetect(text, opts(ctx.settings())))
     if (!found.length) return deliver(target, text)
-    ready ??= vault.hydrate()
-    const [, hashes] = await Promise.all([withTimeout(ready, ALLOW_TIMEOUT_MS), Promise.all(found.map(h => sha256Hex(h.value)))])
+    const attempt = (ready ??= vault.hydrate().catch(() => false))
+    const [hydrated, hashes] = await Promise.all([withTimeout(attempt, HYDRATE_TIMEOUT_MS), Promise.all(found.map(h => sha256Hex(h.value)))])
+    if (hydrated !== true) {
+      if (ready === attempt) ready = undefined
+      ui.fallback('failed')
+      return
+    }
     const allowed = await withTimeout(send({ t: 'allow.has', hashes }), ALLOW_TIMEOUT_MS)
     const remaining = found.filter((_, i) => !(Array.isArray(allowed) && allowed[i] === true))
     if (!remaining.length) return deliver(target, text)
@@ -167,22 +173,37 @@ export function installGuard(ctx: GuardCtx): void {
   }
 
   const onPaste = (e: ClipboardEvent): void => {
-    if (own || !e.clipboardData) return
-    const s = ctx.settings()
-    if (s.paused.includes(location.host)) return
-    const target = targetOf(e)
-    if (!target) return
-    ctx.mark?.('paste')
-    const text = e.clipboardData.getData('text/plain')
-    if (!text) return
+    if (own) return
+    let target: HTMLElement | null
+    let text: string
     let hits: Hit[] | null = null
-    if (text.length <= BIG_PASTE) {
-      hits = detect(text, opts(s))
-      if (!hits.length) return
+    try {
+      if (!e.clipboardData) return
+      const s = ctx.settings()
+      if (s.paused.includes(location.host)) return
+      target = targetOf(e)
+      if (!target) return
+      ctx.mark?.('paste')
+      text = e.clipboardData.getData('text/plain')
+      if (!text) return
+      if (text.length <= BIG_PASTE) {
+        hits = detect(text, opts(s))
+        if (!hits.length) return
+      }
+    } catch {
+      e.preventDefault()
+      e.stopImmediatePropagation()
+      try {
+        ui.fallback('failed')
+      } catch {
+        return
+      }
+      return
     }
     e.preventDefault()
     e.stopImmediatePropagation()
-    queue = queue.then(() => guarded(target, text, hits))
+    const t = target
+    queue = queue.then(() => guarded(t, text, hits))
   }
 
   window.addEventListener('paste', onPaste, { capture: true })
