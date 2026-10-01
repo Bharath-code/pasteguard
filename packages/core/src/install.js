@@ -20,29 +20,48 @@ const PYPI_NAME = /^[a-z0-9][\w.-]*$/i
 export const parseInstalls = code => {
   /** @type {Pkg[]} */
   const out = []
-  const sep = /\\\r?\n|\r?\n|&&|\|\||;/g
-  const cont = /\\\r?\n/y
   let from = 0
+  let quote = ''
   /** @param {number} to */
-  const segment = to => {
+  const flush = to => {
     const text = code.slice(from, to)
-    const lead = /^\s*(?:[$>#]\s+)?/.exec(text)?.[0].length ?? 0
-    const base = from + lead
-    parseSegment(text.slice(lead), base, out)
+    const lead = /^\s*(?:[$>]\s+)?/.exec(text)?.[0].length ?? 0
+    parseSegment(text.slice(lead), from + lead, out)
   }
-  const joined = []
-  let m
-  while ((m = sep.exec(code))) {
-    joined.push(m)
+  let i = 0
+  while (i < code.length) {
+    const c = code[i]
+    if (quote) {
+      if (c === quote) quote = ''
+      i++
+      continue
+    }
+    if (c === '\\' && (code[i + 1] === '\n' || (code[i + 1] === '\r' && code[i + 2] === '\n'))) {
+      i += code[i + 1] === '\n' ? 2 : 3
+      continue
+    }
+    if (c === '"' || c === "'") { quote = c; i++; continue }
+    if (c === '#' && (i === from || /\s/.test(code[i - 1]))) {
+      flush(i)
+      const nl = code.indexOf('\n', i)
+      i = nl === -1 ? code.length : nl
+      from = i
+      continue
+    }
+    const two = code.slice(i, i + 2)
+    let len = 0
+    if (c === '\n' || c === ';' || c === '<') len = 1
+    else if (two === '&&' || two === '||') len = 2
+    else if (c === '|' || (c === '>' && code.slice(from, i).trim() !== '')) len = 1
+    if (len) {
+      flush(i)
+      i += len
+      from = i
+      continue
+    }
+    i++
   }
-  const bounds = []
-  for (const x of joined) {
-    cont.lastIndex = x.index
-    if (cont.test(code)) continue
-    bounds.push(x)
-  }
-  for (const x of bounds) { segment(x.index); from = x.index + x[0].length }
-  segment(code.length)
+  flush(code.length)
   return out
 }
 

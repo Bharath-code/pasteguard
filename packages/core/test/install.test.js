@@ -35,3 +35,22 @@ test('value flags and uv pip, poetry', () => {
   assert.deepEqual(names('pip install -i https://x/simple -c cons.txt foo\nuv pip install bar\npoetry add baz'), ['pypi:foo', 'pypi:bar', 'pypi:baz'])
   assert.deepEqual(names('pip install git+https://x/y.git file:./z'), [])
 })
+test('pipes, redirects and trailing comments end the command', () => {
+  assert.deepEqual(names('pip install foo # comment bar'), ['pypi:foo'])
+  assert.deepEqual(names('npm i foo | tee x'), ['npm:foo'])
+  assert.deepEqual(names('npm i foo > out.txt'), ['npm:foo'])
+  assert.deepEqual(names('npm i foo < in.txt'), ['npm:foo'])
+  assert.deepEqual(names('npm i a; npm i b && pip install c || pip install d'), ['npm:a', 'npm:b', 'pypi:c', 'pypi:d'])
+})
+test('shell comment lines are not commands, prompts still are', () => {
+  assert.deepEqual(names('# npm i foo'), [])
+  assert.deepEqual(names('> npm i foo\n$ pip install bar'), ['npm:foo', 'pypi:bar'])
+})
+test('operators inside quotes do not split', () => {
+  assert.deepEqual(names('pip install "pkg>=1.0" "other<2"'), ['pypi:pkg', 'pypi:other'])
+})
+test('offsets stay correct after pipes and comments', () => {
+  const src = 'echo hi | cat; # c\nnpm i zod # x\n'
+  const [p] = parseInstalls(src)
+  assert.equal(src.slice(p.start, p.end), 'zod')
+})
