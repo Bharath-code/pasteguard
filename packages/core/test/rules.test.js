@@ -27,10 +27,44 @@ test('at least 35 rules, grouped rules carry the d flag', () => {
   for (const r of RULES) if (r.group) assert.ok(r.re.hasIndices, `${r.id} needs /d`)
 })
 
-test('keyword prefilter skips a rule when none of its keywords appear', () => {
-  const r = RULES.find(r => r.keywords?.length)
-  assert.ok(r, 'at least one rule uses keywords')
-  assert.equal(detect('nothing relevant here '.repeat(50)).length, 0)
+test('keyword prefilter skips a rule whose keywords are absent and runs it when present', () => {
+  const rule = { id: 'zz-test', type: 'Zz test', re: /zzsecret\d{6}/g, keywords: ['zzkeyword'] }
+  RULES.push(rule)
+  try {
+    assert.equal(detect('value zzsecret123456').length, 0)
+    const hits = detect('zzkeyword value zzsecret123456')
+    assert.equal(hits.length, 1)
+    assert.equal(hits[0].rule, 'zz-test')
+  } finally {
+    RULES.splice(RULES.indexOf(rule), 1)
+  }
+})
+
+test('no rule keyword is shorter than three characters except @', () => {
+  for (const r of RULES) for (const k of r.keywords ?? []) assert.ok(k.length >= 3 || k === '@', `${r.id}: ${k}`)
+})
+
+test('github and twilio rules still detect their samples under tightened keywords', () => {
+  assert.equal(detect(`x ghp_${'aB3'.repeat(12)}`)[0].rule, 'github')
+  assert.equal(detect(`x ghs_${'aB3'.repeat(12)}`)[0].type, 'GitHub token')
+  assert.equal(detect(`TWILIO_API_KEY=SK${'0a1b2c3d'.repeat(4)}`)[0].rule, 'twilio-api-key')
+  assert.equal(detect(`SK${'0a1b2c3d'.repeat(4)}`).length, 0)
+})
+
+test('tokens end at punctuation, quotes, newline and end of input', () => {
+  const npm = 'npm_' + 'abcdefghijklmnopqrstuvwxyz0123456789'
+  const pul = 'pul-' + '0123456789abcdef'.repeat(3).slice(0, 40)
+  const kvs = 'mailgun_key = "key-' + '0123456789abcdef'.repeat(2) + '"'
+  for (const after of [')', '.', ',', ';', '"', "'", '\n', ' more', ''])
+    for (const [rule, tok] of [['npm-access-token', npm], ['pulumi-api-token', pul]]) {
+      const hits = detect(`(${tok}${after}`)
+      assert.equal(hits.length, 1, `${rule} before ${JSON.stringify(after)}`)
+      assert.equal(hits[0].rule, rule)
+      assert.equal(hits[0].value, tok)
+    }
+  for (const after of [')', '.', ',', ';', '"', "'", '\n', ''])
+    assert.equal(detect(`${kvs}${after}`).filter(h => h.rule === 'mailgun-private-api-token').length, 1, JSON.stringify(after))
+  assert.equal(detect(npm + 'x').filter(h => h.rule === 'npm-access-token').length, 0)
 })
 
 test('keywords are lowercase', () => {
@@ -94,7 +128,7 @@ const SAMPLES = {
   'slack-user-token': () => `xoxp-${num(11)}-${num(11)}-${num(12)}-${alnum(30)}`,
   'slack-app-token': () => `xapp-1-${alnum(11).toUpperCase()}-${num(13)}-${lower(40)}`,
   'slack-webhook-url': () => `https://hooks.slack.com/services/${alnum(43)}`,
-  'twilio-api-key': () => `SK${hex(32)}`,
+  'twilio-api-key': () => `TWILIO_API_KEY=SK${hex(32)}`,
   'sendgrid-api-token': () => `SG.${alnum(22)}.${alnum(43)}`.slice(0, 69),
   'mailgun-private-api-token': () => `mailgun_key = "key-${hex(32)}"`,
   'mailgun-signing-key': () => `MAILGUN_SIGNING: ${pick('abcdefgh01234567', 32)}-${hex(8)}-${hex(8)}`,

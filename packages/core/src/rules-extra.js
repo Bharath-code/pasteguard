@@ -15,14 +15,14 @@
 // DEALINGS IN THE SOFTWARE.
 //
 // Conversion notes: Go (?i) prefix became the JS i flag, mid-pattern (?i) was expanded to explicit classes, the
-// trailing boundary group became a lookahead (so no capture group is needed), per-rule entropy thresholds and
+// trailing boundary group became a negative lookahead for a token character (so no capture group is needed and `)`, `.`, `,` also end a token), per-rule entropy thresholds and
 // allowlists were not carried over. (?-i:) segments are matched case-insensitively.
 // Not in gitleaks, written from vendor token formats: azure-storage-key, gcp-service-account, supabase-secret-key,
 // vercel-token.
 
 /** @typedef {{ id: string, type: string, re: RegExp, group?: number, check?: (v: string) => boolean, keywords?: string[], pii?: true }} Rule */
 
-const END = String.raw`(?=[\x60'"\s;]|\\[nr]|$)`
+const END = String.raw`(?![\w-])`
 const SEP = String.raw`(?:[ \t\w.-]{0,20})[\s'"]{0,3}(?:=|>|:{1,3}=|\|\||:|=>|\?=|,)[\x60'"\s=]{0,5}`
 
 /** @param {string} id @param {string} type @param {string} src @param {string[]} keywords @param {string} [flags] @returns {Rule} */
@@ -48,7 +48,7 @@ export const EXTRA = [
   tok('slack-user-token', 'Slack token', String.raw`\bxox[pe](?:-[0-9]{10,13}){3}-[a-zA-Z0-9-]{28,34}`, ['xoxp-', 'xoxe-']),
   tok('slack-app-token', 'Slack token', String.raw`\bxapp-\d-[A-Z0-9]+-\d+-[a-z0-9]+`, ['xapp'], 'gi'),
   tok('slack-webhook-url', 'Slack webhook URL', String.raw`(?:https?://)?hooks\.slack\.com/(?:services|workflows|triggers)/[A-Za-z0-9+/]{43,56}`, ['hooks.slack.com']),
-  tok('twilio-api-key', 'Twilio API key', String.raw`\bSK[0-9a-fA-F]{32}\b`, ['sk']),
+  kv('twilio-api-key', 'Twilio API key', 'twilio', 'SK[0-9a-fA-F]{32}', ['twilio']),
   tok('sendgrid-api-token', 'SendGrid API key', String.raw`\bSG\.[a-zA-Z0-9=_\-.]{66}`, ['sg.']),
   kv('mailgun-private-api-token', 'Mailgun API key', 'mailgun', 'key-[a-f0-9]{32}', ['mailgun']),
   kv('mailgun-signing-key', 'Mailgun signing key', 'mailgun', '[a-h0-9]{32}-[a-h0-9]{8}-[a-h0-9]{8}', ['mailgun']),

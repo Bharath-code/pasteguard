@@ -11,7 +11,7 @@ export const RULES = [
   { id: 'openai', type: 'OpenAI key', re: /\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}/g, keywords: ['sk-'] },
   { id: 'stripe', type: 'Stripe key', re: /\b(?:sk|rk)_(?:live|test)_[A-Za-z0-9]{16,}/g, keywords: ['_live_', '_test_'] },
   { id: 'aws-access-key', type: 'AWS access key', re: /\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/g, keywords: ['akia', 'asia'] },
-  { id: 'github', type: 'GitHub token', re: /\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{40,})/g, keywords: ['gh', 'github_pat_'] },
+  { id: 'github', type: 'GitHub token', re: /\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{40,})/g, keywords: ['ghp_', 'gho_', 'ghu_', 'ghs_', 'ghr_', 'github_pat_'] },
   { id: 'slack', type: 'Slack token', re: /\bxox[abprs]-[A-Za-z0-9-]{10,}/g, keywords: ['xox'] },
   { id: 'google-api', type: 'Google API key', re: /\bAIza[0-9A-Za-z_-]{35}/g, keywords: ['aiza'] },
   { id: 'jwt', type: 'JWT', re: /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g, keywords: ['eyj'] },
