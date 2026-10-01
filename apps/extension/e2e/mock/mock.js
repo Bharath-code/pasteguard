@@ -41,10 +41,16 @@ if (kind !== 'textarea') clearComposer()
 
 if (kind === 'prosemirror') {
   composer.addEventListener('paste', e => {
-    if (flag('broken') && !e.isTrusted) return e.preventDefault()
+    if (flag('broken') && !e.isTrusted) return
     const text = e.clipboardData?.getData('text/plain')
     if (!text) return
     e.preventDefault()
+    if (flag('asyncpaste')) setTimeout(() => place(text), 20)
+    else place(text)
+  })
+}
+
+function place(text) {
     const sel = getSelection()
     const lines = text.split('\n')
     let range = sel.rangeCount && composer.contains(sel.anchorNode) ? sel.getRangeAt(0) : null
@@ -75,7 +81,6 @@ if (kind === 'prosemirror') {
     end.collapse(false)
     sel.removeAllRanges()
     sel.addRange(end)
-  })
 }
 
 if (flag('broken')) {

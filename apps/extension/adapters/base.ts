@@ -18,18 +18,26 @@ const caretToEnd = (el: HTMLElement): void => {
   sel.addRange(r)
 }
 
-const syntheticPaste = (el: HTMLElement, text: string): void => {
+const syntheticPaste = (el: HTMLElement, text: string): boolean => {
   const data = new DataTransfer()
   data.setData('text/plain', text)
-  el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }))
+  const ev = new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true })
+  el.dispatchEvent(ev)
+  return ev.defaultPrevented
 }
+
+const squash = (s: string): string => s.replace(/\s+/g, ' ').trim()
 
 export const insertText = (el: HTMLElement, text: string): boolean => {
   el.focus()
   caretToEnd(el)
-  const before = readText(el).length
-  const landed = () => readText(el).length > before
-  syntheticPaste(el, text)
+  const before = readText(el)
+  const needle = squash(text)
+  const landed = () => {
+    const after = readText(el)
+    return after !== before && squash(after).includes(needle)
+  }
+  if (syntheticPaste(el, text)) return true
   if (landed()) return true
   el.ownerDocument.execCommand('insertText', false, text)
   return landed()

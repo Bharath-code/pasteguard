@@ -77,3 +77,11 @@ test('mock flag rerender replaces the answer subtree repeatedly', async ({ page 
   })
   await expect.poll(() => page.evaluate(() => (window as unknown as { swaps: number }).swaps), { timeout: 5000 }).toBeGreaterThan(3)
 })
+
+test('async paste handler that calls preventDefault: inserts exactly once and returns true', async ({ page, ext }) => {
+  await page.goto(`${MOCK}/prosemirror.html?asyncpaste=1`)
+  expect(await ext.evalInContent<boolean>(page, 'insert', SECRET_TEXT)).toBe(true)
+  await expect(page.locator('[data-composer]')).toContainText(SECRET_TEXT)
+  await page.waitForTimeout(150)
+  expect(await page.locator('[data-composer]').innerText()).toBe(SECRET_TEXT)
+})

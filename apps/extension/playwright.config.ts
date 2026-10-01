@@ -12,7 +12,7 @@ export default defineConfig({
   expect: { timeout: 5_000 },
   webServer: {
     command: 'node e2e/mock/server.ts',
-    url: 'http://localhost:4323/health',
+    url: 'http://127.0.0.1:4323/health',
     reuseExistingServer: !process.env['CI'],
     timeout: 15_000,
   },

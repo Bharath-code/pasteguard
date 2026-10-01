@@ -7,13 +7,19 @@ import { fileURLToPath } from 'node:url'
 const root = fileURLToPath(new URL('.', import.meta.url))
 const port = Number(process.env.MOCK_PORT ?? 4323)
 const types: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8' }
+const MAX_BODY = 8 * 1024 * 1024
 const log: { text: string; page: string; t: number }[] = []
 
-const body = (req: IncomingMessage): Promise<string> =>
+const body = (req: IncomingMessage): Promise<string | null> =>
   new Promise(resolve => {
     let s = ''
-    req.on('data', d => (s += d))
-    req.on('end', () => resolve(s))
+    let n = 0
+    req.on('data', d => {
+      n += d.length
+      if (n > MAX_BODY) return void resolve(null)
+      s += d
+    })
+    req.on('end', () => resolve(n > MAX_BODY ? null : s))
   })
 
 createServer(async (req, res) => {
@@ -22,6 +28,7 @@ createServer(async (req, res) => {
   if (url.pathname === '/log') {
     if (req.method === 'POST') {
       const raw = await body(req)
+      if (raw === null) return void res.writeHead(413, { connection: 'close' }).end('too large')
       const page = req.headers.referer ?? ''
       try {
         const j = JSON.parse(raw) as { text?: unknown }
@@ -47,4 +54,4 @@ createServer(async (req, res) => {
   } catch {
     res.writeHead(404).end('not found')
   }
-}).listen(port, () => console.log(`mock chat on http://localhost:${port}`))
+}).listen(port, '127.0.0.1', () => console.log(`mock chat on http://127.0.0.1:${port}`))
