@@ -1,1 +1,1 @@
-{ "compilerOptions": { "checkJs": true, "strict": true, "noEmit": true, "module": "nodenext", "target": "es2024", "lib": ["es2024", "dom"], "paths": { "punycode": ["../../node_modules/@types/node/punycode.d.ts"] } }, "include": ["src", "test", "corpus/positive.js"] }
+{ "compilerOptions": { "checkJs": true, "strict": true, "noEmit": true, "module": "nodenext", "target": "es2024", "lib": ["es2024", "dom"], "skipLibCheck": true, "maxNodeModuleJsDepth": 0 }, "include": ["src", "test", "corpus/positive.js"] }
