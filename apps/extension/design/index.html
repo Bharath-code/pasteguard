@@ -862,7 +862,7 @@ function setChip(state, hits) {
 const closeChip = () => chip.classList.remove('open')
 
 function renderComposer(text, mode) {
-  const hits = detect(text)
+  const hits = detect(text, { pii: true })
   composer.replaceChildren()
   if (!hits.length) { composer.textContent = text; closeChip(); return hits }
   const { parts } = redact(text, hits)
@@ -980,7 +980,7 @@ $('#copy-key').addEventListener('click', async e => {
 $('#try').addEventListener('paste', e => {
   e.preventDefault()
   const text = e.clipboardData.getData('text/plain') || $('#fake-key').textContent
-  const hits = detect(text), box = e.currentTarget
+  const hits = detect(text, { pii: true }), box = e.currentTarget
   box.replaceChildren()
   if (!hits.length) { box.textContent = text; $('#try-status').textContent = 'Nothing to tape in that one. Try the fake key.'; return }
   let i = 0

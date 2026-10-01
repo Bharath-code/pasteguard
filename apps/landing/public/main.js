@@ -72,7 +72,7 @@ SUPPORT_EMAIL=priya@acme.io
 NODE_ENV=production`
 
 function renderTry() {
-  const { parts, count } = redact(input.value)
+  const { parts, count } = redact(input.value, detect(input.value, { pii: true }))
   const hits = parts.filter(p => p.hit)
   out.replaceChildren(...(input.value ? parts.map(p => p.hit ? el('mark', { title: p.hit.type, textContent: p.text }) : document.createTextNode(p.text)) : []))
   if (!count) return summary.replaceChildren('Nothing sensitive yet.')

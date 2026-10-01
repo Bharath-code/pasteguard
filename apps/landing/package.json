@@ -6,7 +6,7 @@
     "dev": "npx wrangler@latest pages dev",
     "predeploy": "npm run sync",
     "deploy": "npx wrangler@latest pages deploy",
-    "sync": "cp ../../packages/core/src/detect.js public/detect.js",
+    "sync": "cp ../../packages/core/src/detect.js ../../packages/core/src/rules-extra.js ../../packages/core/src/entropy.js public/",
     "test": "node --test test/"
   },
   "engines": {

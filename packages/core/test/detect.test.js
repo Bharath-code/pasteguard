@@ -24,7 +24,7 @@ test('cards need a valid luhn checksum', () => {
 })
 
 test('same secret gets the same placeholder', () => {
-  const r = redact('a AKIAIOSFODNN7EXAMPLE b AKIAIOSFODNN7EXAMPLE c jane@acme.io')
+  const r = redact('a AKIAIOSFODNN7EXAMPLE b AKIAIOSFODNN7EXAMPLE c 4242 4242 4242 4242')
   assert.equal(r.text, 'a PG_SECRET_1 b PG_SECRET_1 c PG_SECRET_2')
   assert.equal(r.count, 2)
 })
