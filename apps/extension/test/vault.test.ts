@@ -4,7 +4,7 @@ import { TabVault } from '../entrypoints/chat.content/vault.ts'
 import { redact, detect } from '@pasteguard/core/detect'
 import type { Msg } from '../src/shared/messages.ts'
 
-const mk = (reply: unknown = { next: 1, map: {} }) => {
+const mk = (reply: unknown = { next: 1, map: {}, ok: true }) => {
   const sent: Msg[] = []
   const vault = new TabVault(async m => (sent.push(m), reply))
   return { vault, sent }
@@ -46,4 +46,25 @@ test('hydrate ignores bad replies and send failures', async () => {
   await boom.hydrate()
   boom.put(redact(`k ${key}`, detect(`k ${key}`), boom.state))
   assert.equal(boom.state.next, 2)
+})
+
+const tick = () => new Promise(r => setTimeout(r, 0))
+
+test('mirrored stays true on ok replies and goes false on failure or partial', async () => {
+  const good = mk()
+  good.vault.put(redact(`k ${key}`, detect(`k ${key}`), good.vault.state))
+  await tick()
+  assert.equal(good.vault.mirrored, true)
+  for (const reply of [{ ok: false, dropped: 1 }, null]) {
+    const bad = mk(reply)
+    bad.vault.put(redact(`k ${key}`, detect(`k ${key}`), bad.vault.state))
+    await tick()
+    assert.equal(bad.vault.mirrored, false)
+  }
+  const boom = new TabVault(async () => {
+    throw new Error('x')
+  })
+  boom.put(redact(`k ${key}`, detect(`k ${key}`), boom.state))
+  await tick()
+  assert.equal(boom.mirrored, false)
 })

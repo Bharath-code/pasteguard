@@ -1,13 +1,19 @@
 import * as z from 'zod/mini'
 
+export const MAX_ENTRIES_PER_MESSAGE = 1000
+export const MAX_VALUE_CHARS = 2_000_000
+export const MAX_VAULT_CHARS = 8_000_000
+
 const id = z.string().check(z.regex(/^PG_SECRET_\d+$/))
 const str = z.string().check(z.maxLength(512))
 const strs = z.array(str).check(z.maxLength(64))
 
+export const VaultEntrySchema = z.tuple([id, z.string().check(z.maxLength(MAX_VALUE_CHARS)), str])
+
 export const MsgSchema = z.discriminatedUnion('t', [
   z.object({
     t: z.literal('vault.put'),
-    entries: z.array(z.tuple([id, z.string().check(z.maxLength(100_000)), str])).check(z.maxLength(1000)),
+    entries: z.array(z.unknown()).check(z.maxLength(MAX_ENTRIES_PER_MESSAGE)),
     next: z.int().check(z.minimum(1)),
   }),
   z.object({ t: z.literal('vault.get') }),
@@ -23,3 +29,4 @@ export const MsgSchema = z.discriminatedUnion('t', [
 export type Msg = z.infer<typeof MsgSchema>
 export type VaultEntry = { value: string; type: string }
 export type VaultReply = { next: number; map: Record<string, VaultEntry> }
+export type VaultPutReply = { ok: boolean; dropped: number }

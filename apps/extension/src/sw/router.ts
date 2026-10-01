@@ -9,8 +9,7 @@ const ok = { ok: true }
 async function handle(msg: Msg, tabId: number): Promise<unknown> {
   switch (msg.t) {
     case 'vault.put':
-      await putVault(tabId, msg.entries, msg.next)
-      return ok
+      return putVault(tabId, msg.entries, msg.next)
     case 'vault.get':
       return getVault(tabId)
     case 'settings.get':
@@ -31,11 +30,11 @@ async function handle(msg: Msg, tabId: number): Promise<unknown> {
 
 export async function route(raw: unknown, sender: Sender): Promise<unknown> {
   const tabId = sender?.tab?.id
-  if (sender?.id !== chrome.runtime.id || typeof tabId !== 'number') return undefined
+  if (sender?.id !== chrome.runtime.id || !Number.isInteger(tabId) || (tabId as number) <= 0) return undefined
   const parsed = MsgSchema.safeParse(raw)
   if (!parsed.success) return undefined
   try {
-    return await handle(parsed.data, tabId)
+    return await handle(parsed.data, tabId as number)
   } catch {
     return undefined
   }

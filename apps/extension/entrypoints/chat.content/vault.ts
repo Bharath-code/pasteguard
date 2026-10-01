@@ -11,6 +11,7 @@ const isReply = (r: unknown): r is VaultReply =>
 export class TabVault {
   state: { next: number; ids: Map<string, string> } = { next: 1, ids: new Map() }
   byId = new Map<string, { value: string; type: string }>()
+  mirrored = true
   #send: Send
 
   constructor(send: Send = chromeSend) {
@@ -41,6 +42,16 @@ export class TabVault {
     }
     this.state.next = Math.max(this.state.next, r.state.next)
     for (const [value, id] of r.state.ids) this.state.ids.set(value, id)
-    if (entries.length) this.#send({ t: 'vault.put', entries, next: this.state.next }).catch(() => undefined)
+    if (!entries.length) return
+    const fail = () => {
+      this.mirrored = false
+    }
+    try {
+      this.#send({ t: 'vault.put', entries, next: this.state.next }).then(res => {
+        if (!(typeof res === 'object' && res !== null && (res as { ok?: unknown }).ok === true)) fail()
+      }, fail)
+    } catch {
+      fail()
+    }
   }
 }
