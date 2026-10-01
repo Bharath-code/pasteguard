@@ -8,7 +8,7 @@ export type GuardSettings = { paused: string[]; pii: boolean; rules: { type: str
 
 export interface GuardUI {
   taped(r: { types: string[]; count: number; original: string; taped: string; target: HTMLElement }): void
-  fallback(kind: 'inserted-to-clipboard'): void
+  fallback(kind: 'inserted-to-clipboard' | 'failed'): void
 }
 
 type Hit = ReturnType<typeof detect>[number]
@@ -26,8 +26,19 @@ export interface GuardCtx {
 export const BIG_PASTE = 256 * 1024
 export const CHUNK = 64 * 1024
 export const OVERLAP = 512
+export const ALLOW_TIMEOUT_MS = 1500
+export const EDITABLE_INSERT_CAP = 256 * 1024
 const KEY_TAIL_MAX = 16 * 1024
 const EDITABLE = 'textarea, input, [contenteditable]:not([contenteditable=false])'
+
+const withTimeout = <T>(p: Promise<T>, ms: number): Promise<T | undefined> =>
+  new Promise(resolve => {
+    const t = setTimeout(() => resolve(undefined), ms)
+    p.then(
+      v => (clearTimeout(t), resolve(v)),
+      () => (clearTimeout(t), resolve(undefined)),
+    )
+  })
 
 const yieldNow = (): Promise<void> => {
   const s = (globalThis as { scheduler?: { yield?: () => Promise<void> } }).scheduler
@@ -112,31 +123,47 @@ export function installGuard(ctx: GuardCtx): void {
     try {
       await navigator.clipboard.writeText(text)
     } catch {
+      ui.fallback('failed')
       return
     }
     ui.fallback('inserted-to-clipboard')
   }
 
-  const run = async (target: HTMLElement, text: string, hits: Hit[] | null): Promise<void> => {
+  const deliver = async (target: HTMLElement, text: string): Promise<void> => {
+    const field = target instanceof HTMLTextAreaElement || target instanceof HTMLInputElement
+    if ((field || text.length <= EDITABLE_INSERT_CAP) && place(target, text)) return
+    await toClipboard(text)
+  }
+
+  const run = async (target: HTMLElement, text: string, hits: Hit[] | null, safe: { text?: string }): Promise<void> => {
     const found = hits ?? (await chunkedDetect(text, opts(ctx.settings())))
-    if (!found.length) {
-      if (!place(target, text)) await toClipboard(text)
-      return
-    }
+    if (!found.length) return deliver(target, text)
     ready ??= vault.hydrate()
-    const [, hashes] = await Promise.all([ready, Promise.all(found.map(h => sha256Hex(h.value)))])
-    const allowed = await send({ t: 'allow.has', hashes }).catch(() => undefined)
+    const [, hashes] = await Promise.all([withTimeout(ready, ALLOW_TIMEOUT_MS), Promise.all(found.map(h => sha256Hex(h.value)))])
+    const allowed = await withTimeout(send({ t: 'allow.has', hashes }), ALLOW_TIMEOUT_MS)
     const remaining = found.filter((_, i) => !(Array.isArray(allowed) && allowed[i] === true))
-    if (!remaining.length) {
-      if (!place(target, text)) await toClipboard(text)
-      return
-    }
+    if (!remaining.length) return deliver(target, text)
     const r = redact(text, remaining, vault.state)
+    safe.text = r.text
     vault.put(r)
-    if (!place(target, r.text)) await toClipboard(r.text)
+    await deliver(target, r.text)
     const types = [...new Set(remaining.map(h => h.type))]
     ui.taped({ types, count: r.count, original: text, taped: r.text, target })
     void send({ t: 'caught', types, site: location.host }).catch(() => undefined)
+  }
+
+  const guarded = async (target: HTMLElement, text: string, hits: Hit[] | null): Promise<void> => {
+    const safe: { text?: string } = {}
+    try {
+      await run(target, text, hits, safe)
+    } catch {
+      try {
+        if (safe.text === undefined) ui.fallback('failed')
+        else await deliver(target, safe.text)
+      } catch {
+        return
+      }
+    }
   }
 
   const onPaste = (e: ClipboardEvent): void => {
@@ -155,7 +182,7 @@ export function installGuard(ctx: GuardCtx): void {
     }
     e.preventDefault()
     e.stopImmediatePropagation()
-    queue = queue.then(() => run(target, text, hits)).catch(() => undefined)
+    queue = queue.then(() => guarded(target, text, hits))
   }
 
   window.addEventListener('paste', onPaste, { capture: true })

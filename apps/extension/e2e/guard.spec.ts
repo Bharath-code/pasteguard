@@ -98,3 +98,20 @@ test('5 MB paste with a key at the end: redacted, no long task over 50 ms', asyn
   expect(r.to - r.from).toBeGreaterThan(100)
   expect(r.long).toEqual([])
 })
+
+for (const kind of ['contenteditable', 'prosemirror']) {
+  test(`${kind}: 1 MB paste goes to the clipboard, original never lands, no long task`, async ({ page, paste, clipboard, leaks }) => {
+    await page.goto(`http://localhost:4323/${kind}.html`)
+    await page.evaluate(() => {
+      const w = window as unknown as W
+      w.long = []
+      new PerformanceObserver(l => l.getEntries().forEach(e => { if (e.duration > 100) w.long.push([e.startTime, e.duration]) })).observe({ type: 'longtask' })
+    })
+    await paste(page, 'log line 12345 ok\n'.repeat(60_000) + `k=${KEY}`)
+    await expect.poll(async () => (await clipboard(page)).endsWith('k=PG_SECRET_1'), { timeout: 15_000 }).toBe(true)
+    expect(await clipboard(page)).not.toContain(KEY)
+    await expect(page.locator('[data-composer]')).not.toContainText('PG_SECRET_1')
+    expect(await leaks(page, KEY)).toEqual([])
+    expect(await page.evaluate(() => (window as unknown as W).long)).toEqual([])
+  })
+}
