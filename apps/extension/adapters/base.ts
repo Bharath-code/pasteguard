@@ -28,8 +28,22 @@ const syntheticPaste = (el: HTMLElement, text: string): boolean => {
 
 const squash = (s: string): string => s.replace(/\s+/g, ' ').trim()
 
+const HUGE = 256 * 1024
+
+const setRangeInsert = (el: HTMLTextAreaElement | HTMLInputElement, text: string): boolean => {
+  const start = el.selectionStart ?? el.value.length
+  const end = el.selectionEnd ?? start
+  el.setRangeText(text, start, end, 'end')
+  el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertFromPaste' }))
+  return true
+}
+
 export const insertText = (el: HTMLElement, text: string): boolean => {
   el.focus()
+  if (text.length > HUGE && (el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement)) {
+    caretToEnd(el)
+    return setRangeInsert(el, text)
+  }
   caretToEnd(el)
   const before = readText(el)
   const needle = squash(text)
