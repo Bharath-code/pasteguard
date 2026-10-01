@@ -13,11 +13,15 @@
     "src",
     "scripts",
     "wxt.config.ts",
-    "test"
+    "test",
+    "adapters",
+    "e2e",
+    "playwright.config.ts"
   ],
   "exclude": [
     "spike",
     "design",
-    ".output"
+    ".output",
+    "e2e/mock"
   ]
 }

@@ -11,8 +11,9 @@
     "size": "node scripts/size.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "e2e": "playwright test",
-    "test": "node --test test/"
+    "e2e": "npm run build:e2e && playwright test",
+    "test": "node --test test/",
+    "build:e2e": "wxt build --mode development"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

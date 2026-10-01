@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>chat.example.ai mock (contenteditable)</title>
+<style>body{font:15px system-ui;margin:24px;max-width:640px}[data-composer]{display:block;border:1px solid #888;min-height:64px;width:100%;box-sizing:border-box;padding:8px;white-space:pre-wrap}[data-answer],[data-user-turn]{margin:8px 0;padding:8px;border:1px solid #ddd}</style>
+</head>
+<body data-kind="contenteditable">
+<div data-thread></div>
+<div data-composer contenteditable="true" role="textbox" aria-label="Message"></div>
+<p><button data-send>Send</button> <button data-copy-writeText>Copy writeText</button> <button data-copy-write>Copy write</button> <button data-copy-exec>Copy exec</button></p>
+<script src="/mock.js"></script>
+</body>
+</html>
