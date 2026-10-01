@@ -134,3 +134,12 @@ test('card needs a known issuer prefix and length, not just luhn', () => {
 test('vcc_ vercel tokens pass the keyword prefilter', () => {
   assert.equal(detect('vcc_' + 'aB3'.repeat(10))[0].rule, 'vercel-token')
 })
+
+test('xoxp token with an over-long tail falls through to the slack rule', () => {
+  const groups = ['1', '2', '3'].map(() => '7'.repeat(11)).join('-')
+  for (const n of [35, 40]) {
+    const hits = detect(`xoxp-${groups}-${'aB3'.repeat(14).slice(0, n)}`)
+    assert.equal(hits.length, 1, `tail ${n}`)
+    assert.equal(hits[0].rule, 'slack')
+  }
+})
