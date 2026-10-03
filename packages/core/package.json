@@ -1,0 +1,15 @@
+{
+  "name": "@pasteguard/core",
+  "private": true,
+  "type": "module",
+  "exports": { "./*": "./src/*.js" },
+  "scripts": {
+    "test": "node --test \"test/*.test.*\"",
+    "typecheck": "tsc -p jsconfig.json",
+    "gates": "node bench/gates.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.4",
+    "typescript": "5.9.3"
+  }
+}

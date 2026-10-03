@@ -776,7 +776,7 @@ acme_int_7hh3k20pq for staging</textarea>
         <tr><td>Found</td><td>taped state</td><td>peel reveal</td><td>verdict</td><td>count + today bar</td></tr>
         <tr><td>User undid (<kbd>Esc</kbd>)</td><td>exposed ring, "Tape again"</td><td>n/a</td><td>n/a</td><td>not counted</td></tr>
         <tr><td>Placeholder mangled by AI</td><td>n/a</td><td>fuzzy match <code>PG_SECRET 1</code>, else leave as is</td><td>n/a</td><td>n/a</td></tr>
-        <tr><td>Tab reloaded (vault gone)</td><td>n/a</td><td>dashed pill: "Value cleared on reload"</td><td>n/a</td><td>n/a</td></tr>
+        <tr><td>Tab closed (vault gone)</td><td>n/a</td><td>dashed pill: "Value cleared when the tab closed"</td><td>n/a</td><td>n/a</td></tr>
         <tr><td>Offline / registry error</td><td>works</td><td>works</td><td>"Couldn't check" quiet chip + retry</td><td>works</td></tr>
         <tr><td>Paused on site</td><td>not rendered</td><td>still restores existing</td><td>not rendered</td><td>"Paused here" + switch</td></tr>
         <tr><td>Site adapter broken</td><td>fallback bottom toast</td><td>disabled, noted in popup</td><td>disabled</td><td>"Limited on this site"</td></tr>
@@ -862,7 +862,7 @@ function setChip(state, hits) {
 const closeChip = () => chip.classList.remove('open')
 
 function renderComposer(text, mode) {
-  const hits = detect(text)
+  const hits = detect(text, { pii: true })
   composer.replaceChildren()
   if (!hits.length) { composer.textContent = text; closeChip(); return hits }
   const { parts } = redact(text, hits)
@@ -980,7 +980,7 @@ $('#copy-key').addEventListener('click', async e => {
 $('#try').addEventListener('paste', e => {
   e.preventDefault()
   const text = e.clipboardData.getData('text/plain') || $('#fake-key').textContent
-  const hits = detect(text), box = e.currentTarget
+  const hits = detect(text, { pii: true }), box = e.currentTarget
   box.replaceChildren()
   if (!hits.length) { box.textContent = text; $('#try-status').textContent = 'Nothing to tape in that one. Try the fake key.'; return }
   let i = 0

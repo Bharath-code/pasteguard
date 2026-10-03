@@ -1,0 +1,27 @@
+{
+  "extends": "./.wxt/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "noEmit": true,
+    "allowJs": true
+  },
+  "include": [
+    ".wxt/wxt.d.ts",
+    "entrypoints",
+    "src",
+    "scripts",
+    "wxt.config.ts",
+    "test",
+    "adapters",
+    "e2e",
+    "playwright.config.ts"
+  ],
+  "exclude": [
+    "spike",
+    "design",
+    ".output",
+    "e2e/mock"
+  ]
+}

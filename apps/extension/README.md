@@ -1,8 +1,12 @@
-# Extension (MV3), not started
+# Extension (MV3, WXT + Preact)
 
-Planned layout, per the feasibility section of `.claudedocs/extension-decision-report.md`:
-- `content/paste-guard.js`: capture-phase `paste` listener on AI chat sites (tested in the ProseMirror spike)
-- `content/restore.js`: per-site adapters that put real values back in AI answers
-- `main-world/clipboard.js`: wraps `navigator.clipboard.writeText` so "Copy" returns real values
-- `background.js`: registry lookups for the package check
-- `rules/`: detection rules shared with `apps/landing/public/detect.js`
+Run from the repo root:
+- `npm run dev -w apps/extension`: dev build with HMR (adds `http://localhost/*` for E2E mock pages)
+- `npm run build -w apps/extension`: production build to `.output/chrome-mv3/`
+- `npm run size -w apps/extension`: fails if `content-scripts/chat.js` > 25 KB gzip
+- `npm run lint -w apps/extension` / `npm run typecheck -w apps/extension`
+- `npm run zip -w apps/extension`: store package
+
+Layout: `entrypoints/` (background, `chat.content`, `clipboard.content`, popup), `src/shared/` (site lists, i18n), `public/_locales/`. `design/` is the living UI doc; `spike/` is reference only and excluded from build and lint.
+
+Architecture and feasibility: `.claudedocs/extension-decision-report.md` §11 and `.claudedocs/extension-prd-architecture.md`.

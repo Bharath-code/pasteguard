@@ -4,8 +4,10 @@
   "type": "module",
   "scripts": {
     "dev": "npx wrangler@latest pages dev",
+    "predeploy": "npm run sync",
     "deploy": "npx wrangler@latest pages deploy",
-    "test": "node --test test/"
+    "sync": "cp ../../packages/core/src/detect.js ../../packages/core/src/rules-extra.js ../../packages/core/src/entropy.js public/",
+    "test": "node --test \"test/*.test.*\""
   },
   "engines": {
     "node": ">=22"

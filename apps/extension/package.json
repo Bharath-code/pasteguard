@@ -1,0 +1,32 @@
+{
+  "name": "@pasteguard/extension",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "wxt build",
+    "postinstall": "wxt prepare",
+    "dev": "wxt",
+    "zip": "wxt zip",
+    "size": "node scripts/size.mjs",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "e2e": "npm run build:e2e && playwright test",
+    "test": "node --test \"test/*.test.*\"",
+    "build:e2e": "wxt build --mode development"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@preact/preset-vite": "2.10.6",
+    "eslint": "10.11.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.0",
+    "wxt": "0.21.4"
+  },
+  "dependencies": {
+    "@preact/signals": "2.11.3",
+    "preact": "11.0.0",
+    "zod": "4.6.5",
+    "@pasteguard/core": "*"
+  }
+}

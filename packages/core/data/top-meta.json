@@ -1,0 +1,8 @@
+{
+  "fetchedAt": "2026-10-01",
+  "count": 4200,
+  "sources": {
+    "npm": "https://unpkg.com/npm-high-impact/lib/top.js (npm-high-impact, MIT)",
+    "pypi": "https://hugovk.github.io/top-pypi-packages/top-pypi-packages.min.json (hugovk/top-pypi-packages, last_update 2026-09-01 06:34:08)"
+  }
+}

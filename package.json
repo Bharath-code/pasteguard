@@ -1,0 +1,7 @@
+{
+  "name": "pasteguard",
+  "private": true,
+  "workspaces": ["packages/*", "apps/*"],
+  "engines": { "node": ">=22" },
+  "scripts": { "test": "npm test --workspaces --if-present" }
+}

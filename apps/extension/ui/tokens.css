@@ -1,0 +1,15 @@
+:host {
+  --ink: #1B1433; --ink-2: #251C45; --ink-3: #120D24; --line: #3B3163;
+  --text: #EDEAF7; --muted: #ADA6C4;
+  --paper: #F4F2FB; --paper-ink: #1B1433; --paper-muted: #5B5474; --paper-line: #DAD5EA;
+  --marker: #F2E15B; --alert: #FF5E7E; --violet: #9C8CFF;
+  --f-body: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-code: ui-monospace, Menlo, monospace;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 18px;
+  --hatch: repeating-linear-gradient(-45deg, var(--marker) 0 6px, var(--ink-3) 6px 12px);
+
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
+  --ease-in-out: cubic-bezier(.77, 0, .175, 1);
+  --ease-drawer: cubic-bezier(.32, .72, 0, 1);
+  --d-press: 120ms; --d-pop: 180ms; --d-exit: 120ms; --d-tape: 260ms; --d-peel: 320ms; --d-hold: 1200ms;
+}
