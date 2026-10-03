@@ -127,5 +127,30 @@
         "content": "$1"
       }
     }
+  },
+  "leakOne": {
+    "message": "This conversation contains $ARTICLE$ $TYPE$.",
+    "placeholders": {
+      "article": {
+        "content": "$1"
+      },
+      "type": {
+        "content": "$2"
+      }
+    }
+  },
+  "leakMany": {
+    "message": "This conversation contains $COUNT$ secrets: $TYPES$.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "types": {
+        "content": "$2"
+      }
+    }
+  },
+  "rotateIt": {
+    "message": "Rotate it"
   }
 }

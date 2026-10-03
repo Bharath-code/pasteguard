@@ -32,7 +32,12 @@ const addUserTurn = text => {
 }
 
 const hist = q.get('history')
-if (hist) {
+if (hist === 'many') {
+  for (let i = 0; i < 200; i++) addUserTurn(`turn ${i}: ` + 'config value 12345 and some ordinary prose about deploys. '.repeat(8))
+  addUserTurn('my key is ' + 'AKIA' + 'IOSFODNN7EXAMPLE')
+} else if (hist === 'placeholder') {
+  addUserTurn('use PG_SECRET_1 and PG_SECRET_2 please')
+} else if (hist) {
   addUserTurn('earlier question about deploys')
   addUserTurn(hist === 'aws' ? 'my key is ' + 'AKIA' + 'IOSFODNN7EXAMPLE' + ' please rotate it' : 'earlier follow up with nothing sensitive')
 }

@@ -22,6 +22,7 @@ export const MsgSchema = z.discriminatedUnion('t', [
   z.object({ t: z.literal('pkg'), eco: z.enum(['npm', 'pypi']), name: str }),
   z.object({ t: z.literal('allow.has'), hashes: z.array(str).check(z.maxLength(256)) }),
   z.object({ t: z.literal('allow.add'), hash: str, type: str }),
+  z.object({ t: z.literal('scan.once'), id: z.string().check(z.regex(/^[0-9a-f]{64}$/)) }),
   z.object({ t: z.literal('settings.get') }),
   z.object({ t: z.literal('adapter.status'), ok: z.boolean(), site: str }),
 ])

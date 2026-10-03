@@ -2,8 +2,10 @@ import { pickAdapter } from '../../adapters'
 import { AI_MATCHES } from '../../src/shared/sites'
 import { createChip, timing, type Chip } from '../../ui/chip'
 import { mountHost } from '../../ui/host'
+import { createNotice } from '../../ui/notice'
 import { createToast } from '../../ui/toast'
 import { installGuard, type GuardUI } from './guard'
+import { installLeakScan } from './leakscan'
 import { settingsSource } from './settings'
 import { installTestHook } from './testHook'
 import { chromeSend, TabVault } from './vault'
@@ -30,13 +32,15 @@ export default defineContentScript({
   allFrames: false,
   main() {
     if (dev) installTestHook({ 'chip.blurDismissMs': ([n]) => void (timing.blurDismissMs = Number(n)) })
+    const settings = settingsSource(chromeSend)
     own = installGuard({
       adapter,
       vault: new TabVault(),
-      settings: settingsSource(chromeSend),
+      settings,
       ui,
       send: chromeSend,
       mark: dev ? n => performance.mark(`pg:${n}`) : undefined,
     }).own
+    installLeakScan({ adapter, send: chromeSend, settings, show: hits => createNotice(mountHost()).leak(hits) })
   },
 })

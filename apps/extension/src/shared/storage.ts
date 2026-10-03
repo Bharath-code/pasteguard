@@ -65,3 +65,18 @@ export async function addAllow(hash: string, type: string, at = Date.now()): Pro
   await chrome.storage.local.set({ settings: { ...cur, allow: [...cur.allow, { hash, type, at }].slice(-ALLOW_MAX) } })
   return true
 }
+
+export const SCANNED_MAX = 500
+let scanLock: Promise<unknown> = Promise.resolve()
+
+export function markScanned(hash: string): Promise<boolean> {
+  const run = scanLock.then(async () => {
+    const got = await chrome.storage.local.get('scanned')
+    const cur = Array.isArray(got['scanned']) ? got['scanned'].filter((x): x is string => typeof x === 'string') : []
+    if (cur.includes(hash)) return false
+    await chrome.storage.local.set({ scanned: [...cur, hash].slice(-SCANNED_MAX) })
+    return true
+  })
+  scanLock = run.catch(() => undefined)
+  return run
+}

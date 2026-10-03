@@ -128,3 +128,16 @@ test('allow.add stores a valid hash once and rejects junk', async () => {
   const stored = (await chrome.storage.local.get('settings'))['settings'] as { allow: unknown[] }
   assert.equal(stored.allow.length, 1)
 })
+
+test('scan.once is true once per conversation hash and capped at 500', async () => {
+  const h = (n: number) => n.toString(16).padStart(64, '0')
+  assert.deepEqual(await route({ t: 'scan.once', id: h(1) }, okSender), { first: true })
+  assert.deepEqual(await route({ t: 'scan.once', id: h(1) }, okSender), { first: false })
+  assert.equal(await route({ t: 'scan.once', id: 'not-a-hash' }, okSender), undefined)
+  const both = await Promise.all([route({ t: 'scan.once', id: h(2) }, okSender), route({ t: 'scan.once', id: h(2) }, okSender)])
+  assert.deepEqual(both.map(b => (b as { first: boolean }).first).sort(), [false, true])
+  for (let i = 3; i < 510; i++) await route({ t: 'scan.once', id: h(i) }, okSender)
+  const stored = (await chrome.storage.local.get('scanned'))['scanned'] as string[]
+  assert.equal(stored.length, 500)
+  assert.deepEqual(await route({ t: 'scan.once', id: h(1) }, okSender), { first: true })
+})
