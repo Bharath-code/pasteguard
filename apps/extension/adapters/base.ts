@@ -1,6 +1,6 @@
 import type { Adapter, SiteConfig } from './types'
 
-const readText = (el: HTMLElement): string =>
+export const readText = (el: HTMLElement): string =>
   el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement ? el.value : (el.innerText ?? el.textContent ?? '')
 
 const caretToEnd = (el: HTMLElement): void => {
@@ -57,6 +57,22 @@ export const insertText = (el: HTMLElement, text: string): boolean => {
   return landed()
 }
 
+export const replaceText = (el: HTMLElement, text: string): boolean => {
+  el.focus()
+  const field = el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement
+  if (field) el.select()
+  else {
+    const sel = el.ownerDocument.getSelection()
+    const r = el.ownerDocument.createRange()
+    r.selectNodeContents(el)
+    sel?.removeAllRanges()
+    sel?.addRange(r)
+    if (syntheticPaste(el, text)) return true
+  }
+  el.ownerDocument.execCommand('insertText', false, text)
+  return squash(readText(el)) === squash(text)
+}
+
 const all = (sel: string): HTMLElement[] => {
   if (!sel) return []
   const hits = [...document.querySelectorAll<HTMLElement>(sel)]
@@ -67,8 +83,15 @@ export const makeAdapter = (c: SiteConfig): Adapter => ({
   id: c.id,
   composer: () => document.querySelector<HTMLElement>(c.composer),
   insert: insertText,
+  read: readText,
+  replace: replaceText,
+  send: () => {
+    const b = c.send ? document.querySelector<HTMLElement>(c.send) : null
+    b?.click()
+    return !!b
+  },
   answers: () => all(c.answers),
   userTurns: () => all(c.userTurns),
-  conversationId: () => c.conversation.exec(location.pathname)?.[1] ?? null,
+  conversationId: c.conversationId ?? (() => c.conversation.exec(location.pathname)?.[1] ?? null),
   isStreaming: el => !!c.streaming && (el.matches(c.streaming) || !!el.closest(c.streaming) || !!el.querySelector(c.streaming)),
 })

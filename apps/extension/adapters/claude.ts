@@ -7,4 +7,5 @@ export const claude = makeAdapter({
   userTurns: '[data-testid="user-message"]',
   conversation: /\/chat\/([A-Za-z0-9-]+)/,
   streaming: '[data-is-streaming="true"]',
+  send: 'button[aria-label="Send message"]',
 })

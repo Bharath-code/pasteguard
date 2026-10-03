@@ -55,3 +55,13 @@ export async function readSettings(): Promise<Settings> {
     return structuredClone(DEFAULT_SETTINGS)
   }
 }
+
+export const ALLOW_MAX = 2000
+
+export async function addAllow(hash: string, type: string, at = Date.now()): Promise<boolean> {
+  if (!/^[0-9a-f]{64}$/.test(hash)) return false
+  const cur = await readSettings()
+  if (cur.allow.some(a => a.hash === hash)) return true
+  await chrome.storage.local.set({ settings: { ...cur, allow: [...cur.allow, { hash, type, at }].slice(-ALLOW_MAX) } })
+  return true
+}

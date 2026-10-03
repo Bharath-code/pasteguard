@@ -1,9 +1,12 @@
-export type AdapterId = 'chatgpt' | 'claude' | 'gemini' | 'generic'
+export type AdapterId = 'chatgpt' | 'claude' | 'gemini' | 'generic' | 'mock'
 
 export interface Adapter {
   id: AdapterId
   composer(): HTMLElement | null
   insert(el: HTMLElement, text: string): boolean
+  read(el: HTMLElement): string
+  replace(el: HTMLElement, text: string): boolean
+  send(): boolean
   answers(): HTMLElement[]
   userTurns(): HTMLElement[]
   conversationId(): string | null
@@ -17,4 +20,6 @@ export interface SiteConfig {
   userTurns: string
   conversation: RegExp
   streaming: string
+  send: string
+  conversationId?: () => string | null
 }

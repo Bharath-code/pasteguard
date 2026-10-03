@@ -59,7 +59,7 @@ test('stub handlers validate and answer', async () => {
   assert.deepEqual(await route({ t: 'caught', types: ['a'], site: 'claude.ai' }, okSender), { ok: true })
   assert.deepEqual(await route({ t: 'sentOriginal', types: ['a'] }, okSender), { ok: true })
   assert.deepEqual(await route({ t: 'adapter.status', ok: true, site: 'claude.ai' }, okSender), { ok: true })
-  assert.deepEqual(await route({ t: 'allow.add', hash: 'h', type: 'k' }, okSender), { ok: true })
+  assert.deepEqual(await route({ t: 'allow.add', hash: 'h', type: 'k' }, okSender), { ok: false })
   assert.deepEqual(await route({ t: 'allow.has', hashes: ['h1', 'h2'] }, okSender), [false, false])
   assert.deepEqual(await route({ t: 'pkg', eco: 'npm', name: 'left-pad' }, okSender), { kind: 'error' })
   assert.equal(await route({ t: 'caught', types: 'a', site: 1 }, okSender), undefined)
@@ -118,4 +118,13 @@ test('storage.set failure replies ok:false without throwing', async () => {
   const c = installFakeChrome()
   c.storage.session.failSet = true
   assert.deepEqual(await put(28, [['PG_SECRET_1', 'a', 'x']]), { ok: false, dropped: 0 })
+})
+
+test('allow.add stores a valid hash once and rejects junk', async () => {
+  const hash = 'a'.repeat(64)
+  assert.deepEqual(await route({ t: 'allow.add', hash, type: 'AWS access key' }, okSender), { ok: true })
+  assert.deepEqual(await route({ t: 'allow.add', hash, type: 'AWS access key' }, okSender), { ok: true })
+  assert.deepEqual(await route({ t: 'allow.has', hashes: [hash, 'b'.repeat(64)] }, okSender), [true, false])
+  const stored = (await chrome.storage.local.get('settings'))['settings'] as { allow: unknown[] }
+  assert.equal(stored.allow.length, 1)
 })

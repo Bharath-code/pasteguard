@@ -7,4 +7,5 @@ export const gemini = makeAdapter({
   userTurns: 'user-query, .query-text',
   conversation: /\/app\/([A-Za-z0-9]+)/,
   streaming: '[aria-busy="true"], .pending',
+  send: 'button.send-button, button[aria-label="Send message"]',
 })

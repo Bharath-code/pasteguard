@@ -7,4 +7,5 @@ export const chatgpt = makeAdapter({
   userTurns: '[data-message-author-role="user"]',
   conversation: /\/c\/([A-Za-z0-9-]+)/,
   streaming: '.result-streaming',
+  send: '[data-testid="send-button"]',
 })

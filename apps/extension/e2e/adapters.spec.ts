@@ -4,7 +4,7 @@ const SECRET_TEXT = 'hello PG_SECRET_1'
 
 for (const kind of ['prosemirror', 'textarea', 'contenteditable']) {
   test(`${kind}: generic adapter inserts text`, async ({ page, ext }) => {
-    await page.goto(`${MOCK}/${kind}.html`)
+    await page.goto(`${MOCK}/${kind}.html?adapter=generic`)
     expect(await ext.evalInContent<string>(page, 'adapterId')).toBe('generic')
     expect(await ext.evalInContent<boolean>(page, 'insert', SECRET_TEXT)).toBe(true)
     const composer = page.locator('[data-composer]')
@@ -19,7 +19,7 @@ for (const kind of ['prosemirror', 'textarea', 'contenteditable']) {
 }
 
 test('generic adapter: answers and user turns are empty, so restore is disabled', async ({ page, ext }) => {
-  await page.goto(`${MOCK}/textarea.html`)
+  await page.goto(`${MOCK}/textarea.html?adapter=generic`)
   expect(await ext.evalInContent<string[]>(page, 'answers')).toEqual([])
   expect(await ext.evalInContent<string[]>(page, 'userTurns')).toEqual([])
   expect(await ext.evalInContent<string | null>(page, 'conversationId')).toBeNull()

@@ -7,7 +7,7 @@ import type { TabVault } from './vault'
 export type GuardSettings = { paused: string[]; pii: boolean; rules: { type: string; source: string }[] }
 
 export interface GuardUI {
-  taped(r: { types: string[]; count: number; original: string; taped: string; target: HTMLElement }): void
+  taped(r: { types: string[]; count: number; hits: { rule: string; type: string; value: string }[]; original: string; taped: string; target: HTMLElement }): void
   fallback(kind: 'inserted-to-clipboard' | 'failed'): void
 }
 
@@ -88,7 +88,7 @@ export function compileRules(rules: GuardSettings['rules']): Extra[] {
   return out
 }
 
-export function installGuard(ctx: GuardCtx): void {
+export function installGuard(ctx: GuardCtx): { own<T>(fn: () => T): T } {
   const { adapter, vault, ui, send } = ctx
   let own = false
   let ready: Promise<boolean> | undefined
@@ -154,7 +154,7 @@ export function installGuard(ctx: GuardCtx): void {
     vault.put(r)
     await deliver(target, r.text)
     const types = [...new Set(remaining.map(h => h.type))]
-    ui.taped({ types, count: r.count, original: text, taped: r.text, target })
+    ui.taped({ types, count: r.count, hits: remaining.map(h => ({ rule: h.rule, type: h.type, value: h.value })), original: text, taped: r.text, target })
     void send({ t: 'caught', types, site: location.host }).catch(() => undefined)
   }
 
@@ -207,4 +207,14 @@ export function installGuard(ctx: GuardCtx): void {
   }
 
   window.addEventListener('paste', onPaste, { capture: true })
+  return {
+    own: fn => {
+      own = true
+      try {
+        return fn()
+      } finally {
+        own = false
+      }
+    },
+  }
 }

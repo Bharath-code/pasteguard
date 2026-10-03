@@ -1,5 +1,5 @@
 import { MsgSchema, type Msg } from '../shared/messages.ts'
-import { readSettings } from '../shared/storage.ts'
+import { addAllow, readSettings } from '../shared/storage.ts'
 import { dropVault, getVault, putVault } from './vault.ts'
 
 type Sender = { id?: string; tab?: { id?: number } }
@@ -20,9 +20,10 @@ async function handle(msg: Msg, tabId: number): Promise<unknown> {
     }
     case 'pkg':
       return { kind: 'error' }
+    case 'allow.add':
+      return { ok: await addAllow(msg.hash, msg.type) }
     case 'caught':
     case 'sentOriginal':
-    case 'allow.add':
     case 'adapter.status':
       return ok
   }

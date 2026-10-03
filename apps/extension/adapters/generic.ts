@@ -7,4 +7,5 @@ export const generic = makeAdapter({
   userTurns: '',
   conversation: /(?!)/,
   streaming: '',
+  send: '',
 })
