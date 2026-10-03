@@ -1,4 +1,5 @@
 import { signal } from '@preact/signals'
+import { useEffect, useState } from 'preact/hooks'
 import { t } from '../../src/shared/i18n'
 import { DEFAULT_SETTINGS, readSettings, updateSettings, type Settings } from '../../src/shared/storage'
 import { RuleTester, runTest } from './RuleTester'
@@ -38,7 +39,13 @@ const edit = (fn: (v: string) => void) => (v: string) => {
 
 export function Options() {
   const s = settings.value
-  const tested = runTest(pattern.value, sample.value)
+  const [settled, setSettled] = useState(pattern.value)
+  useEffect(() => {
+    const id = setTimeout(() => setSettled(pattern.value), 250)
+    return () => clearTimeout(id)
+  }, [pattern.value])
+  const tested = runTest(settled, sample.value)
+  const fresh = settled === pattern.value
   return (
     <main class="options">
       <h1>{t('optionsTitle')}</h1>
@@ -51,7 +58,7 @@ export function Options() {
           <input id="rule-name" value={name.value} maxLength={40} onInput={e => (name.value = e.currentTarget.value)} />
           <RuleTester pattern={pattern.value} sample={sample.value} tested={tested} onPattern={edit(v => (pattern.value = v))} onSample={v => (sample.value = v)} />
           <div class="row">
-            <button class="btn" type="button" disabled={!tested.result.ok} onClick={() => void addRule(pattern.value)}>{t('optionsAddRule')}</button>
+            <button class="btn" type="button" disabled={!fresh || !tested.result.ok} onClick={() => void addRule(pattern.value)}>{t('optionsAddRule')}</button>
             <p class="rule-meta" role="status">{added.value ? t('optionsRuleAdded') : ''}</p>
           </div>
         </div>

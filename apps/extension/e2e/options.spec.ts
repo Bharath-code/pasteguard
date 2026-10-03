@@ -80,3 +80,11 @@ test('axe finds nothing and targets are at least 44px', async ({ context, extId,
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
   for (const b of await page.getByRole('button').all()) expect((await b.boundingBox())?.height).toBeGreaterThanOrEqual(44)
 })
+
+test('popup Settings link opens the options page', async ({ context, extId }) => {
+  const popup = await context.newPage()
+  await popup.goto(`chrome-extension://${extId}/popup.html`)
+  const opened = context.waitForEvent('page', { predicate: p => /options\.html/.test(p.url()) })
+  await popup.getByRole('button', { name: 'Settings' }).click()
+  await opened
+})

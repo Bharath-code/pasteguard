@@ -475,5 +475,8 @@
   },
   "optionsResume": {
     "message": "Resume"
+  },
+  "popupSettings": {
+    "message": "Settings"
   }
 }

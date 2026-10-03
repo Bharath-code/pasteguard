@@ -140,6 +140,7 @@ function Body({ d }: { d: Data }) {
       </ul>
       <footer class="foot">
         <span>{t('popupFoot')}</span>
+        <button type="button" class="link" onClick={() => void chrome.runtime.openOptionsPage()}>{t('popupSettings')}</button>
         <a href={TRUST_URL} target="_blank" rel="noreferrer">{t('popupSee')}</a>
         <button type="button" class="link" onClick={() => void copyDiagnostic(d)}>{copied.value ? t('popupDiagDone') : t('popupDiag')}</button>
       </footer>
