@@ -138,3 +138,20 @@ for (const scheme of ['dark', 'light'] as const) {
     expect(r.violations).toEqual([])
   })
 }
+
+test('content script reports a healthy adapter', async ({ page, sw }) => {
+  await page.goto(`${MOCK}/textarea.html`)
+  await expect
+    .poll(() => sw.worker.evaluate(async () => ((await chrome.storage.session.get('adapters'))['adapters'] ?? {}) as Record<string, boolean>))
+    .toEqual({ 'localhost:4323': true })
+})
+
+test('pausing from the popup struck-icons the tab', async ({ page, context, extId, sw }) => {
+  await page.goto(`${MOCK}/textarea.html`)
+  const tabId = await sw.worker.evaluate(async () => (await chrome.tabs.query({ url: 'http://localhost/*' }))[0]?.id)
+  const p = await open(context, extId, `?tab=${tabId}`)
+  await p.getByRole('switch').click()
+  await expect
+    .poll(() => sw.worker.evaluate(async () => ((await chrome.action.getTitle({ tabId: (await chrome.tabs.query({ url: 'http://localhost/*' }))[0]?.id }))))
+    , { timeout: 5000 }).toBe('PasteGuard: paused on this site')
+})

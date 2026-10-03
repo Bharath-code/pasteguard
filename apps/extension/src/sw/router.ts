@@ -31,7 +31,7 @@ async function handle(msg: Msg, tabId: number): Promise<unknown> {
       await recordCatch(msg.types)
       return ok
     case 'adapter.status':
-      await setTabState(tabId, msg.ok ? 'active' : 'idle')
+      await setTabState(tabId, (await readSettings()).paused.includes(msg.site) ? 'paused' : msg.ok ? 'active' : 'idle')
       await markAdapter(msg.site, msg.ok)
       return ok
     case 'sentOriginal':

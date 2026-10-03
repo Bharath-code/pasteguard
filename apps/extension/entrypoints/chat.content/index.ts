@@ -6,6 +6,7 @@ import { createNotice } from '../../ui/notice'
 import { createToast } from '../../ui/toast'
 import { readChips, retryChip } from '../../ui/verdict'
 import { installCopy } from './copy'
+import { watchAdapter } from './health'
 import { installGuard, type GuardUI } from './guard'
 import { installLeakScan } from './leakscan'
 import { installPackages } from './packages'
@@ -56,6 +57,7 @@ export default defineContentScript({
     }).own
     installRestorer({ adapter, vault, after: installPackages({ adapter, send: chromeSend, settings, announce: text => announce(mountHost().layer, text) }) })
     installCopy({ vault, adapter })
+    watchAdapter({ adapter, send: chromeSend, site: location.host })
     installLeakScan({ adapter, send: chromeSend, settings, show: hits => createNotice(mountHost()).leak(hits) })
   },
 })

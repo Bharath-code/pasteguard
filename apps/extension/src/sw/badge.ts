@@ -1,3 +1,6 @@
+import { AI_MATCHES } from '../shared/sites.ts'
+import { parseSettings } from '../shared/storage.ts'
+
 const CORAL = '#FF5E7E'
 const SIZES = [16, 32, 48, 128] as const
 const BADGE_MS = 4000
@@ -95,4 +98,29 @@ export async function forgetTab(tabId: number): Promise<void> {
   clearTimeout(timers.get(tabId))
   timers.delete(tabId)
   await serial(() => swallow(() => chrome.storage.session.remove(PREFIX + tabId)))
+}
+
+// Paused hosts get the struck icon; hosts that were just unpaused go back to active/idle.
+export async function syncPaused(oldRaw: unknown, newRaw: unknown): Promise<void> {
+  const before = parseSettings(oldRaw).paused
+  const paused = parseSettings(newRaw).paused
+  const changed = new Set([...before.filter(h => !paused.includes(h)), ...paused.filter(h => !before.includes(h))])
+  if (!changed.size) return
+  let adapters: Record<string, boolean> = {}
+  let tabs: { id?: number; url?: string }[] = []
+  try {
+    adapters = ((await chrome.storage.session.get('adapters'))['adapters'] ?? {}) as Record<string, boolean>
+    tabs = await chrome.tabs.query({ url: [...AI_MATCHES, 'http://localhost/*'] })
+  } catch {
+    return
+  }
+  for (const tab of tabs) {
+    let host = ''
+    try {
+      host = new URL(tab.url ?? '').host
+    } catch {
+      continue
+    }
+    if (tab.id && changed.has(host)) await setTabState(tab.id, paused.includes(host) ? 'paused' : adapters[host] === false ? 'idle' : 'active')
+  }
 }

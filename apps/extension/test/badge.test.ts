@@ -2,7 +2,7 @@ import { test, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { installFakeChrome } from './fake-chrome.ts'
-import { onCaught, setTabState, forgetTab, restoreBadges } from '../src/sw/badge.ts'
+import { onCaught, setTabState, forgetTab, restoreBadges, syncPaused } from '../src/sw/badge.ts'
 
 const msgs = JSON.parse(readFileSync(new URL('../public/_locales/en/messages.json', import.meta.url), 'utf8'))
 
@@ -114,4 +114,18 @@ test('forgetTab purges the stored total', async () => {
   await forgetTab(8)
   await onCaught(8, 1)
   assert.equal(fake.title(8), 'PasteGuard: 1 secret taped on this tab')
+})
+
+test('syncPaused struck-icons only hosts whose pause state changed', async () => {
+  const c = installFakeChrome()
+  const f = fakeAction()
+  Object.assign(c, { tabs: { query: async () => [{ id: 1, url: 'https://claude.ai/chat/x' }, { id: 2, url: 'https://chatgpt.com/' }, { id: 3, url: 'https://claude.ai/new' }] } })
+  const s = (paused: string[]) => ({ v: 1, paused, pii: false, rules: [], allow: [], statsOptIn: false })
+  await syncPaused(s([]), s(['claude.ai']))
+  assert.match(f.icon(1)['16'] ?? '', /paused-16/)
+  assert.match(f.icon(3)['16'] ?? '', /paused-16/)
+  assert.deepEqual(f.icon(2), {})
+  await c.storage.session.set({ adapters: { 'claude.ai': false } })
+  await syncPaused(s(['claude.ai']), s([]))
+  assert.match(f.icon(1)['16'] ?? '', /idle-16/)
 })
