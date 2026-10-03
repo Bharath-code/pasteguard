@@ -126,3 +126,13 @@ export async function markAdapter(site: string, ok: boolean): Promise<void> {
   const map = typeof cur === 'object' && cur !== null ? (cur as Record<string, boolean>) : {}
   await chrome.storage.session.set({ adapters: { ...map, [site]: ok } })
 }
+
+let settingsLock: Promise<unknown> = Promise.resolve()
+
+export function updateSettings(fn: (s: Settings) => Settings): Promise<void> {
+  const run = settingsLock.then(async () => {
+    await chrome.storage.local.set({ settings: fn(await readSettings()) })
+  })
+  settingsLock = run.catch(() => undefined)
+  return run
+}
