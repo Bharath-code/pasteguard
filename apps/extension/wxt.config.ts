@@ -23,7 +23,12 @@ export default defineConfig({
       ...REGISTRY_HOSTS,
       ...(mode === 'production' ? [] : ['http://localhost/*']),
     ],
-    action: { default_popup: 'popup.html', default_title: '__MSG_name__' },
+    icons: { 16: 'icon/active-16.png', 32: 'icon/active-32.png', 48: 'icon/active-48.png', 128: 'icon/active-128.png' },
+    action: {
+      default_popup: 'popup.html',
+      default_title: '__MSG_name__',
+      default_icon: { 16: 'icon/idle-16.png', 32: 'icon/idle-32.png', 48: 'icon/idle-48.png', 128: 'icon/idle-128.png' },
+    },
     content_security_policy: {
       extension_pages:
         "script-src 'self'; object-src 'none'; connect-src https://registry.npmjs.org https://api.npmjs.org https://pypi.org",

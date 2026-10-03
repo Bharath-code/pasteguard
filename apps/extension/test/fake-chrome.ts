@@ -30,7 +30,13 @@ const area = (): FakeArea => {
 }
 
 export function installFakeChrome() {
-  const fake = { runtime: { id: SELF }, storage: { session: area(), local: area() } }
+  const noop = async () => undefined
+  const fake = {
+    runtime: { id: SELF },
+    storage: { session: area(), local: area() },
+    action: { setBadgeText: noop, setBadgeBackgroundColor: noop, setTitle: noop, setIcon: noop },
+    i18n: { getMessage: () => '' },
+  }
   Object.assign(globalThis, { chrome: fake })
   return fake
 }

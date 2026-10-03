@@ -289,5 +289,24 @@
         "content": "$2"
       }
     }
+  },
+  "badgeTitleOne": {
+    "message": "PasteGuard: $COUNT$ secret taped on this tab",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "badgeTitleMany": {
+    "message": "PasteGuard: $COUNT$ secrets taped on this tab",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "badgeTitlePaused": {
+    "message": "PasteGuard: paused on this site"
   }
 }
