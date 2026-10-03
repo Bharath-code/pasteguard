@@ -1,8 +1,10 @@
 import { restoreBadges, syncPaused } from '../src/sw/badge'
+import { onInstalled } from '../src/sw/install'
 import { onTabRemoved, route } from '../src/sw/router'
 
 export default defineBackground(() => {
   void restoreBadges()
+  chrome.runtime.onInstalled.addListener(d => void onInstalled(d))
   chrome.runtime.onMessage.addListener((msg, sender, reply) => {
     route(msg, sender).then(reply)
     return true

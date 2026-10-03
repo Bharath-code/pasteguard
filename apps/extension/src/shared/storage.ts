@@ -101,6 +101,10 @@ export function recordCatch(types: string[], now = new Date()): Promise<void> {
   return run
 }
 
+export async function markActivated(now = Date.now()): Promise<void> {
+  if (typeof (await chrome.storage.local.get('activatedAt'))['activatedAt'] !== 'number') await chrome.storage.local.set({ activatedAt: now })
+}
+
 // Monday-first calendar week; future days are 0.
 export function weekStats(stats: Stats | undefined, now = new Date()): { bars: number[]; total: number; today: number } {
   const today = (now.getDay() + 6) % 7
