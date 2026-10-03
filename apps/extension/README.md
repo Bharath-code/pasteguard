@@ -10,3 +10,5 @@ Run from the repo root:
 Layout: `entrypoints/` (background, `chat.content`, `clipboard.content`, popup), `src/shared/` (site lists, i18n), `public/_locales/`. `design/` is the living UI doc; `spike/` is reference only and excluded from build and lint.
 
 Architecture and feasibility: `.claudedocs/extension-decision-report.md` §11 and `.claudedocs/extension-prd-architecture.md`.
+
+Data handling: every piece of data the extension touches is listed in `apps/landing/public/what-we-see/index.html`. Update that table in the same change whenever you add, move or retain data.
