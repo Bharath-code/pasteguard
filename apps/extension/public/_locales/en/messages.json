@@ -361,5 +361,41 @@
   },
   "popupChartLabel": {
     "message": "Secrets caught each day this week"
+  },
+  "welcomeTitle": {
+    "message": "Let's catch one together."
+  },
+  "welcomeStepCopy": {
+    "message": "Copy this fake key"
+  },
+  "welcomeStepPaste": {
+    "message": "Paste it below"
+  },
+  "welcomeStepPin": {
+    "message": "Pin PasteGuard to your toolbar"
+  },
+  "welcomeCopy": {
+    "message": "Copy"
+  },
+  "welcomeCopied": {
+    "message": "Copied"
+  },
+  "welcomePasteLabel": {
+    "message": "Paste it below"
+  },
+  "welcomePastePlaceholder": {
+    "message": "Paste it here"
+  },
+  "welcomePinHint": {
+    "message": "Click the puzzle-piece icon in Chrome's toolbar, then the pin next to PasteGuard."
+  },
+  "welcomePinned": {
+    "message": "I pinned it"
+  },
+  "welcomeTaped": {
+    "message": "Taped. That's all it takes."
+  },
+  "welcomeFailed": {
+    "message": "That didn't work here. Press Copy, then paste again."
   }
 }

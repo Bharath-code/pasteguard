@@ -1,19 +1,8 @@
+import { limited } from '../../lib/limit.js'
+
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/
 const SIZES = ['1–10', '11–50', '51–200', '201–500', '500+']
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
-
-const LIMIT = 5
-const hash = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))].slice(0, 12).map(b => b.toString(16).padStart(2, '0')).join('')
-
-// ponytail: KV is eventually consistent, so bursts across edge locations can slightly exceed LIMIT; move to a WAF rule once on a custom domain
-async function limited(request, env) {
-  const ip = request.headers.get('cf-connecting-ip') ?? 'unknown'
-  const key = `rl:${await hash(ip)}:${Math.floor(Date.now() / 60000)}`
-  const n = Number(await env.WAITLIST.get(key)) || 0
-  if (n >= LIMIT) return true
-  await env.WAITLIST.put(key, String(n + 1), { expirationTtl: 120 })
-  return false
-}
 
 export async function onRequestPost({ request, env }) {
   if (await limited(request, env)) return json({ error: 'too many requests' }, 429)
