@@ -7,9 +7,9 @@ A local-first Chrome extension that stops secrets being pasted into AI chats and
 ## Layout
 | Path | What | Commands |
 |---|---|---|
-| `apps/landing` | Static site (no framework) on Cloudflare Pages + `functions/api/waitlist.js` (KV `WAITLIST`, 5 req/min per hashed IP). Live: https://pasteguard-landing.pages.dev | `npm test` · `npm run dev` · `npm run deploy` |
+| `apps/landing` | Static site (no framework, incl. `/what-we-see/` data table; keep it true to the code) on Cloudflare Pages + `functions/api/waitlist.js` (KV `WAITLIST`, 5 req/min per hashed IP). Live: https://pasteguard-landing.pages.dev | `npm test` · `npm run dev` · `npm run deploy` |
 | `packages/core` | `src/detect.js` is the single source of truth for secret detection rules + `redact()`; `apps/landing/public/detect.js` is a synced copy (`npm run sync`). | `npm test -w packages/core` |
-| `apps/extension` | MV3 extension, not started. Planned file layout in its `README.md`. | — |
+| `apps/extension` | MV3 extension (WXT + Preact). Layout in its `README.md`. | `npm run dev\|build\|lint\|typecheck\|size\|zip -w apps/extension` |
 | `apps/extension/design/index.html` | Living UI/UX design doc: surfaces, motion tokens, a11y, budgets, state matrix, voice. Interactive demos import `detect.js`. | preview `ext-design` (serves `apps/` on :4322 → `/extension/design/`) |
 | `research/slopsquatting` | Zero-dependency study: how often LLMs recommend nonexistent packages. Feeds the "Slopsquatting Index" content. | `npm test` · `node study.mjs prompts\|run\|check\|report` |
 | `.claudedocs` | Strategy reports: `extension-decision-report.md` (product, feasibility, kill criteria), `gtm-strategy.md` (market size, moat, GTM), `product-strategy.md` (competitor matrix, wow moments, horizons, north star), `extension-prd-architecture.md` (PRD, stack, architecture, screen flow, build plan). | — |

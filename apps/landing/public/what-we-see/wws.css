@@ -1,0 +1,26 @@
+.wws { max-width: 1040px; margin-inline: auto; padding: 32px var(--gutter) var(--section); display: grid; gap: 24px; }
+.back { font-weight: 600; text-underline-offset: 3px; justify-self: start; }
+.paper { background: var(--paper); color: var(--paper-ink); border-radius: var(--r-lg); padding: clamp(8px, 2vw, 24px); box-shadow: 0 40px 80px -30px rgb(0 0 0 / .6); }
+.paper table { width: 100%; border-collapse: collapse; font-size: .9375rem; }
+.paper th, .paper td { text-align: left; vertical-align: top; padding: 14px 12px; border-bottom: 1px solid #DAD5EA; }
+.paper thead th { font-size: .8125rem; font-weight: 600; color: var(--paper-muted); }
+.paper tbody tr:last-child > * { border-bottom: 0; }
+.paper tbody th { font-weight: 600; white-space: nowrap; }
+.paper tbody th a { display: block; margin-top: 2px; font: 400 .78rem var(--f-code); color: var(--paper-muted); text-underline-offset: 3px; }
+.paper a:focus-visible { outline-color: var(--paper-ink); }
+.paper code { font-size: .82em; background: #fff; padding: 1px 5px; border-radius: 4px; }
+.flow { width: 100%; height: auto; }
+.flow .box { fill: var(--ink-2); stroke: var(--line); stroke-width: 1.5; }
+.flow .box.dev { fill: var(--ink-3); }
+.flow text { fill: var(--text); font: 500 14px var(--f-body); }
+.flow text.s { fill: var(--muted); font-size: 12px; }
+.flow .wire { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 6; }
+.flow .fence { fill: none; stroke: var(--violet); stroke-width: 1.5; stroke-dasharray: 2 5; opacity: .7; }
+@media (max-width: 720px) {
+  .paper thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .paper tr, .paper tbody { display: block; }
+  .paper tr { padding: 14px 4px; border-bottom: 1px solid #DAD5EA; }
+  .paper tbody tr:last-child { border-bottom: 0; }
+  .paper th, .paper td { display: block; padding: 4px 8px; border: 0; }
+  .paper td::before { content: attr(data-label); display: block; font-size: .75rem; font-weight: 600; color: var(--paper-muted); }
+}
