@@ -49,7 +49,7 @@ export async function route(raw: unknown, sender: Sender): Promise<unknown> {
   }
 }
 
-export const onTabRemoved = (tabId: number) => {
-  forgetTab(tabId)
+export const onTabRemoved = async (tabId: number) => {
+  await forgetTab(tabId)
   return dropVault(tabId)
 }

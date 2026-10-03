@@ -2,7 +2,7 @@ import { test, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { installFakeChrome } from './fake-chrome.ts'
-import { onCaught, setTabState, forgetTab } from '../src/sw/badge.ts'
+import { onCaught, setTabState, forgetTab, restoreBadges } from '../src/sw/badge.ts'
 
 const msgs = JSON.parse(readFileSync(new URL('../public/_locales/en/messages.json', import.meta.url), 'utf8'))
 
@@ -32,6 +32,7 @@ function fakeAction() {
   }
 }
 
+const flush = () => new Promise<void>(r => setImmediate(r))
 let fake: ReturnType<typeof fakeAction>
 beforeEach(() => {
   installFakeChrome()
@@ -39,17 +40,17 @@ beforeEach(() => {
 })
 
 test('catch sets coral badge then clears after 4 s', async (t) => {
-  t.mock.timers.enable({ apis: ['setTimeout'] })
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'] })
   await onCaught(7, 2)
   assert.deepEqual(fake.badge(7), { text: '2', color: '#FF5E7E' })
   t.mock.timers.tick(4000)
-  await Promise.resolve()
+  await flush()
   assert.equal(fake.badge(7).text, '')
   assert.equal(fake.title(7), 'PasteGuard: 2 secrets taped on this tab')
 })
 
 test('title is singular for one and totals across catches; second catch restarts the 4 s', async (t) => {
-  t.mock.timers.enable({ apis: ['setTimeout'] })
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'] })
   await onCaught(3, 1)
   assert.equal(fake.title(3), 'PasteGuard: 1 secret taped on this tab')
   t.mock.timers.tick(3000)
@@ -58,7 +59,7 @@ test('title is singular for one and totals across catches; second catch restarts
   t.mock.timers.tick(3000)
   assert.equal(fake.badge(3).text, '2')
   t.mock.timers.tick(1000)
-  await Promise.resolve()
+  await flush()
   assert.equal(fake.badge(3).text, '')
 })
 
@@ -81,5 +82,36 @@ test('ignores zero or invalid counts and survives action errors', async () => {
   assert.equal(fake.badge(9).text, '<unset>')
   ;(chrome.action as unknown as { setBadgeText: () => Promise<void> }).setBadgeText = async () => { throw new Error('tab gone') }
   await onCaught(9, 1)
-  forgetTab(9)
+  await forgetTab(9)
+})
+
+test('after a SW restart the total survives and expired badges are cleared', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'] })
+  await onCaught(4, 2)
+  t.mock.timers.reset()
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: Date.now() + 5000 })
+  await restoreBadges()
+  assert.equal(fake.badge(4).text, '')
+  await onCaught(4, 1)
+  assert.equal(fake.title(4), 'PasteGuard: 3 secrets taped on this tab')
+})
+
+test('after a SW restart a live badge is re-armed for the remaining time', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'] })
+  await onCaught(6, 1)
+  t.mock.timers.tick(1000)
+  await restoreBadges()
+  t.mock.timers.tick(2999)
+  await flush()
+  assert.equal(fake.badge(6).text, '1')
+  t.mock.timers.tick(1)
+  await flush()
+  assert.equal(fake.badge(6).text, '')
+})
+
+test('forgetTab purges the stored total', async () => {
+  await onCaught(8, 2)
+  await forgetTab(8)
+  await onCaught(8, 1)
+  assert.equal(fake.title(8), 'PasteGuard: 1 secret taped on this tab')
 })

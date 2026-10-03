@@ -1,7 +1,7 @@
 export type FakeArea = {
   data: Map<string, unknown>
   failSet: boolean
-  get(key: string | string[]): Promise<Record<string, unknown>>
+  get(key: string | string[] | null): Promise<Record<string, unknown>>
   set(items: Record<string, unknown>): Promise<void>
   remove(key: string | string[]): Promise<void>
 }
@@ -15,6 +15,7 @@ const area = (): FakeArea => {
     failSet: false,
     async get(key) {
       const out: Record<string, unknown> = {}
+      if (key === null) return Object.fromEntries([...data].map(([k, v]) => [k, structuredClone(v)]))
       for (const k of Array.isArray(key) ? key : [key]) if (data.has(k)) out[k] = structuredClone(data.get(k))
       return out
     },
