@@ -1,5 +1,6 @@
 import { MsgSchema, type Msg } from '../shared/messages.ts'
 import { addAllow, markScanned, readSettings } from '../shared/storage.ts'
+import { check } from './registry.ts'
 import { dropVault, getVault, putVault } from './vault.ts'
 
 type Sender = { id?: string; tab?: { id?: number } }
@@ -19,7 +20,7 @@ async function handle(msg: Msg, tabId: number): Promise<unknown> {
       return msg.hashes.map(h => known.has(h))
     }
     case 'pkg':
-      return { kind: 'error' }
+      return check(msg.eco, msg.name)
     case 'scan.once':
       return { first: await markScanned(msg.id) }
     case 'allow.add':

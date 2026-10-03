@@ -61,7 +61,7 @@ test('stub handlers validate and answer', async () => {
   assert.deepEqual(await route({ t: 'adapter.status', ok: true, site: 'claude.ai' }, okSender), { ok: true })
   assert.deepEqual(await route({ t: 'allow.add', hash: 'h', type: 'k' }, okSender), { ok: false })
   assert.deepEqual(await route({ t: 'allow.has', hashes: ['h1', 'h2'] }, okSender), [false, false])
-  assert.deepEqual(await route({ t: 'pkg', eco: 'npm', name: 'left-pad' }, okSender), { kind: 'error' })
+  assert.deepEqual(await route({ t: 'pkg', eco: 'npm', name: 'Bad Name' }, okSender), { kind: 'error' })
   assert.equal(await route({ t: 'caught', types: 'a', site: 1 }, okSender), undefined)
 })
 
