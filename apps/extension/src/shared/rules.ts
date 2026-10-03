@@ -14,7 +14,8 @@ const timeOnce = (re: RegExp): number => {
   return performance.now() - t0
 }
 
-export function validateRule(source: string): RuleResult {
+// timed:false skips the speed gate: the content script uses it so a rule that passed at save time is never dropped by a slow moment.
+export function validateRule(source: string, { timed = true } = {}): RuleResult {
   if (!source) return bad('Enter a pattern.')
   let re: RegExp
   try {
@@ -24,7 +25,7 @@ export function validateRule(source: string): RuleResult {
   }
   if (re.test('')) return bad('That pattern matches empty text, so it would tape everything.')
   re.lastIndex = 0
-  if (timeOnce(re) > SLOW_MS && timeOnce(re) > SLOW_MS) return bad(`That pattern is too slow (over ${SLOW_MS} ms on a 10 KB sample).`)
+  if (timed && timeOnce(re) > SLOW_MS && timeOnce(re) > SLOW_MS) return bad(`That pattern is too slow (over ${SLOW_MS} ms on a 10 KB sample).`)
   re.lastIndex = 0
   return { ok: true, re }
 }

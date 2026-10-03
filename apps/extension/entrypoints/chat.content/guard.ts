@@ -79,7 +79,7 @@ export async function chunkedDetect(text: string, opts: { pii: boolean; extra: E
 
 export function compileRules(rules: GuardSettings['rules']): Extra[] {
   return rules.flatMap(r => {
-    const v = validateRule(r.source)
+    const v = validateRule(r.source, { timed: false })
     return v.ok ? [{ type: r.type, re: v.re }] : []
   })
 }

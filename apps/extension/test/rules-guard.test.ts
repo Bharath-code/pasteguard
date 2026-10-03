@@ -19,3 +19,8 @@ test('returned regex starts at lastIndex 0', () => {
   const r = validateRule('acme_svc_[a-z0-9]{8,}')
   assert.ok(r.ok && r.re.lastIndex === 0)
 })
+test('timed:false skips the speed gate but keeps syntax and empty checks', () => {
+  assert.equal(validateRule('(a+)+$', { timed: false }).ok, true)
+  assert.equal(validateRule('(', { timed: false }).ok, false)
+  assert.equal(validateRule('a*', { timed: false }).ok, false)
+})
