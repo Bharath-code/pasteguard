@@ -1,4 +1,16 @@
 {
   "name": { "message": "PasteGuard" },
-  "description": { "message": "Stop secret leaks in ChatGPT & Claude. Flags packages the AI made up." }
+  "description": { "message": "Stop secret leaks in ChatGPT & Claude. Flags packages the AI made up." },
+  "chipTapedOne": { "message": "$COUNT$ secret taped: $TYPES$", "placeholders": { "count": { "content": "$1" }, "types": { "content": "$2" } } },
+  "chipTapedMany": { "message": "$COUNT$ secrets taped: $TYPES$", "placeholders": { "count": { "content": "$1" }, "types": { "content": "$2" } } },
+  "chipExposedOne": { "message": "$COUNT$ secret visible: $TYPES$", "placeholders": { "count": { "content": "$1" }, "types": { "content": "$2" } } },
+  "chipExposedMany": { "message": "$COUNT$ secrets visible: $TYPES$", "placeholders": { "count": { "content": "$1" }, "types": { "content": "$2" } } },
+  "chipHelperTaped": { "message": "The AI will see placeholders. Your answer is restored on this screen." },
+  "chipHelperExposed": { "message": "Press Esc to tape them again." },
+  "keySend": { "message": "send" },
+  "keyUndo": { "message": "undo" },
+  "annTapedOne": { "message": "1 secret replaced with a placeholder." },
+  "annTapedMany": { "message": "$COUNT$ secrets replaced with placeholders.", "placeholders": { "count": { "content": "$1" } } },
+  "toastClipboard": { "message": "Couldn't paste here. The taped text is on your clipboard." },
+  "toastFailed": { "message": "Couldn't check that paste, so nothing was pasted. Try again." }
 }

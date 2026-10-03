@@ -16,7 +16,7 @@ const root = () => {
   if (!r) throw new Error('no shadow root exposed')
   return r
 }
-const rootAll = (sel: string) => [...root().querySelectorAll<HTMLElement>(sel)]
+const rootAll = (sel: string) => (roots.length ? [...root().querySelectorAll<HTMLElement>(sel)] : [])
 
 const readers: Record<string, (el: HTMLElement | undefined, arg: string) => unknown> = {
   text: el => el?.textContent ?? null,

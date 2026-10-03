@@ -1,0 +1,87 @@
+:host { all: initial; }
+*, *::before, *::after { box-sizing: border-box; }
+
+.layer {
+  all: unset;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  font: 400 13.5px/1.45 var(--f-body);
+  color: var(--paper-ink);
+  -webkit-font-smoothing: antialiased;
+}
+.layer:not(:popover-open) { display: none; }
+
+.chip {
+  position: fixed;
+  inset-block-end: var(--pg-bottom, 24px);
+  inset-inline-start: var(--pg-start, 0);
+  inline-size: var(--pg-width, fit-content);
+  max-inline-size: calc(100vw - 16px);
+  margin-inline: var(--pg-margin, auto);
+  inset-inline-end: var(--pg-end, 0);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 10px 12px;
+  background: var(--paper);
+  color: var(--paper-ink);
+  border-radius: 12px;
+  box-shadow: 0 18px 40px -14px rgb(0 0 0 / .6);
+  pointer-events: auto;
+  transform-origin: bottom center;
+  opacity: 0;
+  transform: translateY(6px) scale(.98);
+  transition: opacity var(--d-exit) ease;
+}
+.chip[data-anchor=composer] { --pg-margin: 0; --pg-end: auto; }
+.chip[data-open] {
+  opacity: 1;
+  transform: none;
+  transition: opacity var(--d-pop) var(--ease-out), transform var(--d-pop) var(--ease-out);
+}
+.chip[data-state=exposed] { box-shadow: 0 0 0 2px var(--alert), 0 18px 40px -14px rgb(0 0 0 / .6); }
+
+.ico { inline-size: 22px; block-size: 22px; flex: none; }
+.msg { flex: 1 1 14em; min-inline-size: 0; color: var(--paper-ink); }
+.msg b { font-weight: 600; }
+.msg small { display: block; color: var(--paper-muted); font-size: 12px; }
+.keys { display: flex; align-items: center; gap: 6px; color: var(--paper-muted); font-size: 12px; }
+kbd {
+  display: inline-block;
+  min-inline-size: 1.6em;
+  padding-inline: 6px;
+  text-align: center;
+  font: 12px/1.5 var(--f-code);
+  color: var(--paper-muted);
+  border: 1px solid currentColor;
+  border-block-end-width: 2px;
+  border-radius: 5px;
+}
+
+.swap { transition: filter 200ms ease, opacity 200ms ease; }
+.swap.out { filter: blur(3px); opacity: 0; }
+
+.sr {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chip { transform: none; transition-property: opacity; transition-duration: 150ms; }
+  .chip[data-open] { transition-property: opacity; transition-duration: 150ms; }
+  .swap { transition-duration: 150ms; }
+}
+
+@media (forced-colors: active) {
+  .chip { outline: 1px solid CanvasText; background: Canvas; color: CanvasText; }
+  .chip[data-state=exposed] { outline: 2px solid Mark; }
+  .msg, .msg small, .keys, kbd { color: CanvasText; }
+  kbd { outline: 1px solid CanvasText; border-color: transparent; }
+}

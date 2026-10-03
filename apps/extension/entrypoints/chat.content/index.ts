@@ -1,11 +1,25 @@
 import { pickAdapter } from '../../adapters'
 import { AI_MATCHES } from '../../src/shared/sites'
+import { createChip, type Chip } from '../../ui/chip'
+import { mountHost } from '../../ui/host'
+import { createToast } from '../../ui/toast'
 import { installGuard, type GuardUI } from './guard'
 import { settingsSource } from './settings'
 import { installTestHook } from './testHook'
 import { chromeSend, TabVault } from './vault'
 
-const ui: GuardUI = { taped() {}, fallback() {} }
+let chip: Chip | undefined
+let toast: ReturnType<typeof createToast> | undefined
+const ui: GuardUI = {
+  taped: r => {
+    const host = mountHost()
+    ;(chip ??= createChip(host)).taped(r)
+  },
+  fallback: k => {
+    const host = mountHost()
+    ;(toast ??= createToast(host)).fallback(k)
+  },
+}
 const dev = import.meta.env.MODE === 'development'
 
 export default defineContentScript({
