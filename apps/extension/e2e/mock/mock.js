@@ -107,6 +107,7 @@ const reply = sent => {
   const answer = document.createElement('div')
   answer.dataset.answer = ''
   answer.dataset.streaming = 'true'
+  answer.source = pieces.join('') + '\nnpm i react-form-utils-pro zod'
   thread.appendChild(answer)
   const model = []
   const render = () => {
@@ -166,7 +167,8 @@ document.querySelector('[data-send]').addEventListener('click', () => {
   reply(text)
 })
 
-const lastAnswerText = () => [...document.querySelectorAll('[data-answer]')].at(-1)?.innerText ?? ''
+// Real sites copy from app state (markdown), not from the rendered DOM.
+const lastAnswerText = () => [...document.querySelectorAll('[data-answer]')].at(-1)?.source ?? ''
 document.querySelector('[data-copy-writeText]').addEventListener('click', () => navigator.clipboard.writeText(lastAnswerText()))
 document.querySelector('[data-copy-write]').addEventListener('click', () =>
   navigator.clipboard.write([new ClipboardItem({ 'text/plain': new Blob([lastAnswerText()], { type: 'text/plain' }) })]),

@@ -4,6 +4,7 @@ import { createChip, timing, type Chip } from '../../ui/chip'
 import { mountHost } from '../../ui/host'
 import { createNotice } from '../../ui/notice'
 import { createToast } from '../../ui/toast'
+import { installCopy } from './copy'
 import { installGuard, type GuardUI } from './guard'
 import { installLeakScan } from './leakscan'
 import { installRestorer, passMs, readRestored } from './restore'
@@ -50,6 +51,7 @@ export default defineContentScript({
       mark: dev ? n => performance.mark(`pg:${n}`) : undefined,
     }).own
     installRestorer({ adapter, vault })
+    installCopy({ vault, adapter })
     installLeakScan({ adapter, send: chromeSend, settings, show: hits => createNotice(mountHost()).leak(hits) })
   },
 })
