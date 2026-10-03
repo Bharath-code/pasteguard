@@ -131,3 +131,18 @@ test('page listener on copy never sees the real value', async ({ page, restored,
   const seen = await page.evaluate(() => (window as unknown as { __seen: string[] }).__seen)
   expect(seen.join('|')).not.toContain('IOSFODNN7EXAMPLE')
 })
+
+test('forged pg-copy with a gesture only resolves placeholders on screen', async ({ page, pasteTaped, clipboard }) => {
+  await page.goto(`${MOCK}/prosemirror.html?answer=${encodeURIComponent('Use PG_SECRET_1 now')}`)
+  await pasteTaped(page, TWO)
+  await page.click('[data-send]')
+  await page.waitForSelector('[data-answer] pg-v')
+  await arm(page)
+  await page.evaluate(() => document.addEventListener('click', () => document.dispatchEvent(new CustomEvent('pg-copy', { detail: 'PG_SECRET_1 PG_SECRET_2' })), { once: true }))
+  await page.click('body')
+  await expect.poll(() => clipboard(page)).not.toBe(SENTINEL)
+  const text = await clipboard(page)
+  expect(text).toContain(AWS)
+  expect(text).toContain('PG_SECRET_2')
+  expect(text).not.toContain(GH)
+})

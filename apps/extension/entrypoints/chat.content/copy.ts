@@ -1,4 +1,5 @@
 import type { Adapter } from '../../adapters'
+import { restoredHosts } from './restore'
 import type { TabVault } from './vault'
 
 type Vault = Pick<TabVault, 'byId'>
@@ -36,11 +37,33 @@ function widen(r: Range): Range {
   return r
 }
 
+const MAX_IDS = 10
+
+// A site Copy may only resolve placeholders the restorer is showing right now, so a forged event can't dump the vault.
+const onScreen = (): Set<string> => {
+  const ids = new Set<string>()
+  for (const h of document.querySelectorAll('pg-v')) {
+    const id = restoredHosts.get(h)
+    if (id) ids.add(id)
+  }
+  return ids
+}
+
+const swapShown = (text: string, v: Vault): string => {
+  const shown = onScreen()
+  const seen = new Set<string>()
+  return text.replace(/PG_SECRET_\d+/g, id => {
+    if (!shown.has(id) || (!seen.has(id) && seen.size >= MAX_IDS)) return id
+    seen.add(id)
+    return swap(id, v)
+  })
+}
+
 export function installCopy({ vault, adapter }: { vault: Vault; adapter: Pick<Adapter, 'composer'> }): void {
   document.addEventListener('pg-copy', e => {
     const d = (e as CustomEvent).detail as unknown
     if (typeof d !== 'string' || d.length >= 1_000_000 || !/PG_SECRET_\d+/.test(d) || !navigator.userActivation.isActive) return
-    void navigator.clipboard.writeText(swap(d, vault)).catch(() => {})
+    void navigator.clipboard.writeText(swapShown(d, vault)).catch(() => {})
   })
   window.addEventListener(
     'copy',
