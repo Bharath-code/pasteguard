@@ -80,6 +80,7 @@ type Fixtures = {
   extId: string
   sw: ReturnType<typeof makeSw>
   paste: (page: Page, text: string) => Promise<void>
+  pasteTaped: (page: Page, text: string) => Promise<void>
   clipboard: (page: Page) => Promise<string>
   leaks: (page: Page, value: string) => Promise<string[]>
   restored: (page: Page, kind: string, text: string) => Promise<string>
@@ -132,6 +133,15 @@ export const test = base.extend<Fixtures>({
       await page.keyboard.press('ControlOrMeta+V')
     })
   },
+  pasteTaped: async ({ paste }, use) => {
+    await use(async (page, text) => {
+      await paste(page, text)
+      await page.waitForFunction(() => {
+        const c = document.querySelector<HTMLElement>('[data-composer]')
+        return /PG_SECRET_\d/.test(c instanceof HTMLTextAreaElement ? c.value : (c?.textContent ?? ''))
+      })
+    })
+  },
   clipboard: async ({}, use) => {
     await use(async page => {
       await page.bringToFront()
@@ -149,10 +159,10 @@ export const test = base.extend<Fixtures>({
       return found
     })
   },
-  restored: async ({ paste }, use) => {
+  restored: async ({ pasteTaped }, use) => {
     await use(async (page, kind, text) => {
       await page.goto(`${MOCK}/${kind}.html`)
-      await paste(page, text)
+      await pasteTaped(page, text)
       await page.click('[data-send]')
       await page.waitForSelector('[data-answer] pg-v', { timeout: 10_000 })
       return page.locator('[data-answer]').last().innerText()

@@ -152,5 +152,16 @@
   },
   "rotateIt": {
     "message": "Rotate it"
+  },
+  "restoreTip": {
+    "message": "Restored on this screen only. The AI saw $ID$.",
+    "placeholders": {
+      "id": {
+        "content": "$1"
+      }
+    }
+  },
+  "restoreCleared": {
+    "message": "Value cleared when the tab closed"
   }
 }

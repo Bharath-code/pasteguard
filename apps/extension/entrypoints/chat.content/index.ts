@@ -6,6 +6,7 @@ import { createNotice } from '../../ui/notice'
 import { createToast } from '../../ui/toast'
 import { installGuard, type GuardUI } from './guard'
 import { installLeakScan } from './leakscan'
+import { installRestorer, passMs, readRestored } from './restore'
 import { settingsSource } from './settings'
 import { installTestHook } from './testHook'
 import { chromeSend, TabVault } from './vault'
@@ -31,16 +32,24 @@ export default defineContentScript({
   runAt: 'document_start',
   allFrames: false,
   main() {
-    if (dev) installTestHook({ 'chip.blurDismissMs': ([n]) => void (timing.blurDismissMs = Number(n)) })
+    if (dev)
+      installTestHook({
+        'chip.blurDismissMs': ([n]) => void (timing.blurDismissMs = Number(n)),
+        'restore.read': () => readRestored(),
+        'restore.timings': () => [...passMs],
+        'restore.clearTimings': () => void (passMs.length = 0),
+      })
     const settings = settingsSource(chromeSend)
+    const vault = new TabVault()
     own = installGuard({
       adapter,
-      vault: new TabVault(),
+      vault,
       settings,
       ui,
       send: chromeSend,
       mark: dev ? n => performance.mark(`pg:${n}`) : undefined,
     }).own
+    installRestorer({ adapter, vault })
     installLeakScan({ adapter, send: chromeSend, settings, show: hits => createNotice(mountHost()).leak(hits) })
   },
 })

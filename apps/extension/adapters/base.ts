@@ -75,8 +75,13 @@ export const replaceText = (el: HTMLElement, text: string): boolean => {
 
 const all = (sel: string): HTMLElement[] => {
   if (!sel) return []
-  const hits = [...document.querySelectorAll<HTMLElement>(sel)]
-  return hits.filter(h => !hits.some(o => o !== h && o.contains(h)))
+  const out: HTMLElement[] = []
+  let outer: HTMLElement | undefined
+  for (const el of document.querySelectorAll<HTMLElement>(sel)) {
+    if (outer?.contains(el)) continue
+    out.push((outer = el))
+  }
+  return out
 }
 
 export const makeAdapter = (c: SiteConfig): Adapter => ({

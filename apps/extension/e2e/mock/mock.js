@@ -101,7 +101,8 @@ if (flag('broken')) {
 const reply = sent => {
   const tokens = [...new Set(sent.match(/PG_SECRET_\d+/g) ?? [])]
   const pieces = ['Here is the setup. ']
-  if (flag('split')) pieces.push('PG_SEC', 'RET_', '1 done. ')
+  if (q.get('answer')) pieces.push(q.get('answer'))
+  else if (flag('split')) pieces.push('PG_SEC', 'RET_', '1 done. ')
   else for (const t of tokens) pieces.push('Use ', t, ' for it. ')
   const answer = document.createElement('div')
   answer.dataset.answer = ''
@@ -142,6 +143,18 @@ const reply = sent => {
       }, 300)
     }
   }, 30)
+}
+
+const bulk = +(q.get('answers') ?? 0)
+for (let i = 0; i < bulk; i++) {
+  const a = document.createElement('div')
+  a.dataset.answer = ''
+  for (let p = 0; p < 4; p++) {
+    const para = document.createElement('p')
+    para.textContent = `Answer ${i} paragraph ${p}: ` + 'the PG tool and the secret handling doc are ordinary words here. '.repeat(6)
+    a.appendChild(para)
+  }
+  thread.appendChild(a)
 }
 
 document.querySelector('[data-send]').addEventListener('click', () => {
