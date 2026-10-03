@@ -2,6 +2,7 @@ import { detect, redact } from '@pasteguard/core/detect'
 import { sha256Hex } from '@pasteguard/core/hash'
 import type { Adapter } from '../../adapters'
 import type { Msg } from '../../src/shared/messages.ts'
+import { validateRule } from '../../src/shared/rules.ts'
 import type { TabVault } from './vault'
 
 export type GuardSettings = { paused: string[]; pii: boolean; rules: { type: string; source: string }[] }
@@ -77,15 +78,10 @@ export async function chunkedDetect(text: string, opts: { pii: boolean; extra: E
 }
 
 export function compileRules(rules: GuardSettings['rules']): Extra[] {
-  const out: Extra[] = []
-  for (const r of rules) {
-    try {
-      out.push({ type: r.type, re: new RegExp(r.source, 'g') })
-    } catch {
-      continue
-    }
-  }
-  return out
+  return rules.flatMap(r => {
+    const v = validateRule(r.source, { timed: false })
+    return v.ok ? [{ type: r.type, re: v.re }] : []
+  })
 }
 
 export function installGuard(ctx: GuardCtx): { own<T>(fn: () => T): T } {

@@ -397,5 +397,86 @@
   },
   "welcomeFailed": {
     "message": "That didn't work here. Press Copy, then paste again."
+  },
+  "optionsTitle": {
+    "message": "PasteGuard settings"
+  },
+  "optionsRulesTitle": {
+    "message": "Custom rules"
+  },
+  "optionsRulesHelp": {
+    "message": "Add a pattern for secrets only your team has, like internal tokens. Rules run on this device and apply on your next paste."
+  },
+  "optionsRuleName": {
+    "message": "Name shown on the tape"
+  },
+  "optionsRuleNameDefault": {
+    "message": "Custom rule"
+  },
+  "optionsPattern": {
+    "message": "Pattern (JavaScript regex)"
+  },
+  "optionsSample": {
+    "message": "Test text"
+  },
+  "optionsSampleDefault": {
+    "message": "token = acme_svc_9f2kq81xz\ndocs link acme_public_readme"
+  },
+  "optionsMatches": {
+    "message": "Matches"
+  },
+  "optionsMatchCount": {
+    "message": "$1 matches in $2 ms"
+  },
+  "optionsMatchOne": {
+    "message": "1 match in $1 ms"
+  },
+  "optionsNoMatch": {
+    "message": "No matches in $1 ms"
+  },
+  "optionsAddRule": {
+    "message": "Add rule"
+  },
+  "optionsRuleAdded": {
+    "message": "Rule added. It applies on your next paste."
+  },
+  "optionsRuleRemove": {
+    "message": "Remove"
+  },
+  "optionsRulesEmpty": {
+    "message": "No custom rules yet."
+  },
+  "optionsAllowTitle": {
+    "message": "Always allowed"
+  },
+  "optionsAllowHelp": {
+    "message": "Values you chose to always allow. We only keep a one-way fingerprint, so the values themselves are never shown."
+  },
+  "optionsAllowEmpty": {
+    "message": "Nothing is always allowed."
+  },
+  "optionsAllowAdded": {
+    "message": "Added $1"
+  },
+  "optionsPiiTitle": {
+    "message": "Personal data"
+  },
+  "optionsPiiLabel": {
+    "message": "Also tape email addresses"
+  },
+  "optionsPiiHelp": {
+    "message": "Off by default because emails are common in normal chats."
+  },
+  "optionsPausedTitle": {
+    "message": "Paused sites"
+  },
+  "optionsPausedEmpty": {
+    "message": "No sites are paused."
+  },
+  "optionsResume": {
+    "message": "Resume"
+  },
+  "popupSettings": {
+    "message": "Settings"
   }
 }
