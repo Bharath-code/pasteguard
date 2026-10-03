@@ -1,5 +1,5 @@
 import { MsgSchema, type Msg } from '../shared/messages.ts'
-import { addAllow, markScanned, readSettings } from '../shared/storage.ts'
+import { addAllow, markAdapter, markScanned, readSettings, recordCatch } from '../shared/storage.ts'
 import { forgetTab, onCaught, setTabState } from './badge.ts'
 import { check } from './registry.ts'
 import { dropVault, getVault, putVault } from './vault.ts'
@@ -28,9 +28,11 @@ async function handle(msg: Msg, tabId: number): Promise<unknown> {
       return { ok: await addAllow(msg.hash, msg.type) }
     case 'caught':
       await onCaught(tabId, msg.types.length)
+      await recordCatch(msg.types)
       return ok
     case 'adapter.status':
       await setTabState(tabId, msg.ok ? 'active' : 'idle')
+      await markAdapter(msg.site, msg.ok)
       return ok
     case 'sentOriginal':
       return ok

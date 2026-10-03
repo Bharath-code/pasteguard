@@ -80,3 +80,45 @@ export function markScanned(hash: string): Promise<boolean> {
   scanLock = run.catch(() => undefined)
   return run
 }
+
+export const dayKey = (d: Date): string => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+let statsLock: Promise<unknown> = Promise.resolve()
+
+export function recordCatch(types: string[], now = new Date()): Promise<void> {
+  if (!types.length) return Promise.resolve()
+  const run = statsLock.then(async () => {
+    const cur = parseStats((await chrome.storage.local.get('stats'))['stats']) ?? { v: 1 as const, days: {} }
+    const key = dayKey(now)
+    const day = cur.days[key] ?? { caught: 0, byType: {} }
+    const byType = { ...day.byType }
+    for (const t of types) byType[t] = (byType[t] ?? 0) + 1
+    const days = { ...cur.days, [key]: { caught: day.caught + types.length, byType } }
+    const keep = Object.keys(days).sort().slice(-STATS_DAYS)
+    await chrome.storage.local.set({ stats: { v: 1, days: Object.fromEntries(keep.map(k => [k, days[k]])) } })
+  })
+  statsLock = run.catch(() => undefined)
+  return run
+}
+
+// Monday-first calendar week; future days are 0.
+export function weekStats(stats: Stats | undefined, now = new Date()): { bars: number[]; total: number; today: number } {
+  const today = (now.getDay() + 6) % 7
+  const bars = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - today + i)
+    return stats?.days[dayKey(d)]?.caught ?? 0
+  })
+  return { bars, total: bars.reduce((a, b) => a + b, 0), today }
+}
+
+export async function setPaused(host: string, paused: boolean): Promise<void> {
+  const cur = await readSettings()
+  const rest = cur.paused.filter(h => h !== host)
+  await chrome.storage.local.set({ settings: { ...cur, paused: paused ? [...rest, host] : rest } })
+}
+
+export async function markAdapter(site: string, ok: boolean): Promise<void> {
+  const cur = (await chrome.storage.session.get('adapters'))['adapters']
+  const map = typeof cur === 'object' && cur !== null ? (cur as Record<string, boolean>) : {}
+  await chrome.storage.session.set({ adapters: { ...map, [site]: ok } })
+}

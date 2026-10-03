@@ -16,6 +16,7 @@
     "build:e2e": "wxt build --mode development"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "1.63.0",
     "@preact/preset-vite": "2.10.6",
     "eslint": "10.11.0",
@@ -24,9 +25,9 @@
     "wxt": "0.21.4"
   },
   "dependencies": {
+    "@pasteguard/core": "*",
     "@preact/signals": "2.11.3",
     "preact": "11.0.0",
-    "zod": "4.6.5",
-    "@pasteguard/core": "*"
+    "zod": "4.6.5"
   }
 }

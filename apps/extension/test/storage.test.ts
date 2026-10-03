@@ -31,3 +31,34 @@ test('stats and pkg cache schemas', () => {
   assert.ok(parsePkgCache({ 'npm:left-pad': { verdict: { kind: 'ok' }, at: 1 } }))
   assert.equal(parsePkgCache({ 'npm:x': { verdict: { kind: 'bogus' }, at: 1 } }), undefined)
 })
+
+import { recordCatch, weekStats, setPaused, markAdapter, dayKey } from '../src/shared/storage.ts'
+
+test('recordCatch accumulates per day and keeps 14 days', async () => {
+  const c = installFakeChrome()
+  const d = new Date(2026, 9, 1)
+  await recordCatch(['AWS access key', 'Stripe key'], d)
+  await recordCatch(['AWS access key'], d)
+  const s = parseStats((await c.storage.local.get('stats'))['stats'])
+  assert.equal(s?.days['2026-10-01']?.caught, 3)
+  assert.deepEqual(s?.days['2026-10-01']?.byType, { 'AWS access key': 2, 'Stripe key': 1 })
+  for (let i = 2; i < 20; i++) await recordCatch(['x'], new Date(2026, 9, i))
+  assert.equal(Object.keys(parseStats((await c.storage.local.get('stats'))['stats'])?.days ?? {}).length, 14)
+})
+test('weekStats is Monday-first and ignores other weeks', () => {
+  const wed = new Date(2026, 9, 7)
+  const stats = { v: 1 as const, days: { [dayKey(new Date(2026, 9, 5))]: { caught: 2, byType: {} }, [dayKey(wed)]: { caught: 1, byType: {} }, [dayKey(new Date(2026, 9, 4))]: { caught: 9, byType: {} } } }
+  assert.deepEqual(weekStats(stats, wed), { bars: [2, 0, 1, 0, 0, 0, 0], total: 3, today: 2 })
+  assert.deepEqual(weekStats(undefined, new Date(2026, 9, 11)), { bars: [0, 0, 0, 0, 0, 0, 0], total: 0, today: 6 })
+})
+test('setPaused toggles one host and markAdapter merges', async () => {
+  const c = installFakeChrome()
+  await setPaused('claude.ai', true)
+  await setPaused('claude.ai', true)
+  await setPaused('chatgpt.com', true)
+  await setPaused('claude.ai', false)
+  assert.deepEqual((await readSettings()).paused, ['chatgpt.com'])
+  await markAdapter('claude.ai', false)
+  await markAdapter('chatgpt.com', true)
+  assert.deepEqual((await c.storage.session.get('adapters'))['adapters'], { 'claude.ai': false, 'chatgpt.com': true })
+})

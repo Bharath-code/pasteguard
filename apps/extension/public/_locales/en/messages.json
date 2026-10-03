@@ -308,5 +308,58 @@
   },
   "badgeTitlePaused": {
     "message": "PasteGuard: paused on this site"
+  },
+  "popupOn": {
+    "message": "On for this site"
+  },
+  "popupPausedHere": {
+    "message": "Paused here"
+  },
+  "popupNotAi": {
+    "message": "Not an AI site"
+  },
+  "popupNotAiWhy": {
+    "message": "Open ChatGPT, Claude or Gemini to pause PasteGuard there."
+  },
+  "popupSwitchFor": {
+    "message": "PasteGuard on $HOST$",
+    "placeholders": {
+      "host": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupCountOne": {
+    "message": "secret kept out of AI chats this week"
+  },
+  "popupCountMany": {
+    "message": "secrets kept out of AI chats this week"
+  },
+  "popupQuiet": {
+    "message": "All quiet on this tab"
+  },
+  "popupLimited": {
+    "message": "Limited on this site"
+  },
+  "popupSiteOn": {
+    "message": "On"
+  },
+  "popupSitePaused": {
+    "message": "Paused"
+  },
+  "popupFoot": {
+    "message": "Local only. Nothing leaves this device."
+  },
+  "popupSee": {
+    "message": "What we see"
+  },
+  "popupDiag": {
+    "message": "Copy diagnostic"
+  },
+  "popupDiagDone": {
+    "message": "Copied"
+  },
+  "popupChartLabel": {
+    "message": "Secrets caught each day this week"
   }
 }

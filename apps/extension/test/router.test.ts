@@ -141,3 +141,13 @@ test('scan.once is true once per conversation hash and capped at 500', async () 
   assert.equal(stored.length, 500)
   assert.deepEqual(await route({ t: 'scan.once', id: h(1) }, okSender), { first: true })
 })
+
+test('caught records stats and adapter.status persists per site', async () => {
+  const c = installFakeChrome()
+  await route({ t: 'caught', types: ['AWS access key'], site: 'claude.ai' }, tab(21))
+  const stats = (await c.storage.local.get('stats'))['stats'] as { days: Record<string, { caught: number }> }
+  const days = Object.values(stats.days)
+  assert.equal(days[0]?.caught, 1)
+  await route({ t: 'adapter.status', ok: false, site: 'claude.ai' }, tab(21))
+  assert.deepEqual((await c.storage.session.get('adapters'))['adapters'], { 'claude.ai': false })
+})
