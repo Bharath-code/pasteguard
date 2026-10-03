@@ -163,5 +163,131 @@
   },
   "restoreCleared": {
     "message": "Value cleared when the tab closed"
+  },
+  "pkgNotFound": {
+    "message": "Not on $ECO$",
+    "placeholders": {
+      "eco": {
+        "content": "$1"
+      }
+    }
+  },
+  "pkgNotFoundScoped": {
+    "message": "Not on public npm"
+  },
+  "pkgNew": {
+    "message": "Registered $WHEN$",
+    "placeholders": {
+      "when": {
+        "content": "$1"
+      }
+    }
+  },
+  "pkgLow": {
+    "message": "Only $N$ downloads last week",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      }
+    }
+  },
+  "pkgLowOne": {
+    "message": "Only 1 download last week"
+  },
+  "pkgLookalike": {
+    "message": "Looks like $LIKE$",
+    "placeholders": {
+      "like": {
+        "content": "$1"
+      }
+    }
+  },
+  "pkgOk": {
+    "message": "On $ECO$",
+    "placeholders": {
+      "eco": {
+        "content": "$1"
+      }
+    }
+  },
+  "pkgError": {
+    "message": "Couldn't check"
+  },
+  "pkgRetry": {
+    "message": "Retry"
+  },
+  "pkgTip": {
+    "message": "We checked the public registry. $REASON$",
+    "placeholders": {
+      "reason": {
+        "content": "$1"
+      }
+    }
+  },
+  "pkgWhyMissing": {
+    "message": "No package with this name exists, and AI tools sometimes invent them."
+  },
+  "pkgWhyScoped": {
+    "message": "It isn't on the public registry. It may be a private package."
+  },
+  "pkgWhyNew": {
+    "message": "It was registered $WHEN$, so it has little history.",
+    "placeholders": {
+      "when": {
+        "content": "$1"
+      }
+    }
+  },
+  "pkgWhyLow": {
+    "message": "It had $N$ downloads last week.",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      }
+    }
+  },
+  "pkgWhyLowOne": {
+    "message": "It had 1 download last week."
+  },
+  "pkgWhyLookalike": {
+    "message": "Its name is close to $LIKE$, a well-known package.",
+    "placeholders": {
+      "like": {
+        "content": "$1"
+      }
+    }
+  },
+  "pkgWhyOk": {
+    "message": "It exists and has some history."
+  },
+  "pkgWhyError": {
+    "message": "The registry didn't answer. Check your connection and retry."
+  },
+  "pkgLink": {
+    "message": "View on $ECO$",
+    "placeholders": {
+      "eco": {
+        "content": "$1"
+      }
+    }
+  },
+  "pkgAnnounceOne": {
+    "message": "1 package checked, $K$ not found.",
+    "placeholders": {
+      "k": {
+        "content": "$1"
+      }
+    }
+  },
+  "pkgAnnounceMany": {
+    "message": "$N$ packages checked, $K$ not found.",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      },
+      "k": {
+        "content": "$2"
+      }
+    }
   }
 }

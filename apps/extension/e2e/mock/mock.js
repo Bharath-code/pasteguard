@@ -107,7 +107,8 @@ const reply = sent => {
   const answer = document.createElement('div')
   answer.dataset.answer = ''
   answer.dataset.streaming = 'true'
-  answer.source = pieces.join('') + '\nnpm i react-form-utils-pro zod'
+  const code = q.get('code') ?? 'npm i react-form-utils-pro zod'
+  answer.source = pieces.join('') + '\n' + code
   thread.appendChild(answer)
   const model = []
   const render = () => {
@@ -121,7 +122,7 @@ const reply = sent => {
     if (model.length === pieces.length) {
       const pre = document.createElement('pre')
       const c = document.createElement('code')
-      c.textContent = 'npm i react-form-utils-pro zod'
+      c.textContent = code
       pre.appendChild(c)
       nodes.push(pre)
     }

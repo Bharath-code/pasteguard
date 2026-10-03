@@ -51,7 +51,7 @@ const textNodes = (root: Element): Text[] => {
   return out
 }
 
-export function installRestorer({ adapter, vault }: { adapter: Adapter; vault: Pick<TabVault, 'byId' | 'hydrate'> }): { stop(): void } {
+export function installRestorer({ adapter, vault, after }: { adapter: Adapter; vault: Pick<TabVault, 'byId' | 'hydrate'>; after?: (answer: HTMLElement) => boolean }): { stop(): void } {
   const targets = new Set<Node>()
   const known = new WeakSet<Element>()
   const peeled = new WeakMap<Element, Set<string>>()
@@ -110,7 +110,8 @@ export function installRestorer({ adapter, vault }: { adapter: Adapter; vault: P
     for (const a of adapter.answers()) {
       if (known.has(a) && !seen.some(n => a.contains(n))) continue
       known.add(a)
-      if (!restoreIn(a)) {
+      const restored = restoreIn(a)
+      if (!(after ? after(a) : true) || !restored) {
         again = true
         targets.add(a)
       }

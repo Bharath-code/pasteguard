@@ -1,12 +1,14 @@
 import { pickAdapter } from '../../adapters'
 import { AI_MATCHES } from '../../src/shared/sites'
 import { createChip, timing, type Chip } from '../../ui/chip'
-import { mountHost } from '../../ui/host'
+import { announce, mountHost } from '../../ui/host'
 import { createNotice } from '../../ui/notice'
 import { createToast } from '../../ui/toast'
+import { readChips, retryChip } from '../../ui/verdict'
 import { installCopy } from './copy'
 import { installGuard, type GuardUI } from './guard'
 import { installLeakScan } from './leakscan'
+import { installPackages } from './packages'
 import { installRestorer, passMs, readRestored } from './restore'
 import { settingsSource } from './settings'
 import { installTestHook } from './testHook'
@@ -39,6 +41,8 @@ export default defineContentScript({
         'restore.read': () => readRestored(),
         'restore.timings': () => [...passMs],
         'restore.clearTimings': () => void (passMs.length = 0),
+        'pkg.read': () => readChips(),
+        'pkg.retry': ([i]) => retryChip(Number(i)),
       })
     const settings = settingsSource(chromeSend)
     const vault = new TabVault()
@@ -50,7 +54,7 @@ export default defineContentScript({
       send: chromeSend,
       mark: dev ? n => performance.mark(`pg:${n}`) : undefined,
     }).own
-    installRestorer({ adapter, vault })
+    installRestorer({ adapter, vault, after: installPackages({ adapter, send: chromeSend, settings, announce: text => announce(mountHost().layer, text) }) })
     installCopy({ vault, adapter })
     installLeakScan({ adapter, send: chromeSend, settings, show: hits => createNotice(mountHost()).leak(hits) })
   },
