@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "e2e": "npm run build:e2e && playwright test",
-    "test": "node --test test/",
+    "test": "node --test \"test/*.test.*\"",
     "build:e2e": "wxt build --mode development"
   },
   "devDependencies": {

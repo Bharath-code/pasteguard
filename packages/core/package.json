@@ -4,7 +4,7 @@
   "type": "module",
   "exports": { "./*": "./src/*.js" },
   "scripts": {
-    "test": "node --test test/",
+    "test": "node --test \"test/*.test.*\"",
     "typecheck": "tsc -p jsconfig.json",
     "gates": "node bench/gates.mjs"
   },
