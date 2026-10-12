@@ -88,4 +88,4 @@ Use `--prefix individual:` for individual signups.
 Please use GitHub's private vulnerability reporting on this repository rather than a public issue.
 
 ## License
-No license file has been added yet. Until one is, all rights are reserved.
+[MIT](LICENSE)
