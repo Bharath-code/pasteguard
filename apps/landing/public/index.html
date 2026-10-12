@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PasteGuard: stop secrets leaking into ChatGPT, Claude and Gemini</title>
-  <meta name="description" content="PasteGuard catches API keys, passwords and customer data the moment you paste them into an AI chat, and swaps them for placeholders. It also flags packages the AI made up. Everything runs in your browser.">
+  <title>Stop API keys leaking into ChatGPT, Claude and Gemini</title>
+  <meta name="description" content="Free, open-source Chrome extension that swaps API keys and passwords for placeholders before you paste into AI chats, and flags packages that don't exist.">
   <meta name="theme-color" content="#1B1433">
   <meta name="color-scheme" content="dark">
   <meta property="og:type" content="website">
@@ -201,12 +201,12 @@ DATABASE_URL=postgres://admin:<span class="sec"><span class="sec-real">hunter2!p
     <ul class="ticks">
       <li>Install it for everyone from Google Admin or Intune. It takes about 10 minutes.</li>
       <li>See which AI tools and AI extensions your team actually uses.</li>
-      <li>Set rules per team: warn, swap for placeholders, or block.</li>
+      <li>Set rules per team: warn or swap for placeholders. Blocking is off unless you turn it on.</li>
       <li>Export an AI tool register and a monthly leak report for your auditor.</li>
     </ul>
   </div>
   <div class="dash" data-live aria-hidden="true">
-    <div class="dash-head"><span>This week at Acme</span><span class="dash-pill">38 people</span></div>
+    <div class="dash-head"><span>Sample data: this week at Acme</span><span class="dash-pill">38 people</span></div>
     <div class="dash-kpis">
       <div><b>14</b><span>secrets stopped</span></div>
       <div><b>9</b><span>AI tools in use</span></div>
@@ -223,7 +223,7 @@ DATABASE_URL=postgres://admin:<span class="sec"><span class="sec-real">hunter2!p
   </div>
   <form class="team-form" data-waitlist data-plan="team" novalidate>
     <h3>Join the team pilot</h3>
-    <p>We're onboarding 20 teams, free until launch. We'll set it up with you on a 15-minute call.</p>
+    <p>We're taking 10 founding teams at $49 a month for 12 months (normally $99). We'll set it up with you on a 15-minute call.</p>
     <div class="fields">
       <label>Work email<input name="email" type="email" autocomplete="email" required></label>
       <label>Company<input name="company" autocomplete="organization" maxlength="100" required></label>
@@ -241,41 +241,42 @@ DATABASE_URL=postgres://admin:<span class="sec"><span class="sec-real">hunter2!p
 </section>
 
 <section id="pricing" class="pricing" aria-labelledby="pricing-title">
-  <h2 id="pricing-title" class="h-big">Pricing</h2>
-  <p class="pricing-note">Planned prices at launch. Early-access members get the first founding offer.</p>
+  <h2 id="pricing-title" class="h-big">Free for developers. Paid when your company needs proof.</h2>
+  <p class="pricing-note">Planned prices at launch. Annual billing gets 2 months free.</p>
   <div class="plans">
     <article class="plan">
       <h3>Free</h3>
       <p class="price"><b>$0</b></p>
-      <p>For anyone who pastes into AI.</p>
+      <p>For anyone who pastes into AI, and teams of up to 3.</p>
       <ul><li>Secret detection and placeholders</li><li>Made-up package warnings</li><li>ChatGPT, Claude and Gemini</li></ul>
-      <a class="btn btn-ghost" href="#join">Get early access</a>
-    </article>
-    <article class="plan">
-      <h3>Pro</h3>
-      <p class="price"><b>$4</b> a month</p>
-      <p>For developers with their own rules.</p>
-      <ul><li>Everything in Free</li><li>40+ AI sites</li><li>Custom patterns for your company's keys</li><li>Sync rules across browsers</li></ul>
       <a class="btn btn-ghost" href="#join">Get early access</a>
     </article>
     <article class="plan plan-team">
       <h3>Team</h3>
-      <p class="price"><b>$4</b> per person a month</p>
-      <p>For companies that need proof. Free for up to 3 people.</p>
-      <ul><li>Everything in Pro</li><li>Install for everyone from Google Admin or Intune</li><li>AI tool register and audit log</li><li>Monthly leak report for auditors</li></ul>
+      <p class="price"><b>$99</b> a month</p>
+      <p>For companies that need proof. Up to 25 developers.</p>
+      <ul><li>Everything in Free</li><li>Install for everyone from Google Admin</li><li>AI tool register and evidence export, 90 days of history</li><li>Questionnaire answer template</li></ul>
       <a class="btn" href="#teams">Join the team pilot</a>
     </article>
+    <article class="plan">
+      <h3>Business</h3>
+      <p class="price"><b>$249</b> a month</p>
+      <p>For larger teams with an auditor to satisfy. Up to 75 developers.</p>
+      <ul><li>Everything in Team</li><li>12 months of history</li><li>Rule controls and custom patterns</li><li>AI extension inventory and an onboarding call</li></ul>
+      <a class="btn btn-ghost" href="#teams">Talk to the founder</a>
+    </article>
   </div>
-  <p class="founding">Founding members: lifetime Pro for $49, limited to the first 200 people on the list.</p>
+  <p class="founding">Founding pilot: $49 a month for 12 months, for the first 10 teams.</p>
 </section>
 
 <section class="faq" aria-labelledby="faq-title">
   <h2 id="faq-title" class="h-big">Questions</h2>
   <details><summary>Can PasteGuard read my prompts?</summary><p>The extension reads what you paste into AI chat sites so it can check it, the same way a spell checker reads what you type. The check happens on your device and nothing is sent to us. The team version reports which AI tool was used and when, never the content.</p></details>
-  <details><summary>What does it detect?</summary><p>API keys for AWS, OpenAI, Anthropic, Stripe, GitHub, Slack and Google, private keys, JWTs, database passwords, values assigned to anything named like a secret, card numbers and email addresses. Pro lets you add your own patterns.</p></details>
+  <details><summary>What does it detect?</summary><p>API keys for AWS, OpenAI, Anthropic, Stripe, GitHub, Slack and Google, private keys, JWTs, database passwords, values assigned to anything named like a secret, card numbers and email addresses. Custom patterns are on the Business plan.</p></details>
   <details><summary>Will the AI's answer still make sense?</summary><p>Yes. The AI sees <code>PG_SECRET_1</code> where your key was and answers normally. On your screen the placeholder is shown as your real value again, so you can copy the answer and use it.</p></details>
   <details><summary>How does the package check work?</summary><p>When an AI answer contains an install command, PasteGuard looks up each package on npm or PyPI. If it doesn't exist, or it was first published recently and hardly anyone uses it, you get a warning next to the command.</p></details>
   <details><summary>Does it work in the ChatGPT or Claude desktop apps?</summary><p>No. It's a browser extension, so it protects AI tools you use in Chrome, Edge or Brave.</p></details>
+  <details><summary>Will it slow down typing or break the chat box?</summary><p>No. PasteGuard only acts when you paste, and if anything goes wrong it falls back to a normal paste. It never takes focus from the chat box, and Enter and Esc work as usual.</p></details>
   <details><summary>Can I turn it off for one message?</summary><p>Yes. Every warning has an option to send the original text, and you can allow a pattern so it stops asking.</p></details>
 </section>
 
