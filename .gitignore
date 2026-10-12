@@ -11,3 +11,5 @@ playwright-report/
 .output-e2e/
 .playwright-mcp/
 video/
+founder/
+scratch/
