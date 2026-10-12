@@ -9,3 +9,5 @@ node_modules/
 test-results/
 playwright-report/
 .output-e2e/
+.playwright-mcp/
+video/
